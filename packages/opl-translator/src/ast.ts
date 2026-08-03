@@ -1,6 +1,11 @@
 // Stage 2 output — TRANSLATOR.md §4 (Grammar). See parser.ts for the (documented)
 // places this AST goes beyond §4's literal grammar text to cover constructs
 // LANGUAGE.md describes in prose but the formal grammar omits.
+//
+// Revised after cross-checking an earlier draft against the real Symbian OPL
+// translator source and the official Psion Series 5 manual (CLAUDE.md).
+// ForStmt/RepeatStmt/SelectStmt/DimStmt are gone — those constructs don't
+// exist in real OPL. DoStmt, VectorStmt, GotoStmt, and LabelDecl were added.
 
 export interface Program {
   kind: "Program";
@@ -10,7 +15,7 @@ export interface Program {
 
 export interface GlobalDecl {
   kind: "GlobalDecl";
-  names: string[];
+  vars: VarDecl[];
   line: number;
 }
 
@@ -22,35 +27,59 @@ export interface ProcDecl {
   line: number;
 }
 
+/**
+ * A declared variable, possibly with array/string-length dimensions —
+ * LANGUAGE.md §4.2. `dimensions` is empty for a plain scalar (INT/LONG/FLOAT),
+ * has one entry for a scalar STRING's max length or a non-string array's
+ * element count, and two entries for a string array's (count, max length).
+ * Telling these apart depends on the name's suffix and is a semantic-analysis
+ * concern, not a parse-time one.
+ */
+export interface VarDecl {
+  name: string;
+  dimensions: Expr[];
+}
+
 export type Stmt =
   | LocalStmt
-  | DimStmt
   | OnErrStmt
+  | GotoStmt
+  | LabelDecl
   | AssignStmt
   | IfStmt
   | WhileStmt
-  | ForStmt
-  | RepeatStmt
-  | SelectStmt
+  | DoStmt
+  | VectorStmt
   | ReturnStmt
   | ProcCallStmt
   | CommandStmt;
 
 export interface LocalStmt {
   kind: "LocalStmt";
-  names: string[];
+  vars: VarDecl[];
   line: number;
 }
 
-export interface DimStmt {
-  kind: "DimStmt";
-  arrays: { name: string; size: Expr }[];
-  line: number;
-}
-
+/** `ONERR label` / `ONERR label::` / `ONERR OFF` — LANGUAGE.md §11.2. `label: null` means OFF. */
 export interface OnErrStmt {
   kind: "OnErrStmt";
+  label: string | null;
+  line: number;
+}
+
+/** `GOTO label` / `GOTO label::` — LANGUAGE.md §7.5. */
+export interface GotoStmt {
+  kind: "GotoStmt";
   label: string;
+  line: number;
+}
+
+/** `name::` — a label declaration, LANGUAGE.md §7.5. Always a double colon;
+ * a single colon is a procedure call (ProcCallStmt/ProcCallExpr) instead, so
+ * this is unambiguous at parse time. */
+export interface LabelDecl {
+  kind: "LabelDecl";
+  name: string;
   line: number;
 }
 
@@ -61,10 +90,12 @@ export interface AssignStmt {
   line: number;
 }
 
+/** `IF cond ... (ELSEIF cond ...)* (ELSE ...)? ENDIF` — LANGUAGE.md §7.2. */
 export interface IfStmt {
   kind: "IfStmt";
   condition: Expr;
   thenBranch: Stmt[];
+  elseIfs: { condition: Expr; body: Stmt[] }[];
   elseBranch: Stmt[] | null;
   line: number;
 }
@@ -76,26 +107,19 @@ export interface WhileStmt {
   line: number;
 }
 
-export interface ForStmt {
-  kind: "ForStmt";
-  variable: string;
-  from: Expr;
-  to: Expr;
-  body: Stmt[];
-  line: number;
-}
-
-export interface RepeatStmt {
-  kind: "RepeatStmt";
+/** `DO ... UNTIL cond` — test-last loop, LANGUAGE.md §7.3. */
+export interface DoStmt {
+  kind: "DoStmt";
   body: Stmt[];
   condition: Expr;
   line: number;
 }
 
-export interface SelectStmt {
-  kind: "SelectStmt";
+/** `VECTOR expr label[,label]* ENDV` — computed jump, LANGUAGE.md §7.4. */
+export interface VectorStmt {
+  kind: "VectorStmt";
   selector: Expr;
-  cases: { value: Expr; body: Stmt[] }[];
+  labels: string[];
   line: number;
 }
 
@@ -106,11 +130,10 @@ export interface ReturnStmt {
 }
 
 /**
- * Colon-form call in statement position, e.g. `hi:` or `add:(5,3)` used only for
- * its side effect. Lexically identical to a label declaration — see the LABEL
- * comment in opl-language's tokens.ts. Disambiguating "is this actually a label"
- * needs the full symbol table (which labels does ONERR reference in this
- * procedure?) and is deferred to semantic analysis, not decided here.
+ * Colon-form call in statement position, e.g. `hi:` or `add:(5,3)` used only
+ * for its side effect — LANGUAGE.md §6.4. Always a *single* colon; a label
+ * declaration/reference always uses a double colon (LabelDecl), so this is
+ * unambiguous at parse time.
  */
 export interface ProcCallStmt {
   kind: "ProcCallStmt";

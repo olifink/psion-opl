@@ -31,19 +31,25 @@ describe("lex — keywords, identifiers, suffixes", () => {
     ]);
   });
 
-  test("type suffixes attach directly to identifiers", () => {
-    const { tokens } = lex("LOCAL x%, y$, z#, w&");
+  test("type suffixes attach directly to identifiers (no # suffix)", () => {
+    const { tokens } = lex("LOCAL x%, y$, w&, price");
     expect(shape(tokens)).toEqual([
       [TokenType.KEYWORD, "LOCAL"],
       [TokenType.IDENTIFIER, "x%"],
       [TokenType.PUNCTUATION, ","],
       [TokenType.IDENTIFIER, "y$"],
       [TokenType.PUNCTUATION, ","],
-      [TokenType.IDENTIFIER, "z#"],
-      [TokenType.PUNCTUATION, ","],
       [TokenType.IDENTIFIER, "w&"],
+      [TokenType.PUNCTUATION, ","],
+      [TokenType.IDENTIFIER, "price"], // no suffix at all = FLOAT (LANGUAGE.md §5.1)
       [TokenType.EOF, ""],
     ]);
+  });
+
+  test("# is not a valid suffix — an unexpected character, not FLOAT", () => {
+    const { diagnostics } = lex("x#");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ token: "#" });
   });
 
   test("a bare identifier with no suffix (built-in call or zero-arg PROC call)", () => {
@@ -55,11 +61,34 @@ describe("lex — keywords, identifiers, suffixes", () => {
     ]);
   });
 
-  test("string concatenation operator is not swallowed as a LONG suffix", () => {
-    const { tokens } = lex("a$&b$");
+  test("a double colon is two separate PUNCTUATION tokens (label vs. call is a parser concern)", () => {
+    const { tokens } = lex("mylabel::");
+    expect(shape(tokens)).toEqual([
+      [TokenType.IDENTIFIER, "mylabel"],
+      [TokenType.PUNCTUATION, ":"],
+      [TokenType.PUNCTUATION, ":"],
+      [TokenType.EOF, ""],
+    ]);
+  });
+
+  test("'&' with nothing preceding it is an unexpected character, not an operator", () => {
+    // & is exclusively the LONG suffix now (real OPL has no & operator at all).
+    const { tokens, diagnostics } = lex("a$ & b$");
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ token: "&" });
     expect(shape(tokens)).toEqual([
       [TokenType.IDENTIFIER, "a$"],
-      [TokenType.OPERATOR, "&"],
+      [TokenType.IDENTIFIER, "b$"],
+      [TokenType.EOF, ""],
+    ]);
+  });
+
+  test("string concatenation uses + (type-overloaded with addition)", () => {
+    const { tokens, diagnostics } = lex("a$+b$");
+    expect(diagnostics).toEqual([]);
+    expect(shape(tokens)).toEqual([
+      [TokenType.IDENTIFIER, "a$"],
+      [TokenType.OPERATOR, "+"],
       [TokenType.IDENTIFIER, "b$"],
       [TokenType.EOF, ""],
     ]);
@@ -110,7 +139,7 @@ describe("lex — literals", () => {
 
 describe("lex — operators, comments, unknown characters", () => {
   test("word operators are OPERATOR tokens, not KEYWORD", () => {
-    const { tokens } = lex("a% AND b% OR NOT c% MOD 2");
+    const { tokens } = lex("a% AND b% OR NOT c%");
     expect(shape(tokens)).toEqual([
       [TokenType.IDENTIFIER, "a%"],
       [TokenType.OPERATOR, "AND"],
@@ -118,10 +147,13 @@ describe("lex — operators, comments, unknown characters", () => {
       [TokenType.OPERATOR, "OR"],
       [TokenType.OPERATOR, "NOT"],
       [TokenType.IDENTIFIER, "c%"],
-      [TokenType.OPERATOR, "MOD"],
-      [TokenType.INT_LITERAL, "2"],
       [TokenType.EOF, ""],
     ]);
+  });
+
+  test("MOD is not reserved — it's a plain identifier (real OPL has no MOD operator)", () => {
+    const { tokens } = lex("MOD");
+    expect(tokens[0]).toMatchObject({ type: TokenType.IDENTIFIER, value: "MOD" });
   });
 
   test("multi-character comparison operators use longest match", () => {
@@ -131,6 +163,15 @@ describe("lex — operators, comments, unknown characters", () => {
       [TokenType.OPERATOR, ">="],
       [TokenType.OPERATOR, "<"],
       [TokenType.OPERATOR, ">"],
+      [TokenType.EOF, ""],
+    ]);
+  });
+
+  test("** is exponentiation, a single two-character operator", () => {
+    expect(shape(lex("2**3").tokens)).toEqual([
+      [TokenType.INT_LITERAL, "2"],
+      [TokenType.OPERATOR, "**"],
+      [TokenType.INT_LITERAL, "3"],
       [TokenType.EOF, ""],
     ]);
   });

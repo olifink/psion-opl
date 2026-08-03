@@ -9,7 +9,7 @@ export interface LexResult {
   diagnostics: Diagnostic[];
 }
 
-/** Word-form operators (AND/OR/NOT/MOD), derived from the single OPERATORS list so the
+/** Word-form operators (AND/OR/NOT), derived from the single OPERATORS list so the
  * set can't drift from it — TRANSLATOR.md §3.2, LANGUAGE.md §8.1. */
 const WORD_OPERATORS: ReadonlySet<string> = new Set(OPERATORS.filter((op) => /^[A-Z]+$/.test(op)));
 
@@ -166,7 +166,11 @@ export function lex(source: string): LexResult {
       }
       return { type: TokenType.OPERATOR, value: ">", line: startLine, column: startCol };
     }
-    if ("+-*/=&".includes(ch)) {
+    if (ch === "*" && peek() === "*") {
+      advance();
+      return { type: TokenType.OPERATOR, value: "**", line: startLine, column: startCol };
+    }
+    if ("+-*/=".includes(ch)) {
       return { type: TokenType.OPERATOR, value: ch, line: startLine, column: startCol };
     }
     if (":;,()".includes(ch)) {

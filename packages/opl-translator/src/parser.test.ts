@@ -34,7 +34,7 @@ ENDP
 
   test("produces the expected AST", () => {
     const { program } = parseSource(source);
-    expect(program.globals).toEqual([{ kind: "GlobalDecl", names: ["g%"], line: 2 }]);
+    expect(program.globals).toEqual([{ kind: "GlobalDecl", vars: [{ name: "g%", dimensions: [] }], line: 2 }]);
     expect(program.procedures).toHaveLength(2);
 
     const [main, add] = program.procedures;
@@ -43,7 +43,7 @@ ENDP
       name: "main",
       params: [],
       body: [
-        { kind: "LocalStmt", names: ["x%"] },
+        { kind: "LocalStmt", vars: [{ name: "x%", dimensions: [] }] },
         { kind: "AssignStmt", target: "g%", value: { kind: "IntLiteral", value: 10 } },
         {
           kind: "AssignStmt",
@@ -137,9 +137,9 @@ describe("parse — same-line disambiguation", () => {
 });
 
 describe("parse — control flow", () => {
-  test("IF/ELSE/ENDIF", () => {
+  test("IF/ELSEIF/ELSE/ENDIF", () => {
     const { program, diagnostics } = parseSource(
-      'PROC p:\nIF x%>10\nPRINT "big"\nELSE\nPRINT "small"\nENDIF\nENDP',
+      'PROC p:\nIF x%>10\nPRINT "big"\nELSEIF x%=10\nPRINT "ten"\nELSE\nPRINT "small"\nENDIF\nENDP',
     );
     expect(diagnostics).toEqual([]);
     expect(program.procedures[0]!.body).toMatchObject([
@@ -147,6 +147,12 @@ describe("parse — control flow", () => {
         kind: "IfStmt",
         condition: { kind: "BinaryExpr", operator: ">" },
         thenBranch: [{ kind: "CommandStmt", name: "PRINT", args: [{ kind: "StringLiteral", value: "big" }] }],
+        elseIfs: [
+          {
+            condition: { kind: "BinaryExpr", operator: "=" },
+            body: [{ kind: "CommandStmt", name: "PRINT", args: [{ kind: "StringLiteral", value: "ten" }] }],
+          },
+        ],
         elseBranch: [{ kind: "CommandStmt", name: "PRINT", args: [{ kind: "StringLiteral", value: "small" }] }],
       },
     ]);
@@ -163,59 +169,62 @@ describe("parse — control flow", () => {
     ]);
   });
 
-  test("FOR/NEXT", () => {
-    const { program } = parseSource("PROC p:\nFOR i%=1 TO 10\nPRINT i%\nNEXT\nENDP");
+  test("DO/UNTIL (real OPL's test-last loop — there is no REPEAT)", () => {
+    const { program, diagnostics } = parseSource("PROC p:\nDO\nx%=x%-1\nUNTIL x%=0\nENDP");
+    expect(diagnostics).toEqual([]);
     expect(program.procedures[0]!.body).toMatchObject([
       {
-        kind: "ForStmt",
-        variable: "i%",
-        from: { kind: "IntLiteral", value: 1 },
-        to: { kind: "IntLiteral", value: 10 },
-        body: [{ kind: "CommandStmt", name: "PRINT" }],
-      },
-    ]);
-  });
-
-  test("REPEAT/UNTIL", () => {
-    const { program } = parseSource("PROC p:\nREPEAT\nx%=x%-1\nUNTIL x%=0\nENDP");
-    expect(program.procedures[0]!.body).toMatchObject([
-      {
-        kind: "RepeatStmt",
+        kind: "DoStmt",
         body: [{ kind: "AssignStmt", target: "x%" }],
         condition: { kind: "BinaryExpr", operator: "=" },
       },
     ]);
   });
 
-  test("SELECT/CASE/ENDSEL", () => {
-    const { program, diagnostics } = parseSource(
-      'PROC p:\nSELECT x%\nCASE 1\nPRINT "one"\nCASE 2\nPRINT "two"\nENDSEL\nENDP',
-    );
+  test("VECTOR/ENDV (real OPL's computed jump — there is no SELECT/CASE)", () => {
+    const { program, diagnostics } = parseSource("PROC p:\nVECTOR x%\none,two,three\nENDV\nENDP");
     expect(diagnostics).toEqual([]);
     expect(program.procedures[0]!.body).toMatchObject([
       {
-        kind: "SelectStmt",
+        kind: "VectorStmt",
         selector: { kind: "Identifier", name: "x%" },
-        cases: [
-          { value: { kind: "IntLiteral", value: 1 }, body: [{ kind: "CommandStmt", name: "PRINT" }] },
-          { value: { kind: "IntLiteral", value: 2 }, body: [{ kind: "CommandStmt", name: "PRINT" }] },
-        ],
+        labels: ["one", "two", "three"],
       },
     ]);
   });
 
-  test("DIM and ONERR", () => {
-    const { program, diagnostics } = parseSource("PROC p:\nDIM a%(10), s$(5)\nONERR oops:\nENDP");
+  test("labels (double colon), GOTO, and ONERR (bare, ::, and OFF forms)", () => {
+    const { program, diagnostics } = parseSource(
+      "PROC p:\nONERR oops\nGOTO there::\nthere::\noops::\nONERR OFF\nENDP",
+    );
+    expect(diagnostics).toEqual([]);
+    expect(program.procedures[0]!.body).toMatchObject([
+      { kind: "OnErrStmt", label: "oops" },
+      { kind: "GotoStmt", label: "there" },
+      { kind: "LabelDecl", name: "there" },
+      { kind: "LabelDecl", name: "oops" },
+      { kind: "OnErrStmt", label: null },
+    ]);
+  });
+
+  test("array and string-length declarations fold into GLOBAL/LOCAL (no DIM)", () => {
+    const { program, diagnostics } = parseSource("PROC p:\nLOCAL a%(10), s$(5), names$(5,8)\nENDP");
     expect(diagnostics).toEqual([]);
     expect(program.procedures[0]!.body).toMatchObject([
       {
-        kind: "DimStmt",
-        arrays: [
-          { name: "a%", size: { kind: "IntLiteral", value: 10 } },
-          { name: "s$", size: { kind: "IntLiteral", value: 5 } },
+        kind: "LocalStmt",
+        vars: [
+          { name: "a%", dimensions: [{ kind: "IntLiteral", value: 10 }] },
+          { name: "s$", dimensions: [{ kind: "IntLiteral", value: 5 }] },
+          {
+            name: "names$",
+            dimensions: [
+              { kind: "IntLiteral", value: 5 },
+              { kind: "IntLiteral", value: 8 },
+            ],
+          },
         ],
       },
-      { kind: "OnErrStmt", label: "oops" },
     ]);
   });
 });
@@ -232,14 +241,31 @@ describe("parse — expressions", () => {
     });
   });
 
-  test("string concatenation with &", () => {
-    const { program } = parseSource('PROC p:\ns$=a$&b$&"!"\nENDP');
+  test("string concatenation with + (there is no & operator)", () => {
+    const { program } = parseSource('PROC p:\ns$=a$+b$+"!"\nENDP');
     const stmt = program.procedures[0]!.body[0] as { value: unknown };
     expect(stmt.value).toMatchObject({
       kind: "BinaryExpr",
-      operator: "&",
-      left: { kind: "BinaryExpr", operator: "&", left: { kind: "Identifier", name: "a$" }, right: { kind: "Identifier", name: "b$" } },
+      operator: "+",
+      left: { kind: "BinaryExpr", operator: "+", left: { kind: "Identifier", name: "a$" }, right: { kind: "Identifier", name: "b$" } },
       right: { kind: "StringLiteral", value: "!" },
+    });
+  });
+
+  test("** is right-associative and binds tighter than unary minus", () => {
+    // 2**3**2 should be 2**(3**2), and -2**2 should be -(2**2).
+    const { program } = parseSource("PROC p:\nx%=2**3**2\ny%=-2**2\nENDP");
+    const [assign1, assign2] = program.procedures[0]!.body as { value: unknown }[];
+    expect(assign1!.value).toMatchObject({
+      kind: "BinaryExpr",
+      operator: "**",
+      left: { kind: "IntLiteral", value: 2 },
+      right: { kind: "BinaryExpr", operator: "**", left: { kind: "IntLiteral", value: 3 }, right: { kind: "IntLiteral", value: 2 } },
+    });
+    expect(assign2!.value).toMatchObject({
+      kind: "UnaryExpr",
+      operator: "-",
+      operand: { kind: "BinaryExpr", operator: "**", left: { kind: "IntLiteral", value: 2 }, right: { kind: "IntLiteral", value: 2 } },
     });
   });
 

@@ -8,13 +8,6 @@ export enum TokenType {
   STRING_LITERAL = "STRING_LITERAL",
   OPERATOR = "OPERATOR",
   PUNCTUATION = "PUNCTUATION",
-  /**
-   * Reserved for the parser: "identifier followed by colon" is lexically identical
-   * whether it's a label declaration or a zero-argument procedure call (e.g. real
-   * device source calls a no-arg PROC as `hi:`). The lexer always emits plain
-   * IDENTIFIER + PUNCTUATION(":") and never this type directly.
-   */
-  LABEL = "LABEL",
   EOF = "EOF",
 }
 
@@ -25,13 +18,19 @@ export interface Token {
   column: number;
 }
 
-/** Operators — LANGUAGE.md §8.1. */
+/**
+ * Operators — LANGUAGE.md §8.1. There is no `MOD` and no `&`/`|` (`&` is
+ * exclusively the LONG type suffix, see keywords.ts TYPE_SUFFIXES); string
+ * concatenation is type-overloaded onto `+`. `**` is exponentiation.
+ * Corrected after cross-checking the real translator source and the
+ * official Series 5 manual — see CLAUDE.md.
+ */
 export const OPERATORS = [
   "+",
   "-",
   "*",
   "/",
-  "MOD",
+  "**",
   "=",
   "<>",
   "<",
@@ -41,7 +40,6 @@ export const OPERATORS = [
   "AND",
   "OR",
   "NOT",
-  "&",
 ] as const;
 
 /** Punctuation — TRANSLATOR.md §3.2. */

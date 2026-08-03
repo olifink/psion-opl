@@ -72,7 +72,7 @@ OPL has a small, fixed set of primitive types:
 |------|-------------|
 | **INT** | 16‑bit signed integer |
 | **LONG** | 32‑bit signed integer |
-| **FLOAT** | 32‑bit IEEE float |
+| **FLOAT** | 64‑bit float (`TReal64` in the real translator source) |
 | **STRING** | Variable-length string |
 | **DATE** | Psion date format (integer) |
 | **TIME** | Psion time format (integer) |
@@ -86,14 +86,26 @@ Rules follow original Psion behaviour:
 - DATE/TIME behave as integers unless used with date/time functions
 
 ### **4.2 Arrays**
-Declared with `DIM`:
+
+There is no `DIM` statement. Arrays are declared directly in a `GLOBAL` or `LOCAL`
+variable list (§5.1, §6.5), by following the variable name with a size in
+parentheses:
 
 ```
-DIM a%(10)
-DIM s$(5)
+GLOBAL a%(10), f&(3), names$(5,8)
 ```
+
+- Non‑string arrays take **one** size: the element count — `a%(10)` is 10 INTs.
+- String arrays take **two** sizes: element count, then max string length —
+  `names$(5,8)` is 5 strings, each up to 8 characters.
+- A scalar (non‑array) `STRING` variable still requires a parenthesised size —
+  it declares the variable's max length, not an array: `a$(3)` is a single
+  string up to 3 characters, not a 3‑element array.
 
 Array bounds are fixed at runtime.
+
+*(Confirmed against the real Symbian OPL translator source and the official
+Psion Series 5 OPL manual — see `CLAUDE.md`.)*
 
 ---
 
@@ -103,14 +115,19 @@ Array bounds are fixed at runtime.
 - Start with a letter  
 - Followed by letters, digits, or `_`  
 - Case-insensitive  
-- Type suffix required:
+- Type suffix is **optional**. A name with **no suffix is FLOAT**, not INT:
 
 | Suffix | Type |
 |--------|------|
+| *(none)* | FLOAT |
 | `%` | INT |
 | `&` | LONG |
-| `#` | FLOAT |
 | `$` | STRING |
+
+There is no `#` suffix — FLOAT is the no-suffix default, not a separate
+suffixed type. *(Confirmed against the real translator source and the
+official Series 5 manual; corrects an earlier, unverified assumption — see
+`CLAUDE.md`.)*
 
 ### **5.2 Scope**
 - **Local variables**: declared inside procedures  
@@ -144,19 +161,35 @@ Procedures return values using:
 RETURN expr
 ```
 
-If omitted, return type defaults to INT (classic behaviour).
+If omitted, return type defaults to **FLOAT** — the same no-suffix-means-FLOAT
+rule as variables (§5.1) applies to procedure names. *(Corrects an earlier,
+unverified "defaults to INT" claim — confirmed via the real translator's
+identifier-suffix table, where a colon with no preceding type character maps
+to `EReal`; see `CLAUDE.md`.)*
 
 ### **6.4 Calling**
 ```
 result% = add:(2,3)
+hi:
 ```
+
+Calling a procedure always uses a single colon after its name — with a
+parenthesised argument list (`add:(2,3)`) or, for zero arguments, with
+nothing after the colon at all (`hi:`). This works both as a statement
+(discarding the return value) and, with an argument list, as an expression.
+A **double** colon (`name::`) is never a call — it's a label (§7.5).
 
 ### **6.5 Local Variables**
-Declared with `LOCAL`:
+Declared with `LOCAL`, immediately after the procedure name (before any other
+statement) — arrays and string lengths are declared inline, the same as for
+`GLOBAL` (§4.2):
 
 ```
-LOCAL x%, y$
+LOCAL x%, y$(20), a%(10)
 ```
+
+More than one `LOCAL` (or `GLOBAL`) statement is allowed, but each must be on
+its own line, and all of them must come immediately after the procedure name.
 
 ---
 
@@ -172,43 +205,83 @@ s$ = "hello"
 ```
 IF x%>10
   PRINT "big"
+ELSEIF x%=10
+  PRINT "exactly ten"
 ELSE
   PRINT "small"
 ENDIF
 ```
 
+`ELSEIF` may repeat any number of times; `ELSE` is optional and, if present,
+must be last. `IF`, `ELSEIF`, `ELSE`, and `ENDIF` must appear in that order.
+
 ### **7.3 Loops**
 
-#### **WHILE**
+There is **no `FOR`/`TO`/`NEXT` loop and no `REPEAT`/`UNTIL`** — these do not
+exist in real OPL and were incorrectly documented here previously. `NEXT` is a
+real keyword, but it's a database-record-navigation command (alongside
+`FIRST`/`LAST`/`BACK`), unrelated to loops. The only two loop forms are:
+
+#### **WHILE** (test-first)
 ```
 WHILE x%<10
   x%=x%+1
 ENDWH
 ```
 
-#### **FOR**
+#### **DO...UNTIL** (test-last)
 ```
-FOR i%=1 TO 10
-  PRINT i%
-NEXT
-```
-
-#### **REPEAT**
-```
-REPEAT
+DO
   x%=x%-1
 UNTIL x%=0
 ```
 
-### **7.4 SELECT**
+*(Confirmed against the real Symbian OPL translator source and the official
+Psion Series 5 OPL manual — see `CLAUDE.md`.)*
+
+### **7.4 VECTOR (computed jump)**
+
+There is no `SELECT`/`CASE`/`ENDSEL` — this was fabricated in an earlier
+version of this document. Multi-way branching is done with `VECTOR`, a
+computed jump to the Nth label in a list:
+
 ```
-SELECT x%
-CASE 1
+VECTOR x%
+one,two,three
+ENDV
+one::
   PRINT "one"
-CASE 2
+  GOTO done::
+two::
   PRINT "two"
-ENDSEL
+  GOTO done::
+three::
+  PRINT "three"
+done::
 ```
+
+`VECTOR x%` jumps to the label at position `x%` in the following
+comma-separated list (1 = first label). The list may span multiple lines. If
+`x%` is out of range, execution just continues after `ENDV` — this is not an
+error. See §7.5 for label syntax.
+
+### **7.5 Labels and GOTO**
+
+A label is declared with a **double colon**, immediately after its name, with
+no type suffix: `mylabel::`. This is deliberately different from a
+zero-argument procedure call, which uses a **single** colon (`hi:` — §6.4);
+the double colon is what makes a label declaration lexically unambiguous.
+
+```
+GOTO mylabel::
+...
+mylabel::
+  PRINT "jumped here"
+```
+
+A label reference (in `GOTO`, `ONERR`, or a `VECTOR` list) may be written
+either as `name::` or as a bare `name` with no suffix and no colon at all —
+both refer to the same label.
 
 ---
 
@@ -218,10 +291,24 @@ ENDSEL
 
 | Category | Operators |
 |----------|-----------|
-| Arithmetic | `+ - * / MOD` |
+| Arithmetic | `+ - * / **` (`**` is exponentiation, e.g. `2**(n%/12.0)`) |
 | Comparison | `= <> < > <= >=` |
-| Logical | `AND OR NOT` |
-| String | `&` (concatenation) |
+| Logical | `AND OR NOT` (word-only; there is no symbolic `&`/`\|` form) |
+| String | `+` (concatenation — the **same** operator as numeric addition, type-overloaded, e.g. `b$+MID$(a$)`) |
+
+There is **no `MOD` operator** — this was fabricated in an earlier version of
+this document (`KMOD` is a real function, but it reads keyboard-modifier
+state, not arithmetic modulo). There is **no `&` operator at all** — `&` is
+exclusively the `LONG` type suffix (§5.1); string concatenation uses `+`, not
+`&`. *(All confirmed against the real Symbian OPL translator source and the
+official Psion Series 5 manual — see `CLAUDE.md`.)*
+
+`%` has a further, undocumented-elsewhere dual role inside expressions in the
+real language: immediately after another operator it converts that operator
+to a forced-real-arithmetic "percentage" variant (`%<`,`%>`,`%+`,`%-`,`%*`,`%/`);
+where an operand is expected, it introduces a character-code literal (e.g.
+`%A` = 65). Confirmed to exist in the real translator; not yet assessed for
+whether it's in scope to implement.
 
 ### **8.2 Precedence**
 Classic Psion precedence rules apply (documented in translator spec).
@@ -269,10 +356,15 @@ Errors may be trapped or untrapped.
 
 ### **11.2 ONERR**
 ```
-ONERR label:
+ONERR label
+ONERR OFF
 ```
 
-Transfers control to `label:` on error.
+Transfers control to the label declared as `label::` (§7.5) when an error
+occurs within the procedure. `ONERR OFF` disables the handler. *(The
+single-colon `ONERR label:` form in an earlier version of this document was
+wrong — a single colon means a procedure call, not a label reference; see
+§7.5 and `CLAUDE.md`.)*
 
 ### **11.3 ERR Function**
 Returns the last error code.

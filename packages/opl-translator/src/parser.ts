@@ -1,38 +1,46 @@
 // Stage 2 of the translator pipeline — TRANSLATOR.md §4 (Grammar).
 //
-// TRANSLATOR.md's formal grammar is incomplete on its own terms: it can't parse
-// LANGUAGE.md §12's own canonical example (no productions for LOCAL, DIM, GLOBAL's
-// body, or ONERR; "primary" omits procedure calls entirely even though §6.4 shows
-// `add:(2,3)` as an expression; the expr grammar has no tier for the `&` string
-// operator LANGUAGE.md §8.1 lists). Rather than guess at the *binary* format the
-// way OPO-FORMAT.md apparently did, these gaps are filled here only where
-// LANGUAGE.md's prose or examples/hello-new.opl's real source directly evidence
-// the construct — each fill is commented at the point it's used. Anything neither
-// document nor the real example evidences (e.g. FOR/STEP, parenthesized no-colon
-// built-in function calls) is left unimplemented rather than invented.
+// This grammar was revised after cross-checking an earlier draft against the
+// real Symbian OPL translator source and the official Psion Series 5 OPL
+// manual (see CLAUDE.md for the full findings). The earlier draft included
+// several fabricated constructs that don't exist in real OPL — FOR/TO/NEXT,
+// REPEAT/UNTIL, SELECT/CASE/ENDSEL, a DIM statement, MOD, `&` as string
+// concatenation — all replaced here by what's actually there (DO/UNTIL,
+// VECTOR/ENDV, ELSEIF, array declarations folded into GLOBAL/LOCAL, `+` for
+// concatenation, GOTO, and double-colon labels).
+//
+// TRANSLATOR.md §4's formal grammar is still incomplete on its own terms in a
+// few places (e.g. "primary" omits procedure calls entirely even though
+// LANGUAGE.md §6.4 shows `add:(2,3)` as an expression). Those gaps are filled
+// here only where LANGUAGE.md's prose, the real translator source, or the
+// official manual directly evidence the construct — each fill is commented at
+// the point it's used. The real language's `%`-as-percentage-operator and
+// `%`-as-character-literal duality (LANGUAGE.md §8.1) is confirmed to exist
+// but deliberately NOT implemented yet — not enough has been verified about it
+// to commit to a grammar.
 
 import { TokenType, type Token } from "@psion-opl/opl-language";
 import { OplErrorCode } from "@psion-opl/opl-shared";
 import type {
   AssignStmt,
-  BinaryExpr,
   CommandStmt,
-  DimStmt,
+  DoStmt,
   Expr,
-  ForStmt,
   GlobalDecl,
+  GotoStmt,
   IfStmt,
+  LabelDecl,
   LocalStmt,
   OnErrStmt,
   ProcCallExpr,
   ProcCallStmt,
   ProcDecl,
   Program,
-  RepeatStmt,
   ReturnStmt,
-  SelectStmt,
   Stmt,
   UnaryExpr,
+  VarDecl,
+  VectorStmt,
   WhileStmt,
 } from "./ast.js";
 import type { Diagnostic } from "./types.js";
@@ -44,7 +52,7 @@ export interface ParseResult {
 
 /** Keywords that end an enclosing block — used both to terminate stmt_list loops
  * and as synchronization points after a parse error. */
-const BLOCK_TERMINATORS = new Set(["ENDP", "ENDIF", "ELSE", "ENDWH", "NEXT", "UNTIL", "ENDSEL", "CASE"]);
+const BLOCK_TERMINATORS = new Set(["ENDP", "ENDIF", "ELSEIF", "ELSE", "ENDWH", "UNTIL", "ENDV"]);
 
 class ParseError extends Error {}
 
@@ -160,17 +168,31 @@ class Parser {
     return { kind: "Program", globals, procedures };
   }
 
-  /** GLOBAL's declaration-list body isn't in TRANSLATOR.md's formal grammar
-   * (only LANGUAGE.md §5.2's prose: "declared outside any procedure"); mirrored
-   * on LOCAL's documented shape (§6.5). */
+  /** `ident ( "(" expr ("," expr)? ")" )?` — LANGUAGE.md §4.2. Whether the
+   * parenthesised size(s) mean an array element count, a scalar string's max
+   * length, or a string array's (count, length) depends on the name's suffix
+   * and is left to semantic analysis. */
+  private parseVarDecl(): VarDecl {
+    const name = this.expect(TokenType.IDENTIFIER, undefined, "Expected a variable name").value;
+    const dimensions: Expr[] = [];
+    if (this.match(TokenType.PUNCTUATION, "(")) {
+      dimensions.push(this.parseExpr());
+      if (this.match(TokenType.PUNCTUATION, ",")) {
+        dimensions.push(this.parseExpr());
+      }
+      this.expect(TokenType.PUNCTUATION, ")", "Expected ')' after variable size");
+    }
+    return { name, dimensions };
+  }
+
   private parseGlobalDecl(): GlobalDecl {
     const line = this.peek().line;
     this.advance(); // GLOBAL
-    const names = [this.expect(TokenType.IDENTIFIER, undefined, "Expected identifier after GLOBAL").value];
+    const vars = [this.parseVarDecl()];
     while (this.match(TokenType.PUNCTUATION, ",")) {
-      names.push(this.expect(TokenType.IDENTIFIER, undefined, "Expected identifier").value);
+      vars.push(this.parseVarDecl());
     }
-    return { kind: "GlobalDecl", names, line };
+    return { kind: "GlobalDecl", vars, line };
   }
 
   private parseProcDecl(): ProcDecl {
@@ -231,20 +253,18 @@ class Parser {
       switch (tok.value) {
         case "LOCAL":
           return this.parseLocalStmt();
-        case "DIM":
-          return this.parseDimStmt();
         case "ONERR":
           return this.parseOnErrStmt();
+        case "GOTO":
+          return this.parseGotoStmt();
         case "IF":
           return this.parseIfStmt();
         case "WHILE":
           return this.parseWhileStmt();
-        case "FOR":
-          return this.parseForStmt();
-        case "REPEAT":
-          return this.parseRepeatStmt();
-        case "SELECT":
-          return this.parseSelectStmt();
+        case "DO":
+          return this.parseDoStmt();
+        case "VECTOR":
+          return this.parseVectorStmt();
         case "RETURN":
           return this.parseReturnStmt();
       }
@@ -257,44 +277,47 @@ class Parser {
     throw this.error(tok, `Unexpected token '${tok.value}'`);
   }
 
-  /** LOCAL's list form is documented only in LANGUAGE.md §6.5 prose, not in
-   * TRANSLATOR.md's formal grammar. */
   private parseLocalStmt(): LocalStmt {
     const line = this.peek().line;
     this.advance(); // LOCAL
-    const names = [this.expect(TokenType.IDENTIFIER, undefined, "Expected identifier after LOCAL").value];
+    const vars = [this.parseVarDecl()];
     while (this.match(TokenType.PUNCTUATION, ",")) {
-      names.push(this.expect(TokenType.IDENTIFIER, undefined, "Expected identifier").value);
+      vars.push(this.parseVarDecl());
     }
-    return { kind: "LocalStmt", names, line };
+    return { kind: "LocalStmt", vars, line };
   }
 
-  /** DIM's shape is documented only in LANGUAGE.md §4.2 prose ("DIM a%(10)"). */
-  private parseDimStmt(): DimStmt {
-    const line = this.peek().line;
-    this.advance(); // DIM
-    const arrays: DimStmt["arrays"] = [this.parseDimItem()];
-    while (this.match(TokenType.PUNCTUATION, ",")) {
-      arrays.push(this.parseDimItem());
-    }
-    return { kind: "DimStmt", arrays, line };
+  /** `label_ref ::= ident "::" | ident` — LANGUAGE.md §7.5. Greedily consumes
+   * up to two colons if present (handles both the bare and "::" forms; a
+   * lone stray single colon is tolerated rather than treated as an error,
+   * since it can't be anything else in this position). */
+  private parseLabelRef(): string {
+    const name = this.expect(TokenType.IDENTIFIER, undefined, "Expected a label").value;
+    this.match(TokenType.PUNCTUATION, ":");
+    this.match(TokenType.PUNCTUATION, ":");
+    return name;
   }
 
-  private parseDimItem(): { name: string; size: Expr } {
-    const name = this.expect(TokenType.IDENTIFIER, undefined, "Expected array name").value;
-    this.expect(TokenType.PUNCTUATION, "(", "Expected '(' after array name");
-    const size = this.parseExpr();
-    this.expect(TokenType.PUNCTUATION, ")", "Expected ')' after array size");
-    return { name, size };
-  }
-
-  /** ONERR's target shape is documented only in LANGUAGE.md §11.2 prose ("ONERR label:"). */
+  /** `ONERR (OFF | label_ref)` — LANGUAGE.md §11.2. "OFF" isn't one of our
+   * structural keywords (matches real OPL: it's an EKeyword-class command
+   * word like PRINT, not an EReserved one), so it arrives as a plain
+   * IDENTIFIER and is matched by its text. */
   private parseOnErrStmt(): OnErrStmt {
     const line = this.peek().line;
     this.advance(); // ONERR
-    const label = this.expect(TokenType.IDENTIFIER, undefined, "Expected label after ONERR").value;
-    this.expect(TokenType.PUNCTUATION, ":", "Expected ':' after ONERR label");
+    if (this.check(TokenType.IDENTIFIER) && this.peek().value.toUpperCase() === "OFF") {
+      this.advance();
+      return { kind: "OnErrStmt", label: null, line };
+    }
+    const label = this.parseLabelRef();
     return { kind: "OnErrStmt", label, line };
+  }
+
+  private parseGotoStmt(): GotoStmt {
+    const line = this.peek().line;
+    this.advance(); // GOTO
+    const label = this.parseLabelRef();
+    return { kind: "GotoStmt", label, line };
   }
 
   private parseIfStmt(): IfStmt {
@@ -302,12 +325,20 @@ class Parser {
     this.advance(); // IF
     const condition = this.parseExpr();
     const thenBranch = this.parseStmtList();
+
+    const elseIfs: IfStmt["elseIfs"] = [];
+    while (this.match(TokenType.KEYWORD, "ELSEIF")) {
+      const elseIfCondition = this.parseExpr();
+      const body = this.parseStmtList();
+      elseIfs.push({ condition: elseIfCondition, body });
+    }
+
     let elseBranch: Stmt[] | null = null;
     if (this.match(TokenType.KEYWORD, "ELSE")) {
       elseBranch = this.parseStmtList();
     }
     this.expect(TokenType.KEYWORD, "ENDIF", "Expected ENDIF");
-    return { kind: "IfStmt", condition, thenBranch, elseBranch, line };
+    return { kind: "IfStmt", condition, thenBranch, elseIfs, elseBranch, line };
   }
 
   private parseWhileStmt(): WhileStmt {
@@ -319,43 +350,31 @@ class Parser {
     return { kind: "WhileStmt", condition, body, line };
   }
 
-  /** No STEP clause: neither LANGUAGE.md nor TRANSLATOR.md documents one, and
-   * examples/hello-new.opl doesn't exercise FOR at all, so it's left unsupported
-   * rather than guessed at. */
-  private parseForStmt(): ForStmt {
+  private parseDoStmt(): DoStmt {
     const line = this.peek().line;
-    this.advance(); // FOR
-    const variable = this.expect(TokenType.IDENTIFIER, undefined, "Expected loop variable").value;
-    this.expect(TokenType.OPERATOR, "=", "Expected '=' after loop variable");
-    const from = this.parseExpr();
-    this.expect(TokenType.KEYWORD, "TO", "Expected TO");
-    const to = this.parseExpr();
-    const body = this.parseStmtList();
-    this.expect(TokenType.KEYWORD, "NEXT", "Expected NEXT");
-    return { kind: "ForStmt", variable, from, to, body, line };
-  }
-
-  private parseRepeatStmt(): RepeatStmt {
-    const line = this.peek().line;
-    this.advance(); // REPEAT
+    this.advance(); // DO
     const body = this.parseStmtList();
     this.expect(TokenType.KEYWORD, "UNTIL", "Expected UNTIL");
     const condition = this.parseExpr();
-    return { kind: "RepeatStmt", body, condition, line };
+    return { kind: "DoStmt", body, condition, line };
   }
 
-  private parseSelectStmt(): SelectStmt {
+  /** `VECTOR expr label_ref ("," label_ref)* ENDV` — LANGUAGE.md §7.4. Real
+   * OPL's label list can span multiple lines with no comma between the last
+   * label of one line and the first of the next (only within a line are they
+   * comma-separated) — so rather than requiring a comma, this just consumes
+   * one if present and keeps collecting labels until ENDV. */
+  private parseVectorStmt(): VectorStmt {
     const line = this.peek().line;
-    this.advance(); // SELECT
+    this.advance(); // VECTOR
     const selector = this.parseExpr();
-    const cases: SelectStmt["cases"] = [];
-    while (this.match(TokenType.KEYWORD, "CASE")) {
-      const value = this.parseExpr();
-      const body = this.parseStmtList();
-      cases.push({ value, body });
+    const labels: string[] = [];
+    while (!this.check(TokenType.KEYWORD, "ENDV") && !this.isAtEnd()) {
+      labels.push(this.parseLabelRef());
+      this.match(TokenType.PUNCTUATION, ",");
     }
-    this.expect(TokenType.KEYWORD, "ENDSEL", "Expected ENDSEL");
-    return { kind: "SelectStmt", selector, cases, line };
+    this.expect(TokenType.KEYWORD, "ENDV", "Expected ENDV");
+    return { kind: "VectorStmt", selector, labels, line };
   }
 
   private parseReturnStmt(): ReturnStmt {
@@ -366,13 +385,16 @@ class Parser {
   }
 
   /**
-   * Dispatches on what follows a leading IDENTIFIER — the only point where
-   * OPL's three call conventions collide lexically:
+   * Dispatches on what follows a leading IDENTIFIER — the point where OPL's
+   * call/label conventions collide lexically:
    *   ident "=" expr                    -> assignment
+   *   ident "::"                        -> label declaration (LabelDecl)
    *   ident ":" ("(" args ")")?         -> user PROC call (LANGUAGE.md §6.4;
    *                                        real device source's bare `hi:`)
    *   ident args?                       -> bare built-in command (real device
    *                                        source's `GET` and `PRINT "..."`)
+   * The double-colon check happens before the single-colon one, so this is
+   * unambiguous — no semantic-analysis deferral needed here.
    */
   private parseIdentLedStmt(): Stmt {
     const line = this.peek().line;
@@ -384,6 +406,9 @@ class Parser {
     }
 
     if (this.match(TokenType.PUNCTUATION, ":")) {
+      if (this.match(TokenType.PUNCTUATION, ":")) {
+        return { kind: "LabelDecl", name, line } satisfies LabelDecl;
+      }
       const args = this.match(TokenType.PUNCTUATION, "(") ? this.parseArgListUntilCloseParen() : [];
       return { kind: "ProcCallStmt", name, args, line } satisfies ProcCallStmt;
     }
@@ -406,7 +431,7 @@ class Parser {
     return args;
   }
 
-  // --- expressions (TRANSLATOR.md §4.5, with `&` and calls filled in) --------
+  // --- expressions (TRANSLATOR.md §4.6) --------------------------------------
 
   private parseExpr(): Expr {
     return this.parseLogicalOr();
@@ -453,15 +478,13 @@ class Parser {
     return left;
   }
 
-  /**
-   * `&` (string concatenation, LANGUAGE.md §8.1) has no tier in TRANSLATOR.md
-   * §4.5's formal expr grammar at all. Placed at the additive tier as the most
-   * common choice among BASIC-family languages with a dedicated concat operator;
-   * flagged here rather than asserted as verified.
-   */
+  /** `+` is type-overloaded onto string concatenation as well as numeric
+   * addition (LANGUAGE.md §8.1) — that's a semantic-analysis concern, not a
+   * grammar one, so it's just a normal additive operator here. There is no
+   * `&`/`MOD`. */
   private parseAdditive(): Expr {
     let left = this.parseMultiplicative();
-    while (this.check(TokenType.OPERATOR, "+") || this.check(TokenType.OPERATOR, "-") || this.check(TokenType.OPERATOR, "&")) {
+    while (this.check(TokenType.OPERATOR, "+") || this.check(TokenType.OPERATOR, "-")) {
       const op = this.advance();
       left = { kind: "BinaryExpr", operator: op.value, left, right: this.parseMultiplicative(), line: op.line };
     }
@@ -470,7 +493,7 @@ class Parser {
 
   private parseMultiplicative(): Expr {
     let left = this.parseUnary();
-    while (this.check(TokenType.OPERATOR, "*") || this.check(TokenType.OPERATOR, "/") || this.check(TokenType.OPERATOR, "MOD")) {
+    while (this.check(TokenType.OPERATOR, "*") || this.check(TokenType.OPERATOR, "/")) {
       const op = this.advance();
       left = { kind: "BinaryExpr", operator: op.value, left, right: this.parseUnary(), line: op.line };
     }
@@ -483,13 +506,31 @@ class Parser {
       const operand = this.parseUnary();
       return { kind: "UnaryExpr", operator: op.value as "-" | "NOT", operand, line: op.line } satisfies UnaryExpr;
     }
-    return this.parsePrimary();
+    return this.parsePower();
+  }
+
+  /** `**` (exponentiation, LANGUAGE.md §8.1 — confirmed real, e.g.
+   * `440*2**(n%/12.0)` in the official manual) is right-associative and binds
+   * tighter than unary minus, so `-2**2` is `-(2**2)` = -4, matching common
+   * convention (Python, etc.) — `parseUnary` calls this, not the other way
+   * around. */
+  private parsePower(): Expr {
+    const base = this.parsePrimary();
+    if (this.check(TokenType.OPERATOR, "**")) {
+      const op = this.advance();
+      const exponent = this.parsePower();
+      return { kind: "BinaryExpr", operator: "**", left: base, right: exponent, line: op.line };
+    }
+    return base;
   }
 
   /**
-   * `primary ::= literal | ident | "(" expr ")"` per TRANSLATOR.md §4.5 doesn't
-   * include a call form at all, yet LANGUAGE.md §6.4 shows `add:(2,3)` used as
-   * an expression's value — added here as `proc_call`, the colon-form call.
+   * `primary ::= literal | ident | proc_call | "(" expr ")"` — TRANSLATOR.md
+   * §4.6's `primary` doesn't include a call form at all, yet LANGUAGE.md §6.4
+   * shows `add:(2,3)` used as an expression's value — added here as
+   * `proc_call`, the single-colon call. A double colon here would be a label,
+   * which isn't valid in expression position; this doesn't special-case that
+   * (it's not a construct that appears in valid programs).
    */
   private parsePrimary(): Expr {
     const tok = this.peek();
