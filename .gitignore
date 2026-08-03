@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.angular/
+.DS_Store
+*.log

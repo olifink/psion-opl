@@ -1,0 +1,84 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "psion-opl",
+      "devDependencies": {
+        "@types/bun": "^1.3.0",
+        "@types/node": "^24.0.0",
+        "typescript": "~6.0.2",
+      },
+    },
+    "apps/opl-cli": {
+      "name": "@psion-opl/opl-cli",
+      "version": "0.0.0",
+      "bin": {
+        "opl": "src/index.ts",
+      },
+      "dependencies": {
+        "@psion-opl/opl-engine": "workspace:*",
+        "@psion-opl/opl-host": "workspace:*",
+        "@psion-opl/opl-translator": "workspace:*",
+      },
+    },
+    "packages/opl-engine": {
+      "name": "@psion-opl/opl-engine",
+      "version": "0.0.0",
+      "dependencies": {
+        "@psion-opl/opl-host": "workspace:*",
+        "@psion-opl/opl-language": "workspace:*",
+        "@psion-opl/opl-shared": "workspace:*",
+      },
+    },
+    "packages/opl-host": {
+      "name": "@psion-opl/opl-host",
+      "version": "0.0.0",
+      "dependencies": {
+        "@psion-opl/opl-shared": "workspace:*",
+      },
+    },
+    "packages/opl-language": {
+      "name": "@psion-opl/opl-language",
+      "version": "0.0.0",
+      "dependencies": {
+        "@psion-opl/opl-shared": "workspace:*",
+      },
+    },
+    "packages/opl-shared": {
+      "name": "@psion-opl/opl-shared",
+      "version": "0.0.0",
+    },
+    "packages/opl-translator": {
+      "name": "@psion-opl/opl-translator",
+      "version": "0.0.0",
+      "dependencies": {
+        "@psion-opl/opl-language": "workspace:*",
+        "@psion-opl/opl-shared": "workspace:*",
+      },
+    },
+  },
+  "packages": {
+    "@psion-opl/opl-cli": ["@psion-opl/opl-cli@workspace:apps/opl-cli"],
+
+    "@psion-opl/opl-engine": ["@psion-opl/opl-engine@workspace:packages/opl-engine"],
+
+    "@psion-opl/opl-host": ["@psion-opl/opl-host@workspace:packages/opl-host"],
+
+    "@psion-opl/opl-language": ["@psion-opl/opl-language@workspace:packages/opl-language"],
+
+    "@psion-opl/opl-shared": ["@psion-opl/opl-shared@workspace:packages/opl-shared"],
+
+    "@psion-opl/opl-translator": ["@psion-opl/opl-translator@workspace:packages/opl-translator"],
+
+    "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
+
+    "@types/node": ["@types/node@24.13.3", "", { "dependencies": { "undici-types": "~7.18.0" } }, "sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q=="],
+
+    "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
+
+    "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
+
+    "undici-types": ["undici-types@7.18.2", "", {}, "sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w=="],
+  }
+}
