@@ -31,10 +31,18 @@ Established over the last few sessions, keep doing this:
 - [x] Lexer (`lex()`) — tokenizes `.OPL` source
 - [x] Parser (`parse()`) — builds the AST; grammar cross-checked against real
       sources (see `CLAUDE.md` "Ground truth" for the full findings)
-- [ ] Semantic analysis — symbol tables (globals/locals/params), scope
-      resolution, type checking/coercion (INT→LONG→FLOAT promotion, string
-      rules), procedure signature validation, label/GOTO/VECTOR resolution,
-      array/string-length declaration validation (LANGUAGE.md §4.2)
+- [x] Semantic analysis (`analyze()`, `src/semantic.ts`) — symbol tables
+      (`src/symbols.ts`: globals/locals/params/procedures), scope resolution,
+      type checking/coercion (`src/semantic-types.ts`: INT→LONG→FLOAT
+      promotion, real STRING-operator restriction rules), procedure-call
+      argument-count validation, label/GOTO/ONERR/VECTOR resolution
+      (forward references allowed), array/string-length declaration
+      validation (LANGUAGE.md §4.2). **Not yet covered**: built-in
+      function/command signatures (no table of the ~300 real built-ins
+      yet — `CommandStmt`'s target name and arg count/types aren't
+      validated, only its argument expressions are), and the `%`
+      percentage-operator/character-literal duality (still an open question
+      below).
 - [ ] Codegen — QCode emission + `.OPO` assembly. **Blocked on** the OPO
       binary format cross-check below; don't start codegen against
       `OPO-FORMAT.md`/`opo-table.csv` until that's done.
@@ -84,8 +92,23 @@ Established over the last few sessions, keep doing this:
 
 - **`%` percentage-operator / character-literal duality** (LANGUAGE.md §8.1):
   confirmed to exist in real OPL, not yet implemented anywhere (lexer,
-  parser, or docs' grammar). Needs a decision on whether it's in scope before
-  semantic analysis needs to type-check expressions using it.
+  parser, docs' grammar, or semantic analysis's type checker).
+- **Built-in function/command signature table**: semantic analysis doesn't
+  validate `CommandStmt`/bare-call argument counts or types against
+  anything yet, since there's no table of the ~300 real built-ins (their
+  names/signatures are in `references/opl-dev/oplt/stran/OT_RESRV.CPP`,
+  already partly read while cross-checking the grammar). Worth doing once
+  codegen needs to know which built-ins map to which opcodes anyway.
+- **`opl-shared`'s `OplType` vs `opl-translator`'s `SemanticType`**:
+  semantic analysis introduced its own richer type system (`INT`/`LONG`/
+  `FLOAT`/`STRING`) because `opl-shared`'s `OplType` (the runtime stack-tag
+  set from ENGINE.md §3.2) has no `LONG` variant distinct from `INT`. Needs
+  reconciling once engine work starts — does the runtime stack actually
+  need to distinguish LONG from INT as a separate tag, or was that only ever
+  a translator/codegen-time distinction resolved by casts before values hit
+  the stack? The real translator's own type enum (`EWord`/`ELong`/`EReal`/
+  `EString`) suggests LONG is distinct all the way through, which would mean
+  `OplType` is currently incomplete.
 - **Series 3/SIBO vs Series 5/EPOC32 scope**: BRIEF.md says target both;
   `references/opl-dev` covers both via a `TargetIsOpl1993` compatibility flag
   in the same codebase. Not yet decided how much Series 3 fidelity this

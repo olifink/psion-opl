@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-The `/packages` and `/apps` scaffold now exists (bun workspace + a separately-tooled Angular app). `opl-translator`'s lexer (`lex()`, `src/lexer.ts`) and parser (`parse()`, `src/parser.ts`, producing the AST in `src/ast.ts`) are implemented and tested, and now match real OPL (see "Ground truth" below — an earlier draft of both the docs and this parser had fabricated several constructs). Semantic analysis, codegen, and the engine's opcode dispatch are still stubs that throw `"not yet implemented"`. `/integrations/psion-link` from BRIEF.md has not been scaffolded.
+The `/packages` and `/apps` scaffold now exists (bun workspace + a separately-tooled Angular app). `opl-translator`'s lexer (`lex()`, `src/lexer.ts`), parser (`parse()`, `src/parser.ts`, producing the AST in `src/ast.ts`), and semantic analysis (`analyze()`, `src/semantic.ts` + `src/symbols.ts` + `src/semantic-types.ts`) are implemented and tested, and match real OPL (see "Ground truth" below — an earlier draft of both the docs and this parser had fabricated several constructs). See `PLAN.md` for exactly what semantic analysis does and doesn't cover yet. Codegen and the engine's opcode dispatch are still stubs that throw `"not yet implemented"`. `/integrations/psion-link` from BRIEF.md has not been scaffolded.
 
 ### Ground truth: `/references` and `/examples`
 
@@ -75,7 +75,7 @@ Per BRIEF.md, now scaffolded:
 ```
 /packages
   /opl-language        # grammar, tokens, QCode definitions (keywords.ts, tokens.ts, opcodes.ts)
-  /opl-translator       # .OPL → .OPO compiler (lex()+parse() implemented; semantic analysis/codegen still stubs)
+  /opl-translator       # .OPL → .OPO compiler (lex()+parse()+analyze() implemented; codegen still a stub)
   /opl-engine           # QCode VM (QCodeEngine stub)
   /opl-host             # host capability interfaces (capabilities.ts) + node adapter (adapters/node.ts)
   /opl-shared           # common types, errors, utilities (OplValue, OplErrorCode, OplError)
