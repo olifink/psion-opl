@@ -1,7 +1,3 @@
-Here’s a focused, spec‑driven `ENGINE.md` that lines up with your “original QCode, original .OPO” requirement and is friendly to a coding agent implementing the VM in TypeScript.
-
----
-
 # ENGINE.md — OPL QCode Engine Specification (Canonical)
 
 ## 1. Purpose
