@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-The `/packages` and `/apps` scaffold now exists (bun workspace + a separately-tooled Angular app), but it is **scaffold only**: every translator/engine function stub throws `"not yet implemented"`. There is no lexer, parser, codegen, or opcode dispatch yet — implementing those against the specs below is the actual work. `/integrations/psion-link` from BRIEF.md has not been scaffolded.
+The `/packages` and `/apps` scaffold now exists (bun workspace + a separately-tooled Angular app). `opl-translator`'s lexer (`lex()`, `src/lexer.ts`) and parser (`parse()`, `src/parser.ts`, producing the AST in `src/ast.ts`) are implemented and tested. Semantic analysis, codegen, and the engine's opcode dispatch are still stubs that throw `"not yet implemented"`. `/integrations/psion-link` from BRIEF.md has not been scaffolded.
+
+`/examples` contains real Psion-device `.opl`/`.opo` pairs (currently `hello-new.*`) — genuine ground truth, not synthetic test fixtures, and the project's working method going forward is: extend this set with more real-device pairs the user can manually verify, and treat those (not the prose docs) as the tiebreaker whenever a doc's claim is unverified. Use them for golden-file tests as each translator stage comes online (TRANSLATOR.md §11.1). **Important, still unresolved**: `hello-new.opo`'s header does not match `docs/OPO-FORMAT.md`'s assumed layout at all — it doesn't start with the `0xF700`/`0xF701` magic bytes the spec describes. That spec (and likely `docs/opo-table.csv`) appears to have been written speculatively rather than derived from a real Psion binary. Before implementing the codegen or engine opcode-dispatch stages, reverse-engineer the real `.opo` header/procedure-table/QCode layout from the example file(s) and correct `OPO-FORMAT.md` — don't build against the current spec text as if it were verified.
+
+**The surface grammar has documented gaps too**, discovered while writing the parser (these are about `.OPL` syntax, not the `.opo` binary question above — lower-risk, but still worth knowing about): TRANSLATOR.md §4.5's formal `primary` production omits procedure calls entirely even though LANGUAGE.md §6.4 uses `add:(2,3)` as an expression; its `stmt` list has no production for `LOCAL`/`DIM`/`GLOBAL`'s body/`ONERR` even though LANGUAGE.md's own §12 example needs all of them; and the expr grammar has no precedence tier for the `&` string-concat operator LANGUAGE.md §8.1 lists. `parser.ts` fills each gap (commented at the point it's used) only where LANGUAGE.md's prose or the real example directly evidences the construct; anything neither evidences (FOR/STEP, a parenthesized no-colon built-in-function-call syntax) is left unimplemented rather than guessed. The real device source also revealed OPL has (at least) three distinct call conventions the docs never enumerate: colon-form user PROC calls (`hi:`, `add:(5,3)`, usable as statements or expressions), and bare command-form built-in calls with no colon and no parens (`GET`, `PRINT "Hello World"`, statement-only) — both implemented; a third, parenthesized no-colon expression-style built-in call (e.g. hypothetically `ABS(x%)`), is neither evidenced nor implemented yet.
 
 ### Commands
 
@@ -55,7 +59,7 @@ Per BRIEF.md, now scaffolded:
 ```
 /packages
   /opl-language        # grammar, tokens, QCode definitions (keywords.ts, tokens.ts, opcodes.ts)
-  /opl-translator       # .OPL → .OPO compiler (translate() stub)
+  /opl-translator       # .OPL → .OPO compiler (lex()+parse() implemented; semantic analysis/codegen still stubs)
   /opl-engine           # QCode VM (QCodeEngine stub)
   /opl-host             # host capability interfaces (capabilities.ts) + node adapter (adapters/node.ts)
   /opl-shared           # common types, errors, utilities (OplValue, OplErrorCode, OplError)

@@ -1,5 +1,10 @@
 // Reserved words — LANGUAGE.md §3.2, §5–8, TRANSLATOR.md §3.2.
 // OPL is case-insensitive; keywords are listed here in canonical upper case.
+//
+// AND/OR/NOT/MOD are deliberately excluded: TRANSLATOR.md §3.2 and LANGUAGE.md §8.1
+// classify them as operators (see tokens.ts OPERATORS), not structural keywords.
+// REM is excluded too: it introduces a comment (TRANSLATOR.md §3.3) and is stripped
+// during lexing rather than surfaced as a token at all.
 
 export const KEYWORDS = [
   "PROC",
@@ -8,7 +13,6 @@ export const KEYWORDS = [
   "GLOBAL",
   "DIM",
   "RETURN",
-  "REM",
   "IF",
   "ELSE",
   "ENDIF",
@@ -23,10 +27,6 @@ export const KEYWORDS = [
   "CASE",
   "ENDSEL",
   "ONERR",
-  "AND",
-  "OR",
-  "NOT",
-  "MOD",
 ] as const;
 
 export type Keyword = (typeof KEYWORDS)[number];

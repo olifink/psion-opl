@@ -8,6 +8,12 @@ export enum TokenType {
   STRING_LITERAL = "STRING_LITERAL",
   OPERATOR = "OPERATOR",
   PUNCTUATION = "PUNCTUATION",
+  /**
+   * Reserved for the parser: "identifier followed by colon" is lexically identical
+   * whether it's a label declaration or a zero-argument procedure call (e.g. real
+   * device source calls a no-arg PROC as `hi:`). The lexer always emits plain
+   * IDENTIFIER + PUNCTUATION(":") and never this type directly.
+   */
   LABEL = "LABEL",
   EOF = "EOF",
 }
