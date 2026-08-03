@@ -1,0 +1,9 @@
+PROC hello:
+	REM a simple program
+	hi:
+	GET
+ENDP
+
+PROC hi:
+	PRINT "Hello World"
+ENDP
