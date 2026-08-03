@@ -1,0 +1,799 @@
+
+<TITLE>PSION Programming Ref.: Chapter 7. Friendlier interaction</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Friendlier interaction</CENTER></H1>
+<P>
+Everyday OPL programs can use the same graphical interface 
+seen throughout the Series 3a:
+<P>
+<UL><LI>Menus offer lists of options for you to choose </LI> 
+from. You can also select these options with hot-keys like 
+Psion-A, Psion-B etc.
+</UL>
+<UL><LI>Dialogs let a program ask for all kinds of information  </LI> 
+numbers, filenames, dates and times etc  in one go.
+</UL>
+<UL><LI>The status window, and screen messages such </LI> 
+as `Busy' are also available.
+</UL>
+Menu keywords begin with an "M", and dialog keywords 
+with a "D". In this manual a lower case is used for these letters  
+for example, "mINIT" and "dEDIT"  but you can type 
+them using upper or lower case letters.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "7.1"><H2> Menus</H2></A>
+<P>
+Menus provide a simple way for any reasonably complex OPL program 
+to let you choose from its various options.
+<P>
+To display menus in OPL takes three steps:
+<P>
+<UL><LI> Use the mINIT command. This prepares </LI> 
+OPL for new menus.
+</UL>
+<UL><LI> Use the mCARD command to define </LI> 
+each menu.
+</UL>
+<UL><LI> Use the MENU function to display </LI> 
+the menus.
+</UL>
+You use the displayed menus like any others on the Series 3a. Use 
+the arrow keys to move around the menus. Press Enter (or an option's 
+hot-key) to select an option, or press Esc to cancel the menus without 
+making a choice. In either case, the menus are removed, the screen 
+redrawn as it was, and MENU returns a value to indicate the 
+selection made.
+<P>
+<H3>Defining the menus</H3> 
+<P>
+The first argument to mCARD is the name of 
+the menu. This will appear at the top of the menu; the names of all 
+of the menus form a bar across the top of the screen.
+<P>
+From one to eight options on the menu may be defined, each specified 
+by two arguments. The first is the option name, and the second the 
+keycode for a hot-key. This specifies a key which, when 
+pressed together with the Psion key, should select the option. (Your 
+program must still handle hot-keys which are pressed without using 
+the menu.) It is easiest to specify the hot-key with "%"  
+eg "%a" gives the value for "a".
+<P>
+If an upper case character is used for the hot-key 
+keycode, the Shift key must be pressed as well to select the option. 
+If you supply a keycode for a lower case character, the option is 
+selected only without the Shift key pressed. Both upper and 
+lower case keycodes for the same character can be used in the same 
+menu (or set of menus). This feature may be used to increase the total 
+number of hot-keys available, and is also commonly used for related 
+menu options   eg. "%z" might be used for zooming to a 
+larger font and "%Z" for zooming to a smaller font (as in the 
+built-in applications).
+<P>
+For example, 
+"mCARD "Comms","Setup",%s,"Transfer",%t" <BR>
+defines a menu with the title "Comms". When you move to this menu 
+using " LEFT   RIGHT ", you'll see it has the two options "Setup" 
+and "Transfer", with hot-keys Psion-S and Psion-T respectively 
+(and no Shift key required). On the other hand,<BR> "mCARD "Comms","Setup",%S,"Transfer",%T" <BR>
+would give these options the hot-keys Shift-Psion-S and Shift-Psion-T.
+<P>
+The options on a large menu may be divided into logical groups (as 
+seen in many of the menus for the built-in applications) by displaying 
+a grey line under the final option 
+in a group. To do this, you must pass the negative value corresponding 
+to the hot-key keycode for the final option in the group. For example, 
+"-%A" specifies hot-key Shift-Psion-A and displays a grey line 
+under the associated option in the menu.
+<P>
+Each subsequent mCARD defines the next menu to the right. A 
+large OPL application might use mCARD like this:
+<PRE>
+mCARD "File","New",%n,"Open",%o,"Save",%s
+mCARD "Edit","Copy",%c,"Insert",-%i,"Eval",%e
+mCARD "Search","First",%f,"Next",%g,"Previous",%p
+</PRE>
+<H3>Displaying the menus</H3> 
+<P>
+The MENU function displays the menus defined 
+by mINIT and mCARD, and waits for you to select an option. 
+It returns the hot-key keycode of the option selected, in the case 
+supplied by you, whether you used Enter or the hot-key itself to select 
+it. If you supplied a negative hot-key keycode for an underlined option, 
+it is converted to its positive equivalent.
+<P>
+If you cancel the menus by pressing Esc, MENU returns 0.
+<P>
+When a set of menus is displayed, the cursor is positioned to the 
+menu and option that the user selected previously (or, if no menus 
+have previously been displayed, to the first option in the first menu).
+<P>
+This works only if your program has only one set of menus. If you 
+have another set of menus, the cursor is still set to the position 
+of the menu and option selected in the first set of menus (if that 
+position exists in the new menus). To get around this, use "m%=menu(init%)" 
+and set "init%" to zero the first time a set of menus is displayed. 
+The cursor will in this case be positioned to the first option in 
+the first menu. "init%" is set to a value which specifies the 
+menu and option selected, and should be passed to MENU the 
+next time that same set of menus is called  If your program 
+has more than one set of menus, you should have a different "init%" 
+variable for each set of menus.
+<P>
+<H3>Problems with menus</H3> 
+<P>
+When choosing hot-keys, do not use those such as the number 
+keys which produce different characters when used with the Psion key. 
+Unless you have a good reason not to, stick with "a" to "z" 
+and  "A" to "Z".
+<P>
+You must ensure that you do not use the same hot-key twice when defining 
+the menus, as OPL does not check for this.
+<P>
+Each menu definition uses some memory, so `No system memory' errors are possible.
+<P>
+Don't forget to use mINIT before you begin defining the menus.
+<P>
+If the menu titles defined by mCARD are too wide in total to 
+fit on the screen, MENU will raise an error.
+<P>
+<H3>A menu example</H3> 
+<P>
+This procedure allows you to press the Menu key and see a menu. You 
+might instead be typing a number or some text into the program, or 
+moving around in some way with the arrow keys, and this procedure 
+returns any such keypresses. You could use this procedure instead 
+of a simple GET whenever you want to allow a menu to be shown, 
+and its hot-keys to work.
+<P>
+Each option in the menus has a corresponding procedure named "proc" 
+plus the hot-key letter  so for example, the option with hot-key 
+Psion-N is handled by the procedure "procn".
+<P>
+This procedure uses the technique of calling procedures by strings, 
+as described in the `Advanced Topics' chapter.
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC kget%:</B>
+  LOCAL k%,h$(9),a$(5)
+  h$="nosciefgd" REM our hot-keys
+  WHILE 1
+    k%=GET
+    IF k%=$122   REM Menu key?
+      mINIT
+      mCARD "File","New",%n,"Open",%o,"Save",%s
+      mCARD "Edit","Copy",%c,"Insert",-%i,"Eval",%e
+      mCARD "Search","First",%f,"Next",%g,"Previous",%d
+      k%=MENU
+      IF k% AND (LOC(h$,CHR$(k%))<>0)     REM MENU CHECK
+         a$="proc"+CHR$(k%)
+        "@"(a$): REM procn:, proco:, ...
+      ENDIF                        REM END OF MENU CHECK
+    ELSEIF k% AND $200  REM hot-key pressed directly?
+      k%=k%-$200        REM remove Psion key code
+      IF LOC(h$,CHR$(k%))       REM DIRECT HOT-KEY CHECK
+         a$="proc"+CHR$(k%)
+        "@"(a$): REM procn:, proco:, ...
+      ENDIF              REM END OF DIRECT HOT-KEY CHECK
+    ELSE REM some other key
+      RETURN k%
+    ENDIF
+  ENDWH
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC procn:</B>
+...
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC proco:</B>
+...
+<B>ENDP</B>
+</PRE></UL>
+<P>
+...
+<P>
+<P>
+Note: this procedure allows you to press a hot-key with or without 
+the Shift key. So Shift-Psion-N would be treated the same as Psion-N. 
+<P>
+<P>
+Neither LOC nor the "@" operator (for calling procedures 
+by strings) differentiate between upper and lower case. If you have 
+Shifted hot-keys you will need to compare against 
+two sets of hot-key lists. For example, with hot-keys "%A", "%C", 
+"%a" and "%d", you would have upper/lowercase hot-key lists 
+like "hu$="AC"" and "hl$="ad"", and the "MENU CHECK" section 
+becomes:
+<P>
+<PRE>
+IF k%<=%Z     REM if upper case hot-key
+  IF LOC(hu$,CHR$(k%))
+    a$="procu"+CHR$(k%)
+    "@"(a$): REM procua:, procuc:, ...
+  ENDIF
+ELSE          REM else lower case hot-key
+  IF LOC(hl$,CHR$(k%))
+    a$="procl"+CHR$(k%)
+    "@"(a$): REM procla:, procld:, ...
+  ENDIF
+ENDIF
+</PRE>
+(This calls procedures "procua:", "procuc:", "procla:" 
+and "procld:"). If a hot-key was pressed directly you cannot tell 
+from "k%" whether Shift was used; so make the same change to the 
+"DIRECT HOT-KEY CHECK" section, but use "IF KMOD AND 2" 
+instead of "IF k%<=%Z".
+<P>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "7.2"><H2> Dialogs</H2></A>
+<P>
+In OPL, dialogs are constructed in a similar way to menus:
+<P>
+<UL><LI> Use the dINIT command to prepare </LI> 
+OPL for a new dialog. If you give a string argument to dINIT 
+it will be displayed as a title for the dialog, separated from the 
+rest of the dialog by a horizontal line.
+</UL>
+<UL><LI> Define each line of the dialog, from top to bottom. There </LI> 
+are separate commands for each type of item you can use in a dialog  
+for example, dEDIT for editing a string, dDATE for typing 
+in a date, and so on.
+</UL>
+<UL><LI> Use the DIALOG function to display </LI> 
+the dialog. In general it returns a number indicating the line you 
+were on when you pressed Enter (counting any title line as line 1), 
+or 0 if you pressed Esc.
+</UL>
+Use " UP  DOWN " to move from line to line, and enter the relevant 
+information, as in any other Series 3a dialog. You can even press 
+Tab to produce vertical lists of options.
+<P>
+Each of the commands like dEDIT and dDATE specifies 
+a variable to take the information you type in. If you press Enter 
+to complete the dialog, the information is saved in those variables. 
+The dialog is then removed, and the screen redrawn as it was.
+<P>
+You can press Esc to abandon the dialog without making any changes 
+to the variables.
+<P>
+If you enter information which is not valid for the particular line 
+of the dialog, you will be asked to re-enter different information.
+<P>
+Here is simple example. It assumes a global variable "name$" exists:
+<P>
+<UL><PRE>
+<B>PROC getname:</B>
+  dINIT "Who are you?"
+  dEDIT name$,"Name:"
+  DIALOG
+<B>ENDP</B>
+</PRE></UL>
+<P>
+This procedure displays a dialog with "Who are you?" as its top-line 
+title, and an edit box for typing in your name. If you end by pressing 
+Enter, the name you have typed will be saved in "name$"; if you 
+press Esc, "name$" is not changed.
+<P>
+When the dialog is first displayed, the existing contents of "name$" 
+are used as the string to edit.
+<P>
+Note that the dialog is automatically created with a width suitable 
+for the item(s) you defined, and is centred in the screen.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "7.3"><H2> Lines you can use in dialogs</H2></A>
+<P>
+This section describes the various commands that can define a line 
+of a dialog. In all cases:
+<P>
+<UL><LI> "prompt$" is the string which will appear on the left </LI> 
+side of the line.
+</UL>
+<UL><LI> "var" denotes an argument which must be a LOCAL </LI> 
+or GLOBAL variable, because it takes the value you enter. 
+Single elements of arrays may also be used, but not field variables 
+or procedure parameters. (`"var"' is just to show you where you 
+must use a suitable variable  you don't actually type `"var"'.)
+</UL>
+Where appropriate, this variable provides the initial value 
+shown in the dialog.
+<P>
+Although examples are given using each group of commands, you can 
+mix commands of any type to make up your dialog.
+<P>
+<B>More details of the commands may be found in the alphabetic listing.</B>
+<P>
+<H3>Strings, secret strings and filenames</H3> 
+<P>
+dEDIT var str$,prompt$,len%<BR>
+defines a string edit box.
+<P>
+<B>len%</B> is an optional argument. If supplied, it gives the width 
+of the edit box (allowing for the widest possible character in the 
+font). The string will scroll inside the edit box, if necessary. If 
+"len%" is not supplied, the edit box is made wide enough for the 
+maximum width "str$" could be. (You may wish to set a suitably 
+small "len%" to stop some dialogs being drawn all the way across 
+the screen)
+<P>
+dXINPUT var str$,prompt$<BR>
+defines a secret string edit box, such as for a password. A special 
+symbol will be displayed for each character you type, to preserve 
+the secrecy of the string.
+<P>
+dFILE var str$,prompt$,f%<BR>
+defines a filename edit box.
+<P>
+Here is an example dialog using these three commands:
+<P>
+<UL><PRE>
+<B>PROC info:</B>
+  dINIT "Your personal info"
+  dEDIT n$,"Name:",15 
+  dXINPUT pw$,"Password:"
+  dFILE f$,"Log file:",0
+  RETURN DIALOG
+<B>ENDP</B>
+</PRE></UL>
+<P>
+This returns `True' if Enter was used, indicating that the GLOBAL 
+variables "n$", "pw$" and "f$" have been updated.
+<P>
+dFILE automatically has a `Disk' selector on the line below 
+it. The third argument to dFILE controls the type of file editor 
+you see, and the kind of input allowed. See the `Alphabetic listing' 
+for more details of dFILE.
+<P>
+<H3>Choosing one of a list</H3> 
+<P>
+dCHOICE var choice%,prompt$,list$<BR>
+defines a choice list. "list$" should contain the possible 
+choices, separated by commas  for example, ""Yes,No"". 
+The "choice%" variable specifies which choice should initially 
+be shown  1 for the first choice, 2 for the second, and so 
+on.
+<P>
+For example, here is a simple "choice" dialog:
+<P>
+<UL><PRE>
+<B>PROC dcheck:</B>
+  LOCAL c%
+  c%=2         REM default to "Internal"
+  dINIT "Disk Check"
+  dCHOICE c%,"Disk:","A,Internal,B"
+  IF DIALOG    REM returns 0 if cancelled
+    ... REM disk-check code
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<H3>Numbers, dates and times</H3> 
+<P>
+dLONG var long&,prompt$,min&,max&<BR>
+and<BR>
+dFLOAT var fp,prompt$,min,max<BR>
+define edit boxes for long integers and floating-point numbers respectively. 
+Use dFLOAT to allow fractions, and dLONG to disallow 
+them. "min(&)" and "max(&)" give the minimum and maximum values 
+which are to be allowed. There is no separate command for ordinary 
+integers  use dLONG with suitable "min&" and "max&" values.
+<P>
+dDATE var long&,prompt$,min&,max&<BR>
+ and<BR>
+dTIME var long&,prompt$,type%,min&,max&<BR>
+define edit boxes for dates and times. "min&" and "max&" give 
+the minimum and maximum values which are to be allowed.
+<P>
+For dDATE, "long&", "min&" and "max&" are specified 
+in "days since 1/1/1900". The DAYS function is useful for converting 
+to "days since 1/1/1900".
+<P>
+For dTIME, "long&", "min&" and "max&" are in "seconds 
+since 00:00". The DATETOSECS and SECSTODATE functions 
+are useful for converting to and from "seconds since midnight" (they 
+actually use "seconds since 00:00 on 1/1/1970").
+<P>
+dTIME also has a "type%" argument. This specifies the type 
+of display required:
+<PRE>
+"type%"		time display
+0		absolute time without seconds
+1		absolute time with seconds
+2		duration without seconds
+3		duration with seconds
+</PRE>
+For example, "03:45" is an absolute time while 3 hours 45 minutes 
+is a duration.
+<P>
+This procedure creates a dialog, using these commands:
+<P>
+<UL><PRE>
+<B>PROC delivery:</B>
+  LOCAL d&,t&,num&,wt
+  d&=DAYS(DAY,MONTH,YEAR)
+  DO
+    t&=secs&:
+  UNTIL t&=secs&:
+  num&=1 :wt=10
+  dINIT "Delivery"
+  dLONG num&,"Boxes",1,1000
+  dFLOAT wt,"Weight (kg)",0,10000
+  dDATE d&,"Date",d&,DAYS(31,12,1999)
+  dTIME t&,"Time",0,0,DATETOSECS(1970,1,1,23,59,59)
+  IF DIALOG    REM returns 0 if cancelled
+    ...  REM rest of code
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC secs&:</B>
+   RETURN HOUR*INT(3600)+MINUTE*60
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The <B>secs&:</B>
+procedure uses the HOUR and MINUTE functions, which 
+return the time as kept by the Series 3a. It is called twice to 
+guard against an incorrect result, in the (albeit rare) case where 
+the time ticks past the hour between calling HOUR and calling 
+MINUTE.
+<P>
+The INT function is used in <B>secs&:</B> to force OPL to use 
+long integer arithmetic, avoiding the danger of an `Integer overflow' 
+error.
+<P>
+<B>d&</B> and <B>t&</B> are set up to give the current date and time 
+when the dialog is first displayed. The value in "d&" is also 
+used as the minimum value for dDATE, so that in this example 
+you cannot set a date before the current date.
+<P>
+DATETOSECS is used to give the number of seconds representing 
+the time 23:59. The first three arguments, "1970", "1" and 
+"1", represent the first day from which DATETOSECS begins 
+calculating.
+<P>
+<H3>Results from dDATE</H3> 
+<P>
+dDATE returns a value as a number of days. To convert this 
+to a date:
+<P>
+<UL><LI> If you are dealing only with days on or after 1/1/1970, </LI> 
+you can subtract 25567 ("DAYS(1,1,1970)"), multiply by 86400 (the 
+number of seconds in a day), and use SECSTODATE.
+</UL>
+<UL><LI> To handle days before 1/1/1970 as well, you can call the </LI> 
+Operating System to perform the conversion. This procedure is passed 
+one parameter, the number of days, and from it sets four global variables  
+"day%", "month%", "year%" and "yrdy%". It calls the 
+Operating System with the OS function:
+</UL>
+<UL><PRE>
+<B>PROC daytodat:(days&)</B>
+  LOCAL dyscent&(2),dateent%(4)
+  LOCAL flags%,ax%,bx%,cx%,dx%,si%,di%
+  dyscent&(1)=days&
+  si%=ADDR(dyscent&()) :di%=ADDR(dateent%())
+  ax%=$0600 REM TimDaySecondsToDate fn.
+  flags%=OS($89,ADDR(ax%)) REM TimManager int.
+  IF flags% AND 1
+    RAISE (ax% OR $ff00)
+  ELSE
+    year%=PEEKB(di%)+1900 :month%=PEEKB(UADD(di%,1))+1
+    day%=PEEKB(UADD(di%,2))+1 :yrdy%=PEEKW(UADD(di%,6))+1
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+If you do use this procedure, be careful to type it exactly as shown 
+here.
+<P>
+<P>
+<H3>Displaying text</H3> 
+<P>
+dTEXT prompt$,body$,type%<BR>
+defines "prompt$" to be displayed on the left side of the line, 
+and "body$" on the right. There is no variable associated with 
+dTEXT. If you use a null string ("""") for "prompt$", 
+"body$" is displayed across the whole width of the dialog.
+<P>
+"type%" is an optional argument. If specified, it controls the 
+alignment of "body$":
+<PRE>
+"type%"		effect
+0		left align "body$"
+1		right align "body$"
+2		centre "body$"
+</PRE>
+In addition, you can add any or all of the following three values 
+to "type%", for these effects:
+<PRE>
+"type%"		effect
+$100		use bold text for "body$".
+$200		draw a line below this item.
+$400		make this line selectable. (It will also be
+		bulleted if "prompt$" is not """".)
+</PRE>
+dTEXT is not just for displaying information. Since DIALOG 
+returns a number indicating the line you were on when you pressed 
+Enter (or 0 if you pressed Esc), you can use dTEXT to offer 
+a choice of options, rather like a menu:
+<P>
+<UL><PRE>
+<B>PROC selact:</B>
+  dINIT "Select action"
+  dTEXT "","Add",$402
+  dTEXT "","Copy",$402
+  dTEXT "","Review",$402
+  dTEXT "","Delete",$402
+  RETURN DIALOG
+<B>ENDP</B>
+</PRE></UL>
+<P>
+In each case "type%" is $402 ($400+2). The "$400" makes each 
+text string selectable, allowing you to move the cursor onto it, while 
+"2" makes each string centred. 
+<P>
+<P>
+<H3>Displaying exit keys</H3> 
+<P>
+Most dialogs are completed by pressing Enter to confirm the information 
+typed, or Esc to cancel the dialog. These keys are not usually displayed 
+as part of the dialog.
+<P>
+However, some Series 3a dialogs offer you a simple choice, by showing 
+pictures of the keys you can press. A simple "Are you sure?" dialog 
+might, for example, show the two keys `Y' and `N', and indicate the 
+one you press.
+<P>
+If you want to display a message and offer Enter, Esc and/or Space 
+as the exit keys, you can display the entire dialog with the ALERT function.
+<P>
+If you want to use other keys, such as "Y" and "N", or display 
+the keys below other dialog items such as dEDIT, create the 
+dialog as normal and use the dBUTTONS command 
+to define the keys.
+<P>
+ALERT and dBUTTONS are explained in detail in the alphabetic 
+listing. 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "7.4"><H2> Other dialog information</H2></A>
+<P>
+<H3>Positioning dialogs</H3> 
+<P>
+If a dialog overwrites important information on the screen, you can 
+position it with the dPOSITION command. 
+Use dPOSITION at any time between dINIT and DIALOG.
+<P>
+dPOSITION uses two integer values. The first specifies the 
+horizontal position, and the second, the vertical. "dPOSITION -1,-1" 
+positions to the top left of the screen; "dPOSITION 1,1" to 
+the bottom right; "dPOSITION 0,0" to the centre, the usual position 
+for dialogs.
+<P>
+"dPOSITION 1,0", for example, positions to the right-hand edge 
+of the screen, and centres the dialog half way up the screen.
+<P>
+<H3>Restrictions on dialogs</H3> 
+<P>
+The following general restrictions apply to all dialogs:
+<P>
+<UL><LI> Only one dialog may be in use at a time.</LI> 
+</UL>
+<UL><LI> A dialog must be initialised (dINIT), defined (dEDIT </LI> 
+etc) and displayed (DIALOG) in the same procedure.
+</UL>
+<UL><LI> A dialog may consist of up to nine lines, including any </LI> 
+title. Filename editors count as two lines, and exit keys count as 
+three. A `Too many items' error 
+is raised if this limit is exceeded.
+</UL>
+<UL><LI> If the width of any line would make the dialog too wide, </LI> 
+a `Too wide' error is raised when DIALOG 
+is called.
+</UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "7.5"><H2> Giving information</H2></A>
+<P>
+<H3>Status window  temporary and permanent</H3> 
+<P>
+Pressing Psion-Menu when an OPL program is running will 
+always display a temporary status window. This status window is in 
+front of all the OPL windows, so your program can't write over it.
+<P>
+Use "STATUSWIN ON" or "STATUSWIN ON,type%" to display a permanent status window. 
+It will be displayed until you use "STATUSWIN OFF". "type%" 
+specifies the status window type. The small status window is displayed 
+for "type%=1" and the large status window either when "type%" 
+is not supplied or when "type%=2".
+<P>
+You might use "STATUSWIN ON" when Control-Menu is pressed, for 
+consistency with the rest of the Series 3a.
+<P>
+The status window is displayed on the right-hand side of the screen.
+<P>
+<H3>The rank of the status window</H3> 
+<P>
+Important: The permanent status window is behind all other 
+OPL windows. In order to see it, you must use either FONT or both SCREEN and gSETWIN, to reduce the size 
+of the text window and the default graphics window. You should ensure 
+that your program does not create windows over the top of it.
+<P>
+FONT automatically resizes these windows to the maximum size 
+excluding any status window. It should be called after creating the 
+status window because the new size of the text and graphics windows 
+depends on the size of the status window. Note that "FONT -$3fff,0" 
+leaves the current font and style  it just changes the window 
+sizes and clears them.
+<P>
+If you use SCREEN and gSETWIN instead of FONT, 
+you should use the STATWININFO keyword (described next) to 
+find out the size of the status window.
+<P>
+<H3>Finding the position and size of a status window</H3> 
+<P>
+<PRE>
+curtype%=STATWININFO(type%,extent%())
+sets the four element array extent%() as follows:
+extent%(1) = pixels from left of screen to status window
+extent%(2) = pixels from top of screen to status window
+extent%(3) = status window width in pixels
+extent%(4) = status window height in pixels for status window type%
+</PRE>
+<P>
+"type%=3" specifies the compatibility mode status window and "type%=-1" 
+specifies whichever type of status window is currently shown. Otherwise, 
+use the same values of "type%" as for STATUSWIN.
+<P>
+STATWININFO returns the type of the current status window. 
+The values are as for "type%", or zero if there is no current 
+status window.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> If type%=-1 for the current status window and there  
+is none, STATWININFO  returns consistent information in "extent%()" 
+corresponding to a status window of width zero and full screen height 
+positioned one pixel to the right of the physical screen.
+</DL>
+So to set a graphics window to have height "h%" and to use the 
+full screen width up to the current status window (if any), but leaving 
+a one pixel gap between the graphics window and the status window, 
+you could use:<BR>
+"STATWININFO(-1,extent%()) :gSETWIN 0,0,extent%(1),h%" 
+<P>
+Alternatively you could simply use "FONT -$3fff,0" as 
+described under STATUSWIN above, which also sets the height 
+to full screen height and sets the text window size to fit inside 
+it.
+<P>
+<H3>What the status window does</H3> 
+<P>
+The status window always displays the OPL program name, a clock and, 
+by default, an icon. This will be the default OPL icon, unless your 
+program is an OPA with its own icon. (OPAs are described 
+in the `Advanced topics' chapter.) In addition, the settings selected 
+in the `Status window' menu option of the System screen are automatically 
+used in OPL status windows. The status window will therefore also 
+display all the indicators required, and a digital or analog clock 
+as selected there.
+<P>
+The status window is inaccessible to, and does not affect, the OPL 
+keywords gORDER and gRANK.
+<P>
+You can set or change the name displayed in the status window with 
+SETNAME  for example, "SETNAME "ABCD"" 
+or "SETNAME a$".
+<P>
+<H3>Using a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list in the status window</H3> 
+<P>
+Your program may have several distinct modes/views/screens between 
+which you would like the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> key to switch. The built-in applications 
+use the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> key extensively  Agenda uses it it to switch 
+to the different views, while Word switches between `Normal' and `Outine' 
+view. 
+<P>
+The <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list  the list of modes/views/screens which the 
+<IMG ALT = "DIAMOND" SRC = "diamond.gif"> key goes between  is displayed in the status window.
+<P>
+OPL programs can set up a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list. Use <BR>
+"DIAMINIT pos%,str1$,str2$,..." <BR>
+to initialise the list (discarding any existing list). The list can 
+be initialised before or after a status window is displayed.
+<P>
+"str1$", "str2$" etc. contain the text to be displayed in 
+the status window for each item in the list.
+<P>
+"pos%" is the initial item on to which the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> indicator should 
+be positioned, with "pos%=1" specifying the first item. (Any value 
+greater than the number of strings specifies the final item.)
+<P>
+If "pos%=0", or if DIAMINIT is used on its own with no 
+arguments, no bar is defined.
+<P>
+If "pos%=-1" the list is replaced by the icon instead in the large 
+status window.
+<P>
+If "pos%>=1" you must supply at least this many strings.
+<P>
+Defining a list uses some memory, so `No system memory' errors are possible.
+<P>
+"DIAMPOS pos%" positions the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> indicator 
+in a list. You might move the indicator to the next item when the 
+<IMG ALT = "DIAMOND" SRC = "diamond.gif"> key is pressed and to the previous item when Shift-<IMG ALT = "DIAMOND" SRC = "diamond.gif"> 
+is pressed. The <IMG ALT = "DIAMOND" SRC = "diamond.gif"> key has keycode value 292 and KMOD 
+returns 2 when the Shift key is pressed.
+<P>
+Positioning outside the range of the items wraps around in the appropriate 
+way  if there are three items in the list, "DIAMPOS 4" 
+positions to the first. 
+<P>
+"DIAMPOS 0" causes the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> symbol to disappear.
+<P>
+Use "chr$(4)" to display a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> key in a menu. If you 
+use it as a hot-key, a Shift will be added automatically. 
+<P>
+ 
+<P>
+<H3>Information messages</H3> 
+<P>
+GIPRINT displays an information message for 2 seconds, in the 
+bottom right corner of the screen. For example, 
+"GIPRINT "Not Found"" displays "Not Found". The string 
+you specify can be up to 63 characters. If a string is too long for 
+the screen, it will be clipped.
+<P>
+You can add an integer argument to control the corner in which the 
+message appears:
+<PRE>
+value		corner
+0		top left
+1		bottom left
+2		top right
+3		bottom right
+</PRE>
+For example, "GIPRINT "Who?",0" prints "Who?" in the top 
+left corner.
+<P>
+Only one message can be shown at a time. You can make the message 
+go away  for example, if a key has been pressed  with 
+"GIPRINT """.
+<P>
+<H3>`Busy' messages</H3> 
+<P>
+Messages which say a program is temporarily busy, or cannot respond 
+for some reason, are by convention shown in the bottom left corner. 
+The BUSY command lets you display your own messages of this 
+sort. Use "BUSY OFF" to remove it.
+<P>
+"BUSY "Paused..."", for example, displays ""Paused..."" 
+in the bottom left corner. This remains shown until "BUSY OFF" 
+is used.
+<P>
+You can control the corner used in the same way as for GIPRINT. 
+You can also add a third argument, to specify a delay time (in half 
+seconds) before the message should be shown. Use this to prevent `busy' 
+messages from continually appearing very briefly on the screen.
+<P>
+For example, "BUSY "Wait:",1,4" will display "Wait:" in 
+the bottom left corner after a delay of 2 seconds. As soon as your 
+program becomes responsive to the keyboard, it should use "BUSY OFF". 
+If this occurs within two seconds of the original BUSY, no 
+message is seen.
+<P>
+Only one message can be shown at a time. The string to display can 
+be up to 19 characters long.
+<P>
+ 
+<P>
+ 
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

@@ -1,0 +1,592 @@
+
+<TITLE>PSION Programming Ref.: Chapter A. Summary for experienced OPL users </TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Summary for experienced OPL users </CENTER></H1>
+<P>
+OPL has evolved from the Psion Organiser II through the 
+MC and HC computers to the Series 3 and now Series 3a. This appendix 
+explains the changes made. For 
+more details of the following topics and keywords, look them up in 
+the index or table of contents.
+<P>
+Bear in mind that some OPL keywords return or allow different 
+values according to screen size and keyboard layout.
+<P>
+Note: the comparisons against HC and MC OPL in this 
+appendix assume the original versions of these computers. Some of 
+the Series 3/3a OPL features may be incorporated into future releases 
+in the HC and MC ranges.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "A.1"><H2> Using OPL on the SERIES 3a</H2></A>
+<P>
+To create an OPL module, press the System button, and move the cursor 
+to the Program icon. (You can also do this with Psion-Control-Word, 
+as Control-Word is initially set to act like a `Program' button.) 
+Select `New file' from the `File' menu, give the name to use, and 
+then type in the module. The editing features are the same as in Word, 
+but the `Paragraphs' and `Styles' menus are missing, and the `Word' 
+menu has been replaced by a `Prog' menu, containing new programming 
+options. Select its `Translate' option to translate the module, then 
+the `Run' option to run it. You can also run the translated module 
+from the System screen, as its name automatically appears under a 
+`RunOpl' icon  move the cursor right to the RunOpl icon, then 
+down onto the module name, and press Enter.
+<P>
+Existing OPL modules are listed under the Program icon on the System 
+screen. To edit one, move the cursor onto the module name and press 
+Enter.
+<P>
+To stop a running program, press Psion-Esc.
+<P>
+The Series 3a screen is 480 points (pixels) wide by 160 points 
+deep.
+<P>
+OPL programs can be translated as applications which appear in the 
+System screen. This is done with the APP keyword. 
+You can also select the type of application using keyword TYPE, and the icon using ICON, 
+the filename extension of files to be listed under the icon in the 
+System screen using EXT and the directory in 
+which these files are stored using PATH.
+<P>
+<H3>Files</H3> 
+<P>
+If you use the `S3 Translate' option on the `Prog' menu, the Program editor 
+will translate as if for the Series 3. The translated program can 
+then be run on either a Series 3 or a Series 3a; on the latter 
+it will run in compatibility mode.
+<P>
+If you use the `Translate' option on the `Prog' menu, the translated program will run only 
+on the Series 3a.
+<P>
+Modules translated for the Series 3 (not the Series 3a) 
+are also compatible with HC and MC computers, provided that they only 
+use keywords also available on those machines. You can build code 
+libraries which can be used on all four machines, bearing in mind 
+differences between screen size, location of files etc.
+<P>
+There is more about compatibility with the Series 3 towards the 
+end of this chapter. The information includes some rules for combining 
+modules when some of them are translated for Series 3 and some for 
+Series 3a.
+<P>
+Procedures translated on the Organiser need re-translation, as they 
+will not run on the Series 3a.
+<P>
+The Series 3a uses the same MS-DOS filing system as the MC and Series 3, 
+although for everyday use it `hides' the directories from you. The 
+directories and file extensions concerned with OPL are:
+<PRE>
+Type of file	    Directory	   File extension 
+<P>
+OPL modules		\OPL	     .OPL
+translated modules	\OPO	     .OPO
+data files		\OPD	     .ODB
+bitmaps		\OPD	     .PIC
+</PRE>
+<HR SIZE=4 NOSHADE ><A NAME = "A.2"><H2> Changes from Organiser to MC OPL</H2></A>
+<P>
+<H3>Procedures and modules</H3> 
+<P>
+More than one procedure may be stored in a single .OPL file, 
+or module. The beginning of each procedure is identified by 
+the line "PROC procedure name:" and the end of each procedure 
+by the line "ENDP". So a module might look like this:
+<P>
+<UL><PRE>
+<B>PROC oneroot:</B>
+ LOCAL x
+ PRINT "Type a number:"
+ INPUT x
+ root:(x)
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC root:(p)</B>
+ CLS
+ PRINT "Root of",p,"is",sqr(p)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+When you run the module, the first procedure in the module is executed. 
+Any other procedures in the module are available to be called by the 
+first procedure. 
+<P>
+Procedures can be called from other modules only if you've loaded 
+the modules with the new LOADM command. Up to 4 modules can 
+be held in memory at any one time. Use UNLOADM to remove a 
+module from memory.
+<P>
+<H3>Other changes</H3> 
+<P>
+Data files now have a special format. Records can be a maximum of 
+1022 bytes long.
+<P>
+The FIND function compares a search string 
+against entire text fields. To find text anywhere within text fields, 
+add an asterisk at either end of the string  eg "FIND("*JONES*")".
+<P>
+When you use REM at the end of a line you need only precede 
+it with a space, not a space and a colon. So these two lines are equivalent:
+<P>
+RAISE -37 :REM disk full
+<P>
+RAISE -37 REM disk full
+<P>
+No calculator memories are available to OPL on the MC (although they 
+are on the Series 3/3a.)
+<P>
+The specification of the BEEP command has changed.
+<P>
+Different effects are produced by values below 32, used with "PRINT CHR$()". 
+See the Character Set appendix for more details.
+<P>
+New functions and commands: 
+<P>
+<UL><LI> SCREEN allows you to set the maximum size of the </LI> 
+text window.
+</UL>
+<UL><LI> LOPEN must now be used before LPRINTing, to </LI> 
+specify the destination of the LPRINTs. Use LCLOSE if 
+you then want to LPRINT to another device. You can also use 
+LOPEN to print to a file.
+</UL>
+<UL><LI> COMPRESS copies data files, and makes sure that erased </LI> 
+records aren't copied to the destination device.
+</UL>
+<UL><LI> FINDW, DIRW$, COPYW and DELETEW on </LI> 
+Organiser model LZ have been renamed FIND, DIR$, COPY 
+and DELETE  the functions/commands which previously 
+had these names having been removed.
+</UL>
+These functions/commands have been removed from OPL: CLOCK, UDG, 
+DISP, VIEW, FREE, MENU and MENUN. Also, the Comms Link commands 
+are not available.
+<P>
+<H3>Long integers</H3> 
+<P>
+A new variable type has been added  long integers, specified 
+by adding an "&" symbol to the variable name instead of the "%" 
+symbol, eg "price&", "x&(5)".
+<P>
+Long integers are 32-bit rather than 16-bit signed integers, giving 
+the range +2,147,483,647 to -2,147,483,648 rather than +32767 to -32768.
+<P>
+Long hexadecimal constants should have an "&" instead of a "$" 
+sign in front of them. Even when the constant fits into an integer, 
+you can use "&" to widen the constant to 32 bits.
+<P>
+<H3>Advanced use</H3> 
+<P>
+POKEL, POKEF and POKE$ have been added to POKEB 
+and POKEW, and PEEKL, PEEKF and PEEK$ have been 
+added to PEEKB and PEEKW. This means you can poke and 
+peek the full range of value types  strings, long integers 
+etc.
+<P>
+There is a range of I/O file handling facilities, allowing 
+you to open, read, write and position within any type of file.
+<P>
+To complement the keypress functions, KMOD allows you to detect 
+any modifiers, such as Control, which have been pressed.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "A.3"><H2> Changes from MC to HC OPL</H2></A>
+<P>
+<H3>Graphics commands</H3> 
+<P>
+Many graphics commands are available. They can, for example:
+<P>
+<UL><LI> Draw lines and boxes.</LI> 
+</UL>
+<UL><LI> Fill areas with patterns.</LI> 
+</UL>
+<UL><LI> Display text in a variety of styles, at any position on </LI> 
+the screen.
+</UL>
+<UL><LI> Scroll areas of the screen.</LI> 
+</UL>
+<UL><LI> Manipulate up to eight separate windows and bit patterns.</LI> 
+</UL>
+<UL><LI> Read data back from the screen.</LI> 
+</UL>
+The TRAP command can be used with several new commands.
+<P>
+The CURSOR command can be still be used to switch the text 
+cursor on and off, but can also define the shape and position of a 
+graphics cursor.
+<P>
+The gUPDATE command affects anything that displays on the screen. 
+It may make a noticeable difference in speed if, for example, you 
+are using a lot of PRINT commands.
+<P>
+<H3>Other changes</H3> 
+<P>
+When a program runs, it is given the full screen on which to display 
+text. Use the SCREEN command to define a 
+different window size for text display.
+<P>
+The SCREEN command can position the text window anywhere on 
+the screen. You can also use SCREEN repeatedly to change the 
+size of the window.
+<P>
+A new function, OS, allows you to call any interrupt service 
+in the Operating System, and read all returned registers and flags.
+<P>
+GETEVENT and TESTEVENT give details of system events 
+of any kind.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "A.4"><H2> Changes from HC to SERIES 3 OPL</H2></A>
+<P>
+<H3>Everyday features</H3> 
+<P>
+Many of the interface features of the Series 3 applications  
+for example menus, dialog boxes, shadowed boxes and status windows  
+are available via OPL keywords.
+<P>
+Several keywords have been added for OPAs (OPL applications).
+<P>
+The two colons at the end of the label in ONERR or GOTO 
+are optional. The colons must still be used where the label itself 
+occurs in the program.
+<P>
+You can pause a running program by pressing Control-S. It will be 
+paused as soon as it next tries to display something on the screen. 
+Press any other key to let the program resume running.
+<P>
+The EVAL function evaluates a string and returns the result 
+as a floating-point number.
+<P>
+The VECTOR command allows you to jump to one of a list of labels. 
+This can save cumbersome IF statements.
+<P>
+Procedures may now be called using a string expression for the procedure 
+name. 
+<P>
+BEEP may be used with the duration made negative. It will first 
+check whether the sound system is in use (perhaps by another OPL program), 
+and return if it is. This stops BEEP waiting until the sound 
+system is free.
+<P>
+There are new graphics keywords  gINVERT, gXPRINT, 
+gBORDER and gCLOCK.
+<P>
+DATETOSECS and SECSTODATE convert between standard system 
+dates / times and the number of seconds since midnight on 1/1/1970.
+<P>
+The calculator memories M0 to M9 are available to OPL.
+<P>
+<H3>Advanced features</H3> 
+<P>
+MKDIR makes a new directory, RMDIR removes a directory, 
+and SETPATH sets the current directory for file access.
+<P>
+The command line arguments of the OPL program you run, including its 
+full pathname, are returned by CMD$.
+<P>
+Two new I/O commands, IOWAITSTAT and IOYIELD, have been 
+added.
+<P>
+PARSE$ will produce a single full file specification from two 
+separate parts, or break one down into its constituent parts.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "A.5"><H2> Changes from SERIES 3 to SERIES 3a OPL</H2></A>
+<P>
+<H3>Everyday features</H3> 
+<P>
+A new SCREENINFO command provides information about the screen 
+size and type. You can use it to write machine-independent programs, 
+as described later in this chapter.
+<P>
+All appropriate graphics keywords can now draw in grey as well as 
+black. To allow drawing in grey use "DEFAULTWIN 1". 
+By default grey is not available as drawing grey as well as black 
+uses more memory and takes longer.
+<P>
+TYPE supports new larger black/grey icons, and allows you to 
+specify different icons for the Series 3 and Series 3a.
+<P>
+New FONT and STYLE keywords set the font and style for displaying 
+text with PRINT (etc).
+<P>
+gFONT and FONT can access many new fonts which are built into 
+the Series 3a ROM.
+<P>
+gCLOCK supports many more types of clocks.
+<P>
+A dialog on the Series 3 can have up to seven lines including the 
+title, whereas a dialog on the Series 3a can have nine.
+<P>
+A menu on the Series 3 can have up to six options whereas a menu 
+on the Series 3a can have eight. The MENU function allows 
+you to set which menu and item should be highlighted initially.
+<P>
+Series 3 programs will always run correctly in compatibility mode 
+but if retranslated (in normal Series 3a mode) may need changing 
+as follows:
+<P>
+<UL><LI> Menu keywords support case-dependent hot-keys. The hot-keys </LI> 
+you specify should now be in the correct case  upper or lower. 
+If you specify "%P" (upper case), for example, this is the hot-key 
+Shift-Psion-P. On selecting an option, MENU returns the hot-key 
+keycode in the case which you specified.
+</UL>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> On some very early versions of the Series 3, menus exited  
+when any key was pressed together with the Psion key. Later 
+Series 3 versions and all Series 3a versions exit menus only when 
+valid hot-keys are pressed.
+</DL>
+<UL><LI> "STATUSWIN ON" displays a large Series 3a status window </LI> 
+containing an icon. This is 64 pixels wide, whereas it was 50 pixels 
+wide on the Series 3.
+</UL>
+DIAMINIT and DIAMPOS allow a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list to be displayed 
+in the status window.
+<P>
+STATWININFO returns information about the sizes of status windows 
+and/or the current status window. 
+<P>
+gBUTTON draws keys such as those displayed in certain dialogs.
+<P>
+gDRAWOBJECT draws a graphics object. You can use this 
+to draw the "lozenge" used to display the words `City' and `Home' 
+in the World application.
+<P>
+gXBORDER draws bordered boxes, such as those used to display 
+dialogs. (The gBORDER keyword works as it did on the Series 3.)
+<P>
+FINDFIELD finds text in a particular field, or group of fields.
+<P>
+BEEP cannot play tones as high as those played 
+on the Series 3.
+<P>
+gPEEKLINE can now read from the screen as a whole.
+<P>
+CURSOR can display new kinds of cursors, and gINFO can 
+return this (and other) information.
+<P>
+TYPE supports new actions and icon types for OPAs.
+<P>
+<H3>Advanced features</H3> 
+<P>
+IOC performs an asynchronous I/O request, like IOA, 
+but with guaranteed completion. IOCANCEL cancels any outstanding 
+IOA or IOC.
+<P>
+A new set of keywords supports the definition of a sprite, 
+which you can move around "on top of" the rest of the screen. The 
+sprite can be animated, displaying a sequence of different bitmaps.
+<P>
+Cacheing  keeping frequently used procedures in memory 
+instead of loading them from file every time they are called  
+can help increase the speed of OPL programs.
+<P>
+New keywords provide access to dynamic libraries (DYLs), to 
+the memory allocator and to Operating System data file calls.
+<P>
+UADD and USUB allow addition and subtraction of pointers/addresses 
+without the risk of `Integer overflow'.
+<P>
+GETEVENT now returns the event $405 when the date changes.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Some new system services, not available on the Series 3,  
+are mentioned in this manual  for example, the `Foreground 
+and background' section in the `Advanced topics' chapter uses a "event 
+on machine turn on" service.
+</DL>
+ 
+<P>
+Compatibility between Series 3 and Series 3a
+<P>
+<H3>Compatibility mode and normal mode</H3> 
+<P>
+A program translated for the Series 3 can run on the Series 3a 
+without retranslation  the program runs in compatibility 
+mode. This mode makes use of the fact that the Series 3a screen 
+has exactly twice as many pixels as the Series 3 screen in both 
+the horizontal and vertical directions: the Series 3a screen has 
+480x160 pixels and the Series 3 has 240x80 pixels. When a Series 3 
+program runs on the Series 3a, four pixels (2x2) are actually drawn 
+or cleared for each pixel that would have been drawn or cleared on 
+a Series 3. Also, all keywords that explicitly or implicitly specify 
+a screen position (eg. gAT, gMOVE, gBOX and AT) 
+are automatically rescaled.
+<P>
+One or two of the special symbols (characters between 0 and 31 in 
+the character set) are different on the Series 3a. However, in compatibility 
+mode the fonts have the same character set as on the Series 3.
+<P>
+A program translated for the Series 3a runs in normal mode 
+on the Series 3a. It will not run on the Series 3.
+<P>
+<H3>Slowing down Series 3 programs</H3> 
+<P>
+If you wish to slow down a program  such as one of the games 
+on Psion's Games SSDs  you can write a short OPL program to 
+run in the background, like this:
+<P>
+proc slowdn:
+local i%,j
+print "Slow down S3a"
+call($138b) rem "unmark as active"
+while 1
+  i%=10 :j=j+1
+  while i% :i%=i%-1 :endwh
+  if j=300000
+    j=0 :pause 2
+  else
+    pause 1
+  endif
+endwh
+endp
+<P>
+If you change the number 10 assigned to "i%" at the top of the 
+WHILE loop, you can control the amount by which the Series 3a 
+slows down  a bigger value slows it down by more, and a smaller 
+value by less. You may need to use different values for different 
+Series 3 programs.
+<P>
+Warning: running this program will cause the Series 3a to 
+use more battery power.
+<P>
+The loop which "j" counts is designed to do a "pause 2" 
+instead of a "pause 1", roughly every twenty five minutes. A 
+"pause 2" gives just enough delay for the automatic turn off 
+of the Series 3a to have a chance to work. Without this, automatic 
+turn off cannot work.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Using "pause 2" in the main delay loop might cause the  
+foreground process to have a noticeably jerky appearance.
+</DL>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> You can change the value 300000 to change the time before  
+automatic turn off will occur. If you make it too small you may notice 
+the "pause 2" occasionally. (If you make "i%" a lot bigger 
+than 10 in the loop, you may also find the period before automatic 
+turn off increases.)
+</DL>
+If you do not allow automatic turn off like this, and you then forget 
+to exit the "slowdown" program, no automatic turn off can occur. If 
+you left the Series 3a turned on  or if it woke up for an 
+alarm when you were not present  it would stay on until the 
+batteries run down. It would then turn off, and you would not be able 
+to use it again until you changed the batteries.
+<P>
+Do not forget to exit the program from the System screen (use the 
+Delete key) when you want to use the Series 3a at full speed again.
+<P>
+<H3>Combining modules translated for Series 3 and Series 3a</H3> 
+<P>
+The rest of this section relies on the following important rules:
+<P>
+<UL><LI> A program runs in normal mode if its top-level module </LI> 
+was translated for the Series 3a, and in compatibility mode otherwise.
+</UL>
+<UL><LI> When running in normal mode, a module translated for the </LI> 
+Series 3 may be loaded but will run in normal mode.
+</UL>
+<UL><LI> When running in compatibility mode, a Series 3a module </LI> 
+cannot be loaded and will cause an 'Incompatible translator version' 
+error (-107).
+</UL>
+For a program to run on both machines, you could therefore do one 
+of the following:
+<P>
+<UL><LI> translate the whole program for the Series 3, in which </LI> 
+case it will also run on the Series 3a in compatibility mode.
+</UL>
+<UL><LI> translate the top-level module only both for the Series 3a </LI> 
+and for the Series 3, and the rest of the program for the 
+Series 3 only. There are then effectively two programs, although 
+they share all except for the top-level module.
+</UL>
+The program with Series 3a top-level runs only on the 
+Series 3a and only in normal mode. The program with Series 3 top-level 
+runs in compatibility mode on the Series 3a or normally on the Series 3.
+<P>
+For this method to work you should not assume that the physical 
+screen has a fixed number of pixels or that the text screen size and 
+characters in its font have a fixed width and height. Use gINFO, 
+SCREENINFO, gWIDTH and gHEIGHT to find out the 
+values at runtime. eg. pixel "(120,0)" is half-way across the 
+screen on the Series 3 but is only a quarter-way across on the Series 3a, 
+whereas pixel "(gWIDTH/2,0)" is half-way across in both cases.
+<P>
+Clearly Series 3a keywords cannot be included in any program to 
+be run on both machines. The following 'trick' may however prove useful. 
+It relies on the failure to load an Series 3a module when running 
+in compatiblitiy mode on the Series 3a (or when running on the Series 3 
+itself). The steps are:
+<P>
+1.	Create a module containing procedures using Series 3a 
+keywords which are needed when running in normal mode. For example, 
+module "s3aprocs.opl" might contain: 
+<P>
+<UL><PRE>
+<B>PROC scrinfo:(pinfo%)</B>
+  SCREENINFO #pinfo%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC font:(font%,style%)</B>
+  FONT font%,style%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+2.	Translate for the Series 3a (it won't translate for 
+the Series 3 anyway).
+<P>
+3.	Call the procedures in "s3aprocs.opl" as follows 
+to set up global variables containing text screen information  
+if running in compatibility mode, simply set the globals to known 
+values that apply on the Series 3:
+<PRE>
+LOCAL err%,info%(10),...
+<P>
+  TRAP LOADM "S3aprocs"
+  IF ERR=0 OR ERR=-104
+      rem if not 'Incompatible translator' error
+      rem or if already loaded, then in normal mode
+    err%=ERR
+    font%=$9a           rem system font
+    font:(font%,16)     rem mono-ised style 
+    scrInfo:(ADDR(info%))
+    marginX%=info%(1)   rem pixels from left of screen
+    marginY%=info%(2)   rem pixels from top of screen
+    chrW%=info%(7)      rem character width in pixels
+    chrH%=info%(8)      rem character height in pixels
+    screenX%=gWIDTH/chrW%       rem char screen width
+    screenY%=(gHEIGHT+1)/chrH%  rem char screen height
+    IF err%-104       rem if loaded here
+      UNLOADM "S3aprocs"
+    ENDIF
+  ELSE                  rem else on Series 3 or
+                        rem in compatibility mode
+                        rem so just use fixed values
+    marginX%=0          rem no margins on Series 3
+    marginY%=0
+    chrW%=6             rem default console char width
+    chrH%=9             rem ...and height
+    screenX%=40         rem character columns
+    screenY%=9          rem character rows
+    font%=1             rem font ID = 1 on Series 3
+  ENDIF
+</PRE>
+This example assumes that the default font has not been changed 
+using the "IOW(-2,7,17,...)" function (as described in the Series 3 
+Programming manual) when running on the Series 3 or in compatibility 
+mode on the Series 3a. In normal mode on the Series 3a, you must 
+use the FONT command instead.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> A quick way to check that the program is not running on a  
+Series 3 is to call gINFO and check the 31st integer of the 
+information array. If it was 0 before the gINFO and still is 
+afterwards, the program is running on a Series 3. This method
+cannot be used to distinguish between a program running in normal
+mode or compatability mode. 
+</DL>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

@@ -1,0 +1,580 @@
+
+<TITLE>PSION Programming Ref.: Chapter 5. Data file handling</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Data file handling</CENTER></H1>
+<P>
+You can use OPL to create data files (databases) like 
+those used by the Database. You can store any kind of information 
+in a data file, and retrieve it for display, editing or calculations.
+<P>
+<H3>This chapter covers:</H3> 
+<P>
+<UL><LI>Creating data files</LI> 
+</UL>
+<UL><LI>Adding and editing records</LI> 
+</UL>
+<UL><LI>Searching records</LI> 
+</UL>
+<UL><LI>Using a data file both in OPL and in the Database</LI> 
+</UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.1"><H2> Files, records and fields</H2></A>
+<P>
+Data files (or databases)
+    (picture)
+<P>
+are made up of records
+<P>
+<P>
+    (picture)
+<P>
+For example, in a data file of names and addresses, each record might 
+have a name field, a telephone number field, and separate fields for 
+each line of the address.
+<P>
+In OPL you can:
+<P>
+<UL><LI> Create a new file with CREATE, or open an </LI> 
+existing file with OPEN, and copy, delete and rename files 
+with COPY, DELETE and RENAME.
+</UL>
+<UL><LI> Add a new record with APPEND, change an existing </LI> 
+one with UPDATE, and remove a record with ERASE.
+</UL>
+<UL><LI> Fill in a field by assigning a value to a field variable.</LI> 
+</UL>
+ 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.2"><H2> Creating a data file</H2></A>
+<P>
+Use the CREATE command like this:
+<P>
+CREATE filename$,logical name,field1,field2,...
+<P>
+For example:
+<P>
+CREATE "clients",B,nm$,tel$,ad1$,ad2$,ad3$
+<P>
+creates a data file called "clients".
+<P>
+The file name is a string, so remember to put quote marks around it. 
+You can also assign the name string to a string variable (for example 
+"fil$="clients"") and then use the variable name as the argument  
+"CREATE fil$,A,field1,field2".
+<P>
+<H3>Logical names</H3> 
+<P>
+You can have up to 4 data files open at a time. Each of these must 
+have a logical name: "A", "B", "C" or "D". The logical 
+name lets you refer to this file without having to keep using the 
+full file name. 
+<P>
+A different logical name must be used for each data file opened  
+one called "A", one called "B", one called "C" and one 
+called "D". A file does not have to be opened with the same logical 
+name as the last time it was opened. When a file is closed, its logical 
+name is freed for use by another file.
+<P>
+<H3>Fields</H3> 
+<P>
+"field1, field2",... are the field names  up to 32 in any 
+record. These are like variables, so  use "%" "&" or "$" 
+to make the appropriate types of fields for your data. You cannot 
+use arrays. Do not specify the maximum length of strings that the 
+string fields can handle. The length is automatically set at 255 characters.
+<P>
+Field names may be up to 8 characters long, including any qualifier 
+like "&".
+<P>
+When referring to fields, add the logical file name to the front of 
+the field name, to specify which opened file the fields belong to. 
+Separate the two by a dot. For example, "A.name$" is the "name$" 
+field of the file with logical name "A", and "C.age%" is the 
+"age%" field of the file with logical name "C".
+<P>
+The values of all the fields are 0 or null to start with. You can 
+see this if you run this example program: 
+<P>
+<UL><PRE>
+<B>PROC creatfil:</B>
+  CREATE "example",A,int%,long&,float,str$
+  PRINT "integer=";a.int%
+  PRINT "long=";a.long&
+  PRINT "float=";a.float
+  PRINT "string=";a.str$
+  CLOSE
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.3"><H2> Opening a file</H2></A>
+<P>
+When you first CREATE a data file it is automatically open, 
+but it closes again when the program ends. If 
+a file already exists, trying to CREATE it again will give 
+an error- so if you ran the procedure "creatfil:" a second 
+time you would get an error. To open an existing file, use the OPEN 
+command.
+<P>
+OPEN works in the same way as the CREATE command. For 
+example:
+<P>
+OPEN "clients",B,a$,b$,c$,d$,e$
+<P>
+<UL><LI> You must use the same filename as when you first created </LI> 
+it.
+</UL>
+<UL><LI> You must include in the OPEN command each of the </LI> 
+fields you intend to alter or read. You can omit fields from the end 
+of the list; you cannot miss one out from the middle of the 
+list, for example "field1$,,name$" They must remain the same type 
+of field, but you can change their names. So a file created with fields 
+"name$,age%" could later be opened with the fields "a$,x%".
+</UL>
+<UL><LI> Give the file a logical name. Up to 4 files may be open </LI> 
+at any one time, with logical names "A", "B", "C" and 
+"D". You can't have two files open simultaneously with the same 
+logical name, so when opening the files, remember which logical names 
+you have already used.
+</UL>
+You might make a new module, and type these two procedures into 
+it: 
+<P>
+<UL><PRE>
+<B>PROC openfile:</B>
+  IF NOT EXIST("example")
+    CREATE "example",A,int%,lng&,fp,str$
+  ELSE
+    OPEN "example",A,int%,lng&,fp,str$
+  ENDIF
+  PRINT "Current values:"
+  show:
+  PRINT "Assigning values"
+  A.int%=1
+  A.lng&=&2**20   REM the 1st & avoids integer overflow
+  A.fp=SIN(PI/6)
+  PRINT "Give a value for the string:"
+  INPUT A.str$
+  PRINT "New values:"
+  show:
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC show:</B>
+  PRINT "integer=";A.int%
+  PRINT "long=";A.lng&
+  PRINT "float=";A.fp
+  PRINT "string=";A.str$
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<H3>Notes</H3> 
+<P>
+Opening/creating the file
+The IF...ENDIF checks to see if the file already exists, using 
+the EXIST function. If it does, the file is opened; if it doesn't, 
+the file is created.
+<P>
+Giving values to the fields
+The fields can be assigned values just like variables. The field name 
+must be used with the logical file name like this: "A.f%=1" 
+or "INPUT A.f$". 
+<P>
+If you try to give the wrong type of value to a field (for example 
+""Davis"" to "f%") an error message will be displayed.
+<P>
+You can access the fields from other procedures, just like global 
+variables. Here the called procedure "show:" displays the values 
+of the fields.
+<P>
+Field names
+You must know the type of each field, and you must give each a separate 
+name  you cannot refer to the fields in any indexed way, eg 
+as an array.
+<P>
+Opening a file for sharing
+The OPENR command works in exactly the same way as OPEN, 
+except that the file cannot be written to (with UPDATE or APPEND), 
+only read. However, more than one running program can then look at 
+the file at the same time.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.4"><H2> Saving records</H2></A>
+<P>
+The last example procedure did not actually save the field values 
+as a record to a file. To do this you need to use the APPEND 
+command. This program, for example, allows you to add records to the 
+"example" data file:
+<P>
+<UL><PRE>
+<B>PROC count:</B>
+  LOCAL reply%
+  OPEN "example",A,f%,f&,f,f$
+  DO
+    CLS
+    AT 20,1 :PRINT "Record count=";COUNT
+    AT 9,5 :PRINT "(A)dd a record"
+    AT 9,7 :PRINT "(Q)uit"
+    reply%=GET
+    IF reply%=%q OR reply%=%Q
+      BREAK
+    ELSEIF reply%=%A OR reply%=%a
+      add:
+    ELSE
+      BEEP 16,250
+    ENDIF
+  UNTIL 0
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC add:</B>
+  CLS
+  PRINT "Enter integer field:";
+  INPUT A.f%
+  PRINT "Enter long integer field:";
+  INPUT A.f&
+  PRINT "Enter numeric field:";
+  INPUT A.f
+  PRINT "Enter string field:";
+  INPUT A.f$
+  APPEND
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<B>BEEP</B><BR>
+The BEEP command makes a beep of varying pitch and length:
+<P>
+BEEP duration%,pitch%
+<P>
+The duration is measured in  1/32 s of a second, so "duration%=32" 
+would give a beep a second long. Try "pitch%=50" for a high beep, 
+or "500" for a low beep.
+<P>
+<H3>The number of records</H3> 
+<P>
+The COUNT function returns the number of records in the file. 
+If you use it just after creating a database, it will return 0. As 
+you add records the count increases.
+<P>
+<H3>How the values are saved</H3> 
+<P>
+Use the APPEND command to save a new record. This has no arguments. 
+The values assigned to "A.f%", "A.f&", "A.f" and "A.f$" 
+are added as a new record to the end of the "example" data file. 
+If you only give values to some of the fields, not all, you won't 
+see any error message. If the fields happen to have values, these 
+will be used; otherwise  null strings ("") will be given to string 
+fields, and zero to numeric fields.
+<P>
+New field values are always added to the end of the current data 
+file  as the last record in the file (if the file is a new 
+one, it will also be the first record).
+<P>
+At any time while a data file is open, the field names currently in 
+use can be used like any other variable  for example, in a 
+PRINT statement, or a string or numeric expression.
+<P>
+<B>APPEND and UPDATE </B><BR>
+APPEND adds the current field values to the end of the file 
+as a new record, whereas UPDATE deletes the current record 
+and adds the current field values to the end of the file as a new 
+record.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.5"><H2> Moving from record to record</H2></A>
+<P>
+When you open or create a file, the first record in the file is current. 
+To read, edit, or erase another record, you must make that record 
+current  that is, move to it. Only one record is current at 
+a time. To change the current record, use one of these commands: 
+<P>
+POSITION `moves to' a particular record, setting the field 
+variables to the values in that record. For example, the instruction 
+"POSITION 3" makes record 3 the current record. The first record 
+is record 1.
+<P>
+You can find the current record number by using the POS function, 
+which returns the number of the current record.
+<P>
+FIRST moves to the first record in a file.
+<P>
+NEXT moves to the following record in a file. If the end of 
+the file is passed, NEXT does not report an error, but the 
+current record is a new, empty record. This case can be tested for 
+with the EOF function.
+<P>
+BACK moves to the previous record in the file. If the current 
+record is the first record in the file then that first record stays 
+current. 
+<P>
+LAST moves to the last record in the file.
+<P>
+<H3>Deleting a record</H3> 
+<P>
+ERASE deletes the current record in the current 
+file.
+<P>
+The next record is then current. If the erased record was the last 
+record in a file, then following this command the current record will 
+be empty and EOF will return true.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.6"><H2> Finding a record </H2></A>
+<P>
+FIND makes current the next record which has a field matching 
+your search string. Capitals and lower-case letters match. For example:
+<P>
+r%=FIND("Brown")
+<P>
+would select the first record containing a string field with the value 
+"Brown", "brown" or "BROWN", etc. The number of that record is returned, 
+in this case to the variable "r%". If the number returned is zero, 
+no matching field was found. Any other number means that a match was 
+found.
+<P>
+The search includes the current record. So after finding a matching 
+record, you need to use NEXT before you can continue searching 
+through the following records. 
+<P>
+"FIND("Brown")" would not find a field "Mr Brown". To find this, 
+use wildcards, as explained below.
+<P>
+<B>You can only search string fields, not number fields</B>. For example, 
+if you assigned the value 71 to the field "a%", you could not 
+find this with FIND. But if you assigned the value "71" to 
+"a$", you could find this.
+<P>
+<H3>Wildcards</H3> 
+<P>
+"r%=FIND("*Brown*")" would make current the next record containing 
+a string field in which "Brown" occurred  for example, 
+the fields "MR BROWN", "Brown A.R." and "Browns Plumbing" 
+would be matched. The wildcards you can use are:
+<P>
+?  	matches any one character
+<P>
+*   	matches any number of characters.
+<P>
+Once you've found a matching record, you might display it on the screen, 
+erase it or edit it. For example, to display all the records containing 
+"BROWN":
+<P>
+<PRE>
+FIRST
+WHILE FIND("*BROWN*")
+  PRINT a.name$, a.phone$
+  NEXT
+  GET
+ENDWH
+</PRE>
+<H3>More controlled finding</H3> 
+<P>
+FINDFIELD, like FIND, finds a string, makes the record 
+with this string the current record, and returns the number of this 
+record. However you can also use it to do case-dependent searching, 
+to search backwards through the file, to search from the first record 
+(forwards) or from the last record (backwards), and to search in one 
+or more fields only.
+<P>
+You may experience some problems in using FINDFIELD with some 
+versions of OPL. To ensure that problems are avoided use the line:
+<P>
+POKEB(peekw($1c)+7),0
+<P>
+immediately before each call to FINDFIELD.
+<P>
+The first argument to FINDFIELD is the string to look for, 
+as for FIND. The second is the number of the field to start 
+looking in (1 for the first field), and the third is the number of 
+fields to search in (starting from the field specified by the second 
+argument). If you want to search in all fields, use 1 as the second 
+argument and for the third argument use the number of fields you used 
+in the OPEN/CREATE command.
+<P>
+The fourth argument adds together two values:
+<P>
+<UL><LI> 0 for a case independent match, where capitals and </LI> 
+lower-case letters match, or 1 for a case dependent match. <B>This 
+value should be multiplied by 16.</B>
+</UL>
+<UL><LI> 0 to search backwards from the current record, 1 to search </LI> 
+forwards from the current record, 2 to search backwards from the end 
+of the file, or 3 to search forwards from the start of the file.
+</UL>
+For a case independent search (0) forwards from the current record 
+(1*16), use 0+(1*16), ie 16. If you wanted to search only in the second 
+and third fields, the full statement might look like this: "FINDFIELD("brown",2,2,16)".
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> If you understand hexadecimal arithmetic, as described  
+under HEX$ in the `Alphabetic listing' chapter, note that you 
+can combine the two values more easily using hexadecimal numbers. 
+Use a "$" symbol, then the digit for the start/direction (0/1/2/3), 
+then the digit for case dependency (0/1). In the previous example 
+the digits are 1 and 0, producing the hexadecimal number "$10" 
+(=16).
+</DL>
+If you find a matching record and then want to search again from this 
+record, you must first use NEXT or BACK (according to 
+the direction you are searching in), otherwise the same match will 
+be "found" in the current record again."
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.7"><H2> Changing/closing the current file</H2></A>
+<P>
+Immediately after a file has been created or opened, it is automatically 
+current. This means that the APPEND or UPDATE commands 
+save records to this file, and the record-position commands (explained 
+below) move around this file. You can still use the fields of other 
+open files, for example "A.field1=B.field2"
+<P>
+USE makes current one of the other opened files. For example 
+"USE B" selects the file with the logical name B (as specified 
+in the OPEN or CREATE command which opened it).
+<P>
+If you attempt to USE a file which has not yet been opened 
+or created, an error is reported. 
+<P>
+In this procedure, the EOF function checks whether you are 
+at the end of the current data file  that is, whether you've 
+gone past the last record. You can use EOF in the test 
+condition of a loop  UNTIL EOF or WHILE NOT EOF 
+in order to carry out a set of actions on all the records in a file.
+<P>
+<H3> Example  copies selected records from one file to another</H3> 
+<P>
+<UL><PRE>
+<B>PROC copyrec:</B>
+  OPEN "example",A,f%,f&,f,f$
+  TRAP DELETE "temp"
+  REM If file doesn't exist, ignore error
+  CREATE "temp",B,f%,f&,f,f$
+  PRINT "Copying EXAMPLE to TEMP"
+  USE A REM the EXAMPLE file
+  DO
+    IF a.f%>30 and a.f<3.1415
+      b.f%=a.f%
+      b.f&=a.f&
+      b.f=a.f
+      b.f$="Selective copy"
+      USE B REM the TEMP file
+      APPEND
+      USE A
+    ENDIF
+    NEXT
+  UNTIL EOF REM until End Of File
+  CLOSE REM closes A; B becomes current
+  CLOSE REM closes B
+<B>ENDP</B>
+</PRE></UL>
+<P>
+This example uses the DELETE command to delete any "temp" 
+file whch may exist, before making it afresh. Normally, if there was 
+no "temp" file and you tried to delete it, an error would be generated. 
+However, this example uses TRAP with the DELETE command. 
+TRAP followed by a command means "if an error occurs in the 
+command, carry on regardless".
+<P>
+There are more details of TRAP in the chapter on `Error Handling'.
+<P>
+<H3>Closing a data file</H3> 
+<P>
+You should always `close' a data file (with the CLOSE command) 
+when you have finished using it. Data files close automatically when 
+programs end. You can only have 4 files open at a time  if 
+you have 4 files open and you want to access another one, close one 
+of them. CLOSE closes the current file.
+<P>
+<H3>Keeping data files compressed</H3> 
+<P>
+When you change or delete records in a data file, the space taken 
+by the old information is not automatically recovered. By default, 
+the space is recovered when you close the file, provided it 
+is on `Internal drive' or on a RAM SSD (ie it is not on a Flash 
+SSD).
+<P>
+Closing a very large file which contains changed or deleted records 
+can be slow when compression is enabled, as the whole file beyond 
+each old record needs copying down, each time.
+<P>
+You can prevent data file compression if you wish, with these 
+two lines:
+<PRE>
+p%=PEEKW($1c)+$1e
+POKEW p%,PEEKW(p%) or 1
+</PRE>
+(Use any suitable integer variable for "p%".) Files used by the 
+current program will now not compress when they close.
+<P>
+Use these two lines to re-enable auto-compression:
+<PRE>
+p%=PEEKW($1c)+$1e
+POKEW p%,PEEKW(p%) and $fffe
+</PRE>
+Warning: be careful to enter these lines exactly as shown. These 
+examples work by setting a system configuration flag.
+<P>
+If you have closed a file without compression, you can recover 
+the space by using the COMPRESS command to create a new, compressed 
+version of the file. "COMPRESS "dat" "new"", for example, 
+creates a file called "new" which is a compressed version of "dat", 
+with the space which was taken up by old information now recovered. 
+(You have to use COMPRESS to compress data files which are 
+kept on a Flash SSD.)
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "5.8"><H2> Data files and the Database</H2></A>
+<P>
+The files you use with the Database (listed under the Data icon in 
+the System screen)  often called databases or database 
+files  are also just data files.
+<P>
+Data files created by the Database can be viewed in OPL, and vice 
+versa.
+<P>
+In OPL: to open a data file made by the Database, begin its 
+name with "\DAT\", and end it with ".DBF". For example, 
+to open the file called "data" which the Database normally uses:
+<P>
+OPEN "\dat\data.dbf",A,a$,b$,c$,d$...
+<P>
+Restrictions:
+<P>
+<UL><LI> You can use up to 32 field variables, all strings. It is </LI> 
+possible for records to contain more than 32 fields, but these fields 
+cannot be accessed by OPL. It's safe to change such a record and use 
+UPDATE, though, as the extra fields will remain unchanged.
+</UL>
+<UL><LI> The maximum record length in OPL is 1022 characters. You </LI> 
+will see a `Record too large' error (-43) if your program tries 
+to open a file which contains a record longer than this.
+</UL>
+<UL><LI> The Database breaks up long records (over 255 characters) </LI> 
+when storing them. They would appear as separate records to OPL.
+</UL>
+In the Database: to examine an OPL data file, press the Data 
+button, select `Open' from the `File' menu, and type the name with 
+"\OPD\" on the front and ".ODB" at the end  for example:
+<P>
+  \opd\example.odb
+<P>
+Restrictions:
+<P>
+<UL><LI> All of the fields must be string fields.</LI> 
+</UL>
+<UL><LI> You can have up to a maximum of 32 fields, as specified </LI> 
+in the CREATE command. If you view an OPL data file with the 
+Database, and add more lines to records than the number of fields 
+specified in the original CREATE command, you will get an error 
+if you subsequently try to access these additional fields in OPL.
+</UL>
+In both cases, you are using a more complete file specification. 
+There is more about file specifications in the Advanced Topics chapter.
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

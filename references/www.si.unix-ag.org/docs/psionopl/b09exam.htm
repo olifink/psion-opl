@@ -1,0 +1,705 @@
+
+<TITLE>PSION Programming Ref.: Chapter 9. Example programs</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Example programs</CENTER></H1>
+<P>
+This chapter contains example programs written in OPL. The programs 
+are not intended to demonstrate all the features of OPL, but they 
+should give you a few hints. To find out more about a particular command 
+or function, refer to the alphabetic listing.
+<P>
+There are some other example programs in the `Advanced topics' chapter.
+<P>
+<H3>When you're typing in</H3> 
+<P>
+<UL><LI> You can type procedures in all uppercase, all lowercase </LI> 
+or any mixture of the two. Be careful with character codes, though  
+"%A" is different to "%a".
+</UL>
+<UL><LI> When there is more than one command or function on a line, </LI> 
+separate each one with a space and colon  for example:
+<PRE>
+  CLS :PRINT "hello" :GET
+</PRE>
+However, the colon is optional before a REM statement  
+for example:
+<PRE>
+  CLS REM Clears the screen
+</PRE>
+and
+<PRE>
+  CLS :REM Clears the screen
+</PRE>
+are both OK.
+</UL>
+<UL><LI> Put a space between a command and the arguments which follow </LI> 
+it  for example "PRINT  a$". But don't put a space between 
+a function and the arguments in brackets  for example "CHR$(16)".
+</UL>
+<UL><LI> It doesn't matter how many spaces or tabs you have at the </LI> 
+beginning of a line.
+</UL>
+<H3>Errors</H3> 
+<P>
+The following programs do not include full error handling code. This 
+means that they are shorter and easier to understand, but may fail 
+if, for example, you enter the wrong type of input to a variable.
+<P>
+If you want to develop other programs from these example programs, 
+it is recommended that you add some error handling code to them. See 
+the chapter on error handling for further details.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.1"><H2>Countdown Timer</H2></A>
+<P>
+<UL><PRE>
+<B>PROC timer:</B>
+  LOCAL min&,sec&,secs&,i%
+  CACHE 2000,2000
+  sec&=1
+  dINIT "Countdown timer"
+  dLONG min&,"Minutes",0,59
+  dLONG sec&,"Seconds",0,59
+  dBUTTONS "Cancel",-27,"Start",13
+  IF DIALOG=13
+    STATUSWIN ON
+    FONT 11,16
+    secs&=sec&+60*min&
+    WHILE secs&
+      PAUSE -20
+      REM a key gets us out
+      IF KEY
+        RETURN
+      ENDIF
+      secs&=secs&-1
+      AT 20,6 :PRINT NUM$(secs&/60,-2);"m"
+      AT 24,6 :PRINT NUM$(mod&:(secs&,int(60)),-2);"s"
+    ENDWH
+    DO
+      BEEP 5,300
+      PAUSE 10
+      IF KEY :BREAK :ENDIF
+       i%=i%+1
+    UNTIL i%=10
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC mod&:(a&,b&)</B>
+  REM modulo function
+  REM computes (a&)mod(b&)
+  RETURN a&-(a&/b&)*b&
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.2"><H2>Dice</H2></A>
+<P>
+When the program is run, a message is displayed saying that the dice 
+is rolling. You then press a key to stop it. A random number from 
+one to six is displayed and you choose whether to roll again or not. 
+<P>
+<P>
+<UL><PRE>
+<B>PROC dice:</B>
+  LOCAL dice%
+  DO
+    CLS :PRINT "DICE ROLLING:"
+    AT 1,3 :PRINT "Press a key to stop"
+    DO
+      dice%=(RND*6+1)
+      AT 1,2 :PRINT dice%
+    UNTIL KEY
+    BEEP 5,300
+    dINIT "Roll again?"
+    dBUTTONS "No",%N,"Yes",%Y
+  UNTIL DIALOG<>%y
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<B>Random numbers:</B> in this example, the RND 
+function returns a random floating-point number, between 0 and 0.9999999... 
+It is then multiplied by 6, and 1 is added, to give a number from 
+1 to 6.9999999... This is rounded down to a whole number (from 1 to 
+6) by assigning to the integer "dice%".  
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.3"><H2>Birthdays</H2></A>
+<P>
+This procedure finds out on which day of the week people were born.
+<P>
+<UL><PRE>
+<B>PROC Birthday:</B>
+  LOCAL day&,month&,year&,DayInWk%
+  DO
+    dINIT
+    dTEXT "","Enter your date of birth",2
+    dTEXT "","Use numbers, eg 23 12 1963",$202
+    dLONG day&,"Day",1,31
+    dLONG month&,"Month",1,12
+    dLONG year&,"Year",1900,2155
+    IF DIALOG=0
+      BREAK
+    ENDIF
+    DayInWk%=DOW(day&,month&,year&)
+    CLS :PRINT DAYNAME$(DayInWk%),day&,month&,year&
+    dINIT "Again?"
+    dBUTTONS "No",%N,"Yes",%Y
+  UNTIL DIALOG<>%y
+<B>ENDP </B>
+</PRE></UL>
+<P>
+The DOW function works out what day of the week, from 1 to 
+7, a date is. The DAYNAME$ function then converts this to MON, 
+TUE and so on. MON is 1 and SUN is 7.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.4"><H2>Data files </H2></A>
+<P>
+The following module works on a data file called "DATA", containing 
+names, addresses, post codes and telephone numbers. It assumes this 
+file has already been created with a statement like this:
+<PRE>
+CREATE "DATA",A,nm$,ad1$,ad2$,ad3$,ad4$,tel$
+</PRE>
+To use the "DATA" file which the Database application uses, you 
+need to open ""\DAT\DATA.DBF"". 
+<P>
+The first procedure is the controlling, calling procedure, offering 
+you choices. The next two let you add or edit records.
+<P>
+<UL><PRE>
+<B>PROC files:</B>
+  GLOBAL nm$(255),ad1$(255),ad2$(255)
+  GLOBAL ad3$(255),ad4$(255),tel$(255),title$(30)
+  LOCAL g%
+  OPEN "DATA",A,nm$,ad1$,ad2$,ad3$,ad4$,tel$
+  DO
+    CLS
+    dINIT "Select action"
+    dTEXT "","Add new record",$402
+    dTEXT "","Find and edit a record",$402
+    g%=DIALOG
+    IF g%=2
+      add:
+    ELSEIF g%=3
+      edit:
+    ENDIF
+  UNTIL g%=0
+  CLOSE
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC add:</B>
+  nm$="" :ad1$="" :ad2$=""
+  ad3$="" :ad4$="" :tel$=""
+  title$="Enter a new record"
+  IF showd%:
+    APPEND
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC edit:</B>
+  LOCAL search$(30),p%
+  dINIT "Find and edit a record"
+  dEDIT search$,"Search string",15
+  IF DIALOG
+    FIRST
+    IF FIND("*"+search$+"*")=0
+      ALERT("No matching records")
+      RETURN
+    ENDIF
+    DO
+      nm$=A.nm$ :ad1$=A.ad1$ :ad2$=A.ad2$
+      ad3$=A.ad3$ :ad4$=A.ad4$ :tel$=A.tel$
+      title$="Edit matching record"
+      IF showd%:
+        UPDATE :BREAK
+      ELSE
+        NEXT
+      ENDIF
+      FIND("*"+search$+"*")
+      IF EOF
+        ALERT("No more matching records")
+        BREAK
+      ENDIF
+    UNTIL 0
+  ENDIF
+<B>ENDP </B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC showd%:</B>
+  LOCAL ret%
+  dINIT title$
+  dEDIT nm$,"Name",25
+  dEDIT ad1$,"Street",25
+  dEDIT ad2$,"Town",25
+  dEDIT ad3$,"County",25
+  dEDIT ad4$,"Postcode",25
+  dEDIT tel$,"Phone",25
+  ret%=DIALOG
+  IF ret%
+    A.nm$=nm$ :A.ad1$=ad1$ :A.ad2$=ad2$
+    A.ad3$=ad3$ :A.ad4$=ad4$ :A.tel$=tel$
+  ENDIF
+  RETURN ret%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.5"><H2>Re-order</H2></A>
+<P>
+When you use the Database application and enter or change an entry, 
+it goes to the end of the database file. However, if, in your 
+address book, each entry begins with a person's second name  
+for example, "Tate, Hazel"  you can use this program 
+to re-order all of the entries. This doesn't change the way you find 
+an entry, but after running it you can step through it like a paper 
+address book, or print it out neatly ordered.
+<P>
+This procedure can be used as required for any data file in internal 
+memory or on Ram SSDs. If used on a data file held on a Flash SSD 
+it would use up disk space each time you run it. The dialog it shows 
+is set to show data files used by the Database.
+<P>
+You can adapt this procedure to sort other types of data files in 
+other ways.
+<P>
+<UL><PRE>
+<B>PROC reorder:</B>
+  LOCAL last%,e$(255),e%,lpos%,n$(128),c%
+  n$="\dat\*.dbf"
+  dINIT "Re-order Data file"
+  dFILE n$,"Filename",0
+  IF DIALOG REM returns 0 if cancelled
+    OPEN n$,a,a$
+    LAST :last%=POS
+    IF COUNT>0
+      WHILE last%<>0
+        POSITION last% :e%=POS
+        e$=UPPER$(a.a$)
+        DO
+          IF UPPER$(a.a$) < e$
+            e$=UPPER$(a.a$) :e%=POS
+          ENDIF
+          lpos%=POS :BACK
+        UNTIL pos=1 and lpos%=1
+        POSITION e%
+        PRINT e$
+        UPDATE :last%=last%-1
+      ENDWH
+    ENDIF
+    CLOSE
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+If you try to reorder a file which is already open (ie shown in bold 
+on the System screen) you will see a `File or device in use' error. 
+Move the highlight onto the file's name in the System screen, use 
+the Delete key to exit the file, then try again.
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.6"><H2>Stopwatch</H2></A>
+<P>
+Here is a simple stopwatch with lap times. Note that the Series 3a 
+switches off automatically after a time if no keys are pressed; you 
+may want to disable this feature (with the `Auto switch off' option 
+in the System screen) before running this program.
+<P>
+Each timing is only accurate to within one second, as the procedure 
+is based on the SECOND function.
+<P>
+<UL><PRE>
+<B>PROC watch:</B>
+  LOCAL k%,s%,se%,mi%
+  FONT 11,16
+  AT 20,1 :PRINT "Stopwatch"
+  AT 15,11 :PRINT "Press a key to start"
+  GET
+  DO
+  CLS :mi%=0:se%=0:s%=SECOND
+  AT 15,11 :PRINT "   S=Stop, L=Lap    "
+  loop::
+  k%=KEY AND $ffdf REM ensures upper case
+  IF k%=%S
+    GOTO pause::
+  ENDIF
+  IF k%=%L
+    AT 20,6 :PRINT "Lap: ";mi%;":";
+    IF se%<10 :PRINT "0"; :ENDIF
+    PRINT se%;" ";
+  ENDIF
+  IF SECOND<>s%
+    s%=SECOND :se%=se%+1
+    IF se%=60 :se%=0:mi%=mi%+1 :ENDIF
+    AT 17,8
+    PRINT "Mins",mi%,"Secs",
+    IF se%<10 :PRINT "0"; :ENDIF
+    PRINT se%;" ";
+  ENDIF
+  GOTO loop::
+  pause::
+  mINIT
+  mCARD "Watch","Restart",%r,"Zero",%z,"Exit",%x
+  k%=MENU
+  IF k%=%r
+    GOTO loop::
+  ENDIF
+  UNTIL k%<>%z
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.7"><H2>Inserting a new line in a database</H2></A>
+<P>
+If you insert a new label in a database, the entries will no longer 
+match up with the labels. Rather than using the `Update' option on 
+every entry, to insert a suitable blank line in each one, you can 
+use this program to do this for the entire data file.
+<P>
+The Database allows you to use as many lines (fields) as you want 
+in an entry (record); OPL can only access 32 fields. This program 
+only lets you insert a new field in the first 16 fields, although 
+you can adapt the program simply to check up to 31 fields.
+<P>
+If, in the Database, you enter a line longer than 255 characters, 
+it is stored as two fields, with a character of code 20 at the start 
+of the second field. This program correctly handles any such fields.
+<P>
+The program checks that the 17th field is blank, as it will be overwritten 
+by what was the 16th field. If a long entry has a 17th field, and 
+it contains text, the program skips this entry. The rest of longer 
+entries  even if there are more than 32 fields  will 
+be unchanged.
+<P>
+If you insert a new field at a position below the last label, the 
+Database will not show it, even when using `Update'.
+<P>
+The maximum record length in OPL is 1022 characters. The OPEN 
+command will display a `Record too large' error if the file contains 
+a record longer than this. 
+<P>
+<UL><PRE>
+<B>PROC label:</B>
+LOCAL a%,b%,c%,d%,s$(128),s&,i$(17,255)
+s$="\dat\*.dbf"
+dINIT "Insert new field"
+dFILE s$,"Data file",0
+dLONG s&,"Break at line (1-16)",1,16
+IF DIALOG
+OPEN s$,A,a$,b$,c$,d$,e$,f$,g$,h$,i$,j$,k$,l$,m$,n$,o$,p$,q$
+  c%=COUNT :a%=1
+  WHILE a%<=c%
+    AT 1,1 :PRINT "Entry",a%,"of",c%,
+    IF A.q$="" REM Entry (hopefully) not too long
+      i$(1)=A.a$ :i$(2)=A.b$ :i$(3)=A.c$ :i$(4)=A.d$
+      i$(5)=A.e$ :i$(6)=A.f$ :i$(7)=A.g$ :i$(8)=A.h$
+      i$(9)=A.i$ :i$(10)=A.j$ :i$(11)=A.k$ :i$(12)=A.l$
+      i$(13)=A.m$ :i$(14)=A.n$ :i$(15)=A.o$ :i$(16)=A.p$
+      d%=0 :b%=0
+      WHILE d%<s&+b% REM find field to break at
+        d%=d%+1
+        IF LEFT$(i$(d%),1)=CHR$(20) REM line>255...
+          b%=b%+1 REM ...so it's 2 fields
+        ENDIF
+      ENDWH
+      b%=17
+      WHILE b%>d% REM copy the fields down
+        i$(b%)=i$(b%-1) :b%=b%-1 
+      ENDWH
+      i$(d%)="" REM and make an empty field
+      A.a$=i$(1) :A.b$=i$(2) :A.c$=i$(3) :A.d$=i$(4)
+      A.e$=i$(5) :A.f$=i$(6) :A.g$=i$(7) :A.h$=i$(8)
+      A.i$=i$(9) :A.j$=i$(10) :A.k$=i$(11) :A.l$=i$(12)
+      A.m$=i$(13) :A.n$=i$(14) :A.o$=i$(15) :A.p$=i$(16)
+      A.q$=i$(17)
+    ELSE
+      PRINT "has too many fields"
+      PRINT "Press a key..." :GET
+    ENDIF
+    UPDATE :FIRST
+    a%=a%+1
+  ENDWH :CLOSE
+ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.8"><H2>Bouncing Ball</H2></A>
+<P>
+<UL><PRE>
+<B>PROC bounce:</B>
+  LOCAL posX%,posY%,changeX%,changeY%,k%
+  LOCAL scrx%,scry%,info%(10)
+  SCREENINFO info%()
+  scrx%=info%(3) :scry%=info%(4)
+  posX%=1  :posY%=1
+  changeX%=1 :changeY%=1
+  DO
+    posX%=posX%+changeX%
+    posY%=posY%+changeY%
+    IF posX%=1 OR posX%=scrx%
+      changeX%=-changeX%
+      REM at edge ball changes direction
+      BEEP 2, 600 REM low beep
+    ENDIF
+    IF posY%=1 or posY%=scry% REM same for y
+      changeY%=-changeY%
+      BEEP 2, 200 REM high beep
+    ENDIF
+    AT posX%,posY% :PRINT "0";
+    PAUSE 2   REM Try changing this
+    AT posX%,posY% :PRINT " ";
+    REM removes old `0' character
+    k%=KEY
+  UNTIL k%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.9"><H2>Circles</H2></A>
+<P>
+Here are two example programs for drawing circles  the first 
+hollow, the second filled:
+<P>
+<UL><PRE>
+<B>PROC circle:</B>
+  LOCAL a%(963),c&,d%,x&,y&,r&,h,y%,y1%,c2%
+  dINIT "Draw a circle"
+  x&=240 :dLONG x&,"Centre x pos",0,479
+  y&=80 :dLONG y&,"Centre y pos",0,159
+  r&=20 :dLONG r&,"Radius",1,120
+  h=1 :dFLOAT h,"Relative height",0,999
+  IF DIALOG
+    a%(1)=x&+r& :a%(2)=y& :a%(3)=4*r&
+    c&=1 :d%=2*r& :y1%=0
+    WHILE c&<=d%
+      c2%=c&*2 :y%=-SQR(r&*c2%-c&**2)*h
+      a%(2+c2%)=-2 :a%(3+c2%)=y%-y1%
+      y1%=y% :c&=c&+1
+    ENDWH
+    c&=1
+    WHILE c&<=d%
+      c2%=c&*2 :y%=SQR(r&*c2%-c&**2)*h
+      a%(2+a%(3)+c2%)=2 :a%(3+a%(3)+c2%)=y%-y1%
+      y1%=y% :c&=c&+1
+    ENDWH
+    gPOLY a%()
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC circlef:</B>
+  LOCAL c&,d%,x&,y&,r&,h,y%
+  dINIT "Draw a filled circle"
+  x&=240 :dLONG x&,"Centre x pos",0,479
+  y&=80 :dLONG y&,"Centre y pos",0,159
+  r&=20 :dLONG r&,"Radius",1,120
+  h=1 :dFLOAT h,"Relative height",0,999
+  IF DIALOG
+    c&=1 :d%=2*r& :gAT x&-r&,y& :gLINEBY 0,0
+    WHILE c&<=d%
+      y%=-SQR(r&*c&*2-c&**2)*h
+      gAT x&-r&+c&,y&-y% :gLINEBY 0,2*y%
+      c&=c&+1
+    ENDWH
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+If you use "gUPDATE OFF" after the "IF DIALOG" line, and 
+"gUPDATE ON" before the "ENDIF", the procedure will run 
+a little faster. However, all but the smaller circles will be drawn 
+rather jerkily, piece by piece.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.10"><H2>Zooming</H2></A>
+<P>
+For each of the three types of status window, this program changes 
+the font to implement zooming. 
+<P>
+Press Psion-Z to cycle between small, medium and large fonts, and 
+Shift-Psion-Z to cycle in the other direction. Esc changes to the 
+next status window.
+<P>
+As well as changing the font and style for the text window (for PRINT 
+etc.), the FONT command automatically changes the default graphics 
+window size (ID=1) and the text window size to fit exactly in the 
+space left by any status window. (A special feature not used here 
+is that "FONT -$3fff,0" just changes the window sizes without 
+changing font).
+<P>
+The procedure "dispinfo:" uses the command SCREENINFO to 
+display the margin sizes in pixels between the default window and 
+the text window, the text screen size in character units, and the 
+text screen's character width and line height in pixels.
+<P>
+<UL><PRE>
+<B>PROC tzoom:</B>
+  STATUSWIN OFF   REM no status window
+  zoom:           REM display with zooming
+  STATUSWIN ON,2  REM large status window
+  zoom:
+  STATUSWIN ON,1  REM and small
+  zoom:
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC zoom:</B>
+  LOCAL font%(3),font$(3,20),style%(3)
+  LOCAL g%,km%,zoom%
+  zoom%=1
+  font%(1)=13 :font$(1)="(Mono 6x6)" :style%(1)=0  
+  font%(2)=4  :font$(2)="(Mono 8x8)" :style%(2)=0  
+  font%(3)=12 :font$(3)="(Swiss 16)" :style%(3)=16 
+  g%=%z+$200
+  DO
+    IF g%=%z+$200
+      IF km% AND 2        REM Shift-PSION-Z
+        zoom%=zoom%-1
+        IF zoom%<1 :zoom%=3 :ENDIF
+      ELSE                REM PSION-Z
+        zoom%=zoom%+1
+        IF zoom%>3 :zoom%=1 :ENDIF
+      ENDIF
+      FONT font%(zoom%),style%(zoom%)
+      PRINT "Font=";font%(zoom%),font$(zoom%),
+      PRINT "Style=";style%(zoom%)
+      dispinfo:
+      PRINT rept$("1234567890",15)
+      gBORDER 0
+    ENDIF
+    g%=GET
+    km%=KMOD
+  UNTIL g%=27
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC dispinfo:</B>
+  LOCAL scrInfo%(10)
+  SCREENINFO scrInfo%()
+  PRINT "Left margin=";scrInfo%(1),
+  AT 17,2 :PRINT "Top margin=";scrInfo%(2)
+  PRINT "Screen width=";scrInfo%(3)
+  AT 17,3 :PRINT "Screen height=";scrInfo%(4)
+  PRINT "Char width=";scrInfo%(7)
+  AT 17,4 :PRINT "Line height=";scrInfo%(8)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.11"><H2>Animation example</H2></A>
+<P>
+This program requires five bitmap files  "one.pic" to "five.pic". 
+Each of these would differ slightly  they might, for example, 
+be five `snapshots' of a running human figure, each with the legs 
+at a different point in their cycle.
+<P>
+The program copies each bitmap into a window of its own, then makes 
+each window visible in turn, each time slightly further across the 
+screen.
+<P>
+To make bitmap files, first draw the pattern you want with any of 
+the graphics drawing commands. (Use "gLINEBY 0,0" to draw single 
+dots.) When the pattern is complete, use gSAVEBIT to make the 
+bitmap file. For advanced animation, you could use a sprite 
+as described in the `Advanced Topics' chapter.
+<P>
+<UL><PRE>
+<B>PROC animate:</B>
+  LOCAL id%(5),i%,j%,s$(5,10),w%,h%
+  w%=16 :h%=28 REM example width and height
+  s$(1)="one" :s$(2)="two" :s$(3)="three"
+  s$(4)="four" :s$(5)="five" :j%=1
+  WHILE j%<6
+    i%=gLOADBIT(s$(j%))
+    id%(j%)=gCREATE(0,0,w%,h%,0)
+    gCOPY i%,0,0,w%,h%,3
+    gCLOSE i% :j%=j%+1
+  ENDWH
+  i%=0 :gORDER 1,9
+  DO
+    j%=(i%-5*(i%/5))+1 REM (i% MOD 5)+1
+    gVISIBLE OFF REM previous window
+    gUSE id%(j%) REM new window
+    gSETWIN i%,20 REM position it
+    gORDER id%(j%),1 REM make foreground
+    gVISIBLE ON REM make visible
+    i%=i%+1 :PAUSE 2
+  UNTIL KEY OR (i%>(480-w%)) REM screen edge
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "9.12"><H2>Two-voice "ice-cream van" sound</H2></A>
+<P>
+The following program plays a rising and falling scale. It uses the 
+amplifier-driven loudspeaker device (with device driver SND:) which 
+allows you to play tunes using two-note chords  ie it has two 
+voices.
+<P>
+This program uses I/O keywords as described in the `Advanced topics' 
+section. Take care to enter them exactly as shown here.
+<P>
+<UL><PRE>
+<B>PROC main:</B>
+  local ret%,sndHand%
+  ret%=IOOPEN(sndHand%,"SND:",-1) REM open the device
+  if ret%<0
+    print "Failed to start"
+    print err$(err)
+    get
+  else
+    icecream:(sndHand%)
+    ioclose(sndHand%)
+  endif 
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC icecream:(sndHand%)</B>
+  local notes1%(4),notes2%(14)
+  local s1stat%,len1%,len2%
+  REM define 1st voice
+  notes1%(1)=1048  :notes1%(2)=96 REM freq, duration
+  notes1%(3)=524   :notes1%(4)=48
+  len1%=2 REM number of notes in voice 1
+  REM define 2nd voice
+  notes2%(1)=1048  :notes2%(2)=16
+  notes2%(3)=1320  :notes2%(4)=16
+  notes2%(5)=1568  :notes2%(6)=16
+  notes2%(7)=2092  :notes2%(8)=16
+  notes2%(9)=1568  :notes2%(10)=16
+  notes2%(11)=1320 :notes2%(12)=16
+  notes2%(13)=1048 :notes2%(14)=48
+  len2%=7  REM number of notes in voice 2
+  IOC(sndhand%,1,s1stat%,notes1%(),len1%)
+    REM voice 1 asynchronous
+  IOW(sndHand%,2,notes2%(),len2%) REM voice 2 synchronous
+  IOWAITSTAT s1stat%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<B>notes1%()</B> and <B>notes2%()</B> are set up to hold "len1%" 
+and "len2%" notes to be played on voice 1 and voice 2 respectively. 
+The number of notes to each voice must not exceed 16384.
+<P>
+Each note is composed of two consecutive integers in the array  
+with the first of each pair giving the frequency in Hz (middle A is 
+440Hz) and the second giving the note duration in quarter-beats per 
+minute.
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

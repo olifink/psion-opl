@@ -1,0 +1,4515 @@
+
+<TITLE>PSION Programming Ref.: Chapter 13. Alphabetic listing</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Alphabetic listing</CENTER></H1>
+<P>
+This chapter explains how keywords (functions and commands) 
+are specified and used, then lists them all alphabetically. Use this 
+chapter if you know which keyword you need to use, but need to check 
+how to use it. Each one is listed with the specification of its usage, 
+then a description of what it does.
+<P>
+Note: the example programs in this chapter do not include 
+full error handling code. This means that the programs have been kept 
+short and easy to understand, but may fail if, for example, you enter 
+the wrong type of value for a variable.
+<P>
+If you want to develop programs from these examples, 
+it is recommended that you add some error handling code to them. An 
+earlier chapter covers Error handling.
+<P>
+<H3>Typing commands, functions and arguments</H3>
+<P>
+Commands, functions and arguments may be typed in any 
+combination of UPPER and lower case.
+<P>
+<UL><LI>To put more than one statement on a line, separate </LI> 
+them by a space followed by a colon  eg: <BR><CODE>CLS :PRINT hello 
+:GET</CODE>
+</UL>
+Any commands may be strung together like this, and 
+as many of them as you like  provided the total line length 
+does not exceed 255 characters. The colon is optional before a REM 
+statement.
+<P>
+<UL><LI>Where one space is allowed, any number of spaces is </LI> 
+allowed, eg:<BR>
+CLS     : PRINT  Press Esc
+</UL>
+<UL><LI>Functions may be used as arguments to other functions </LI> 
+or commands  eg.<CODE>
+PRINT LEFT$(A$,3) and a=COS(ABS(x))</CODE> are OK.
+</UL>
+<h3>How commands are specified</H3>
+<P>
+Commands are specified as COMMAND argument(s) 
+where argument(s) follow the command after a space and 
+are separated from each other by commas. The arguments may include:
+<P>
+<UL><LI> Floating-point expression (eg SIN(30)+2), variable </LI> 
+(eg price or z) or literal value (eg 78.9)
+</UL>
+<UL><LI> Integer expression (eg 3*567), variable (eg price%, </LI> 
+or price& if in range) or literal value (eg -5676)
+</UL>
+<UL><LI> Long integer expression (eg 3*56799), variable </LI> 
+(eg profit&) or literal value (eg -5676869)
+</UL>
+<UL><LI> String expression (eg b$+MID$(a$)), variable </LI> 
+(eg price$) or literal value (eg word)
+</UL>
+<UL><LI> Logical file name (A, B, C or D)</LI> 
+</UL>
+<UL><LI> Field name</LI> 
+</UL>
+For example, AT X%,Y% might be used like this: 
+AT 15,2
+<P>
+How functions are specified
+<P>
+Functions are specified as variable=FUNCTION(argument(s)) 
+where variable may be f% or f& for a function returning 
+an integer or long integer result, f for a function returning 
+a floating-point result, or f$ for a function returning a string 
+result. The argument(s):
+<P>
+<UL><LI> follow the command immediately</LI> 
+</UL>
+<UL><LI> are enclosed in brackets ( ) </LI> 
+</UL>
+<UL><LI> are separated from each other in the brackets by a comma</LI> 
+</UL>
+<UL><LI> may include variables, literal values or expressions </LI> 
+of the appropriate kind  integer, long integer, floating-point 
+or string, as described above.
+</UL>
+Eg f$=LEFT$(g$,x%) might be used like this: 
+PRINT LEFT$(fname$,2)
+<P>
+If you use the wrong type of number as an argument it 
+will, where possible, be converted. For example, you can use an integer 
+for a floating-point argument, or a long integer for an integer argument. 
+If the conversion is not possible  for example, if you use 
+a floating-point number for an integer argument and its value is outside 
+the range of integers  an error will be produced and the program 
+stopped.
+<P>
+Some functions, such as GET, have no arguments.
+<P>
+<A NAME = "ABS"><A HREF="psi-prog.htm"><H3><HR>ABS</H3></A>
+<B>Usage:</B> <CODE>a=ABS(x)</CODE></DT><P>
+Returns the absolute value of a floating-point number  that 
+is, without any +/- sign  for example ABS(-10.099) 
+is 10.099
+<P>
+If x is an integer, you won't get an error, but the result will 
+be converted to floating-point  for example ABS(-6) is 
+6.0. Use IABS to return the absolute value as a long 
+integer.
+<P>
+<A NAME = "ACOS"><A HREF="psi-prog.htm"><H3><HR>ACOS</H3></A>
+<B>Usage: </B> <CODE>a=ACOS(x)</CODE></DT><P>
+Returns the arc cosine, or inverse cosine (COS^-1) of x. 
+<P>
+<P>
+x must be in the range -1 to +1. The number returned will be 
+an angle in radians. To convert the angle to degrees, use the DEG 
+function.
+<P>
+<A NAME = "ADDR"><A HREF="psi-prog.htm"><H3><HR>ADDR</H3></A>
+<B>Usage:</B> <CODE>a%=ADDR(variable)</CODE></DT><P>
+Returns the address at which variable is stored in memory. 
+<P>
+The values of different types of variables are stored in bytes starting 
+at ADDR(variable). See PEEK for details.
+<P>
+See also UADD, USUB.
+<P>
+<A NAME = "ADJUSTALLOC"><A HREF="psi-prog.htm"><H3><HR>ADJUSTALLOC</H3></A>
+<B>Usage:</B> <CODE>pcelln%=ADJUSTALLOC(pcell%,off%,am%)</CODE></DT><P>
+Opens or closes a gap at off% within the allocated cell pcell%, 
+returning the new cell address or zero if out of memory. off% 
+is 0 for the first byte in the cell. Opens a gap if the amount am% 
+is positive, and closes it if negative.
+<P>
+<A NAME = "ALERT"><A HREF="psi-prog.htm"><H3><HR>ALERT</H3></A>
+<B>Usage any of:</B><DD><CODE>r%=ALERT(m1$,m2$,b1$,b2$,b3$)<BR>
+<DD>r%=ALERT(m1$,m2$,b1$,b2$)<BR>
+<DD>r%=ALERT(m1$,m2$,b1$)<BR>
+<DD>r%=ALERT(m1$,m2$)<BR>
+<DD>r%=ALERT(m1$)<BR>
+</CODE></DT><P>
+Presents an alert  a simple dialog  with the 
+messages and keys specified, and waits for a response. m1$ is 
+the message to be displayed on the first line, and m2$ on the 
+second line. If m2$ is not supplied or if it is a null string, 
+the second message line is left blank.
+<P>
+Up to three keys may be used. b1$, b2$ and b3$ are 
+the strings (usually words) to use over the keys. b1$ appears 
+over an Esc key, b2$ over Enter, and b3$ over 
+Space. This means you can have Esc, or Esc and Enter, 
+or Esc, Enter and Space keys. If no key strings 
+are supplied, the word CONTINUE is used above an Esc key.
+<P>
+The key number  1 for Esc, 2 for Enter or 3 for 
+Space  is returned.
+<P>
+<A NAME = "ALLOC"><A HREF="psi-prog.htm"><H3><HR>ALLOC</H3></A>
+<B>Usage:</B> <CODE>pcell%=ALLOC(size%)</CODE></DT><P>
+Allocates a cell on the heap of the specified size, returning the 
+pointer to the cell or zero if there is not enough memory.
+<P>
+<A NAME = "APP"><A HREF="psi-prog.htm"><H3><HR>APP</H3></A>
+<B>Usage:</B><DD><CODE>APP name<BR>
+<DD>...<BR>
+<DD>ENDA<BR>
+</CODE></DT><P>
+Begins definition of an OPA. name gives the name of the OPA.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+<A NAME = "APPEND"><A HREF="psi-prog.htm"><H3><HR>APPEND</H3></A>
+<B>Usage:</B> <CODE>APPEND</CODE></DT><P>
+Adds a new record to the end of the current data file. The record 
+which was current is unaffected. The new record, the last in the file, 
+becomes the current record.
+<P>
+The record added is made from the current values of the field variables 
+A.field1$, A.field2$, and so on, of the current data file. 
+If a field has not been assigned a value, zero will be assigned to 
+it if it is a numeric field, or a null string if it is a string field.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC add:</B>
+OPEN address,A,f1$,f2$,f3$
+PRINT ADD NEW RECORD
+PRINT Enter name:,
+INPUT A.f1$
+PRINT Enter street:,
+INPUT A.f2$
+PRINT Enter town:,
+INPUT A.f3$
+APPEND
+CLOSE
+<B>ENDP</B>
+</PRE></UL>
+<P>
+To overwrite the current record with new field values, use UPDATE.
+<P>
+<A NAME = "APPENDSPRITE"><A HREF="psi-prog.htm"><H3><HR>APPENDSPRITE</H3></A>
+<B>Usage:</B><DD><CODE>APPENDSPRITE time%,bit$(),dx%,dy%<BR>
+<DD>APPENDSPRITE time%,bit$()<BR>
+</CODE></DT><P>
+Appends a single bitmap-set to the current sprite.
+<P>
+time% gives the duration in tenths of seconds for the bitmap-set 
+to be displayed before going on to the next bitmap-set in the sequence.
+<P>
+bit$() contains the names of bitmap files in the set, or  
+to specify no bitmap. The array must have at least 6 elements:
+<PRE>
+bit$(1) for setting black pixels
+bit$(2) for clearing black pixels
+bit$(3) for inverting black pixels
+bit$(4) for setting grey pixels
+bit$(5) for clearing grey pixels
+bit$(6) for inverting grey pixels
+</PRE>
+All the bitmaps in a single bitmap-set must be the same size or `Argument' 
+error (-2) is raised on attempting to draw the sprite. Bitmaps in 
+different bitmap-sets may differ in size.
+<P>
+dx% and dy%, if supplied, are the (x,y) offsets from the 
+sprite position to the top-left of this bitmap-set, with positive 
+for right and down. The default value of each is zero.
+<P>
+<A NAME = "ASC"><A HREF="psi-prog.htm"><H3><HR>ASC</H3></A>
+<B>Usage:</B> <CODE>a%=ASC(a$)</CODE></DT><P>
+Returns the character code of the first character of a$. 
+<P>
+See the character set in the back of the User Guide for the character 
+codes. Alternatively, use A%=%char to find the code for 
+char  eg %X for `X'.
+<P>
+If a$ is a null string () ASC returns the value 0.
+<P>
+Example A%=ASC(hello) returns 104, the code for h.
+<P>
+<A NAME = "ASIN"><A HREF="psi-prog.htm"><H3><HR>ASIN</H3></A>
+<B>Usage:</B> <CODE>a=ASIN(x)</CODE></DT><P>
+Returns the arc sine, or inverse sine (SIN^-1) of x. 
+<P>
+x must be in the range -1 to +1. The number returned will be 
+an angle in radians. To convert the angle to degrees, use the DEG 
+function.
+<P>
+<A NAME = "AT "><A HREF="psi-prog.htm"><H3><HR>AT </H3></A>
+<B>Usage:</B> <CODE>AT x%,y%</CODE></DT><P>
+Positions the cursor at x% characters across the text window 
+and y% rows down. AT 1,1 always moves to the top left 
+corner of the window. Initially, the window is the full size of the 
+screen, but you can change its size and position with the SCREEN 
+command.
+<P>
+A common use of AT is to display strings at particular positions 
+in the text window. For example:
+AT 5,2 :PRINT message.
+<P>
+<UL><LI> PRINT statements without an AT display </LI> 
+at the left edge of the window on the line below the last PRINT 
+statement (unless you use `,' or `;') and strings displayed 
+at the top of the window eventually scroll off as more strings are 
+displayed at the bottom of the window. 
+</UL>
+<UL><LI> Displayed strings always overwrite anything that is on the </LI> 
+screen  they do not cause things below them on the screen to 
+scroll down.
+</UL>
+Example:
+<P>
+<UL><PRE>
+<B>PROC records:</B>
+LOCAL k%
+OPEN clients,A,name$,tel$
+DO
+ CLS
+ AT 1,7
+ PRINT Press a key to
+ PRINT step to next record
+ PRINT or Q to quit
+ AT 2,3 :PRINT A.name$
+ AT 2,4 :PRINT A.tel$
+ NEXT
+ IF EOF
+  AT 1,6 :PRINT EndOfFile
+  FIRST
+ ENDIF
+ k%=GET
+UNTIL k%=%Q OR k%=%q
+CLOSE
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "ATAN"><A HREF="psi-prog.htm"><H3><HR>ATAN</H3></A>
+<B>Usage:</B> <CODE>a=ATAN(x)</CODE></DT><P>
+Returns the arc tangent, or inverse tanget (TAN^-1) of x. 
+<P>
+<P>
+The number returned will be an angle in radians. To convert the angle 
+to degrees, use the DEG function.
+<P>
+<A NAME = "BACK"><A HREF="psi-prog.htm"><H3><HR>BACK</H3></A>
+<B>Usage:</B> <CODE>BACK</CODE></DT><P>
+Makes the previous record in the current data file the current record. 
+<P>
+<P>
+If the current record is the first record in the file, then the current 
+record does not change. 
+<P>
+<A NAME = "BEEP "><A HREF="psi-prog.htm"><H3><HR>BEEP </H3></A>
+<B>Usage:</B> <CODE>BEEP time%,pitch%</CODE></DT><P>
+Sounds the buzzer. The beep lasts for time%/32 seconds  
+so for a beep a second long make time%=32, etc. The maximum 
+is 3840 (2 minutes).
+<P>
+The pitch (frequency) of the beep is  512/(pitch%+1) KHz.
+<P>
+BEEP 5,300 gives a comfortably pitched beep.
+<P>
+If you make time% negative, BEEP first checks whether 
+the sound system is in use (perhaps by another OPL program), and returns 
+if it is. Otherwise, BEEP waits until the sound system is free.
+<P>
+Example  a scale from middle C:
+<P>
+<UL><PRE>
+<B>PROC scale:</B>
+LOCAL freq,n%
+REM n% relative to middle A
+n%=3 REM start at middle C
+WHILE n%<16
+ freq=440*2**(n%/12.0)
+ REM middle A = freq 440Hz
+ BEEP 8,512000/freq-1.0
+ n%=n%+1
+ IF n%=4 OR n%=6 OR n%=9 OR
+              n%=11 OR n%=13
+  n%=n%+1
+ ENDIF
+ENDWH
+<B>ENDP</B>
+</PRE></UL>
+<P>
+(Note that the IF statement should all be on the same line).
+<P>
+Alternatively, sound the buzzer with this statement: PRINT CHR$(7). 
+This beeps at a fixed pitch for a fixed length of time. 
+<P>
+<A NAME = "BREAK"><A HREF="psi-prog.htm"><H3><HR>BREAK</H3></A>
+<B>Usage:</B> <CODE>BREAK</CODE></DT><P>
+Makes a program performing a DO...UNTIL or WHILE...ENDWH 
+loop exit the loop and immediately execute the line following the 
+UNTIL or ENDWH statement.
+<P>
+Example:
+    (picture)
+<PRE>
+DO
+ ...
+ ....
+ IF a=b
+  BREAK
+ ENDIF
+ ..
+ ...
+ .....
+UNTIL a=b
+x%=3
+..
+</PRE>
+<P>
+<A NAME = "BUSY"><A HREF="psi-prog.htm"><H3><HR>BUSY</H3></A>
+<B>Usage - one of:</B><DD><CODE>BUSY str$,c%,delay%<BR>
+<DD>BUSY str$,c%<BR>
+<DD>BUSY str$<BR>
+<DD>BUSY OFF<BR>
+</CODE></DT><P>
+BUSY str$ displays str$ in the bottom left of the screen, 
+until BUSY OFF is called. Use this to indicate `Busy' messages, 
+usually when an OPL program is going to be unresponsive to keypresses 
+for a while.
+<P>
+If c% is given, it controls the corner in which the message 
+appears:
+<PRE>
+c%	corner
+0	top left
+1	bottom left (default)
+2	top right
+3	bottom right
+</PRE>
+delay% specifies a delay time (in half seconds) before the message 
+should be shown. Use this to prevent `busy' messages from continually 
+appearing very briefly on the screen.
+<P>
+Only one message can be shown at a time. The string to display can 
+be up to 19 characters long.
+<P>
+<A NAME = "CACHE"><A HREF="psi-prog.htm"><H3><HR>CACHE</H3></A>
+<B>Usage - one of:</B><DD><CODE>CACHE init%,max%<BR>
+<DD>CACHE ON<BR>
+<DD>CACHE OFF<BR>
+</CODE></DT><P>
+CACHE creates a procedure cache of a specified initial number 
+of bytes init% which may grow up to the maximum size max%. 
+You should usually TRAP this.
+<P>
+Once a cache has been created, CACHE OFF prevents further 
+cacheing, although the cache is still searched when calling subsequent 
+procedures. CACHE ON may then be used to re-enable cacheing.
+<P>
+<A NAME = "CACHEHDR"><A HREF="psi-prog.htm"><H3><HR>CACHEHDR</H3></A>
+<B>Usage:</B> <CODE>CACHEHDR addr(hdr%())</CODE></DT><P>
+Read the current cache index header into array hdr%(), which 
+must have at least 11 integer elements.
+<P>
+See the `Advanced topics' chapter for more details.
+<P>
+<A NAME = "CACHEREC"><A HREF="psi-prog.htm"><H3><HR>CACHEREC</H3></A>
+<B>Usage:</B> <CODE>CACHEREC addr(rec%()),off%</CODE></DT><P>
+Read the cache index record at offset off% into array rec%(), 
+which must have at least 18 integer elements.
+<P>
+See the `Advanced topics' chapter for more details.
+<P>
+<A NAME = "CACHETIDY"><A HREF="psi-prog.htm"><H3><HR>CACHETIDY</H3></A>
+<B>Usage:</B> <CODE>CACHETIDY</CODE></DT><P>
+Remove from the cache any procedures that have returned to their callers.
+<P>
+<A NAME = "CALL"><A HREF="psi-prog.htm"><H3><HR>CALL</H3></A>
+<B>Usage:</B> <CODE>e%=CALL(s%,bx%,cx%,dx%,si%,di%)</CODE></DT><P>
+This function enables you to make operating system calls. To use it 
+requires extensive knowledge of the Operating System and related 
+programming techniques. The syntax of this command is included here 
+for completeness.
+<P>
+The INT number itself is the least significant byte of s%. The 
+AH value (the subfunction number) is the most significant byte of 
+s%. The values of the other arguments are passed to the corresponding 
+8086 registers. The value of the AX register is returned.
+<P>
+<A NAME = "CHANGESPRITE"><A HREF="psi-prog.htm"><H3><HR>CHANGESPRITE</H3></A>
+<B>Usage:</B><DD><CODE>CHANGESPRITE ix%,time%,bit$(),dx%,dy%<BR>
+<DD>CHANGESPRITE ix%,time%,bit$()<BR>
+</CODE></DT><P>
+Changes the bitmap-set specified by ix% (1 for the first bitmap-set) 
+in the current sprite, using the supplied bitmap files, offsets and 
+duration in the same way as for APPENDSPRITE.
+<P>
+<A NAME = "CHR$"><A HREF="psi-prog.htm"><H3><HR>CHR$</H3></A>
+<B>Usage:</B> <CODE>a$=CHR$(x%)</CODE></DT><P>
+Returns the character with character code x%. 
+<P>
+You can use it to display characters not easily available from the 
+keyboard  for example, the instruction PRINT CHR$(174) 
+displays ®.
+<P>
+The full character set is in the User Guide.
+<P>
+<A NAME = "CLOSE"><A HREF="psi-prog.htm"><H3><HR>CLOSE</H3></A>
+<B>Usage:</B> <CODE>CLOSE</CODE></DT><P>
+Closes the current file (that is, the one which has been OPENed 
+and most recently USEd).
+<P>
+If you've used ERASE to remove some records, CLOSE recovers 
+the memory used by the deleted records, provided it is held either 
+in the internal memory or on a Ram SSD.
+<P>
+<A NAME = "CLOSESPRITE"><A HREF="psi-prog.htm"><H3><HR>CLOSESPRITE</H3></A>
+<B>Usage:</B> <CODE>CLOSESPRITE id%</CODE></DT><P>
+Closes the sprite with ID id%.
+<P>
+<A NAME = "CLS"><A HREF="psi-prog.htm"><H3><HR>CLS</H3></A>
+<B>Usage:</B> <CODE>CLS</CODE></DT><P>
+Clears the contents of the text window.
+<P>
+The cursor then goes to the beginning of the top line. If you have 
+used CURSOR OFF the cursor is still positioned there, but is 
+not displayed.
+<P>
+<A NAME = "CMD$"><A HREF="psi-prog.htm"><H3><HR>CMD$</H3></A>
+<B>Usage:</B> <CODE>c$=CMD$(x%)</CODE></DT><P>
+Returns the command-line arguments passed when starting a program. 
+Null strings may be returned. x% should be from 1 to 5. cmd$(2) 
+to cmd$(5) are only for OPAs (OPL applications).
+<P>
+cmd$(1) returns the full path name used to start the running 
+program.
+<P>
+cmd$(2) returns the full path name of the file to be used by 
+an OPA application.
+<P>
+cmd$(3) returns C for Create file or O for 
+Open file. If the OPA is being run with a new filename, this 
+will return C. This happens the very first time the OPA 
+is used, and whenever a new filename is used to run it. Otherwise, 
+the OPA is being run with the name of an existing file, and 
+cmd$(3) will return O.
+<P>
+cmd$(4) returns the alias information, if any. In 
+practice this has no relevance for OPAs.
+<P>
+cmd$(5) returns the application name, as declared with the 
+APP keyword.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+See also GETCMD$.
+<P>
+<A NAME = "COMPRESS"><A HREF="psi-prog.htm"><H3><HR>COMPRESS</H3></A>
+<B>Usage:</B> <CODE>COMPRESS src$,dest$</CODE></DT><P>
+Copies data file src$ to another data file dest$. If dest$ 
+already exists, the records in src$ are appended to the end 
+of dest$.
+<P>
+Deleted records are not copied. This makes COMPRESS particularly 
+useful when copying from a Flash SSD. (The space used by deleted records 
+on a Ram SSD or in internal memory is automatically freed when you 
+close the file.)
+<P>
+If you want src$ to overwrite instead of append to dest$, 
+use:
+TRAP DELETE dest$
+before the COMPRESS statement.
+<P>
+You can use wildcards if you wish to copy more than one file at a 
+time. But if the first name contains any wildcards, the second name 
+must not include a filename, just the device and directory to which 
+the files are to be copied under their original names.
+<P>
+Example: to copy all the data files on A: (in \OPD, the default 
+directory) to B:\BCK\:
+<P>
+COMPRESS A:*.ODB,B:\BCK\
+<P>
+(Remember the final backslash on the directory name.)
+<P>
+See COPY for copying any type of file.
+<P>
+<A NAME = "CONTINUE"><A HREF="psi-prog.htm"><H3><HR>CONTINUE</H3></A>
+<B>Usage:</B> <CODE>CONTINUE</CODE></DT><P>
+Makes a program immediately go to the UNTIL... line of a DO...UNTIL 
+loop or the WHILE... line of a WHILE...ENDWH loop  
+ie to the test condition.
+<P>
+Example:
+    (picture)
+<P>
+<PRE>
+DO
+ ...
+ .....
+ ....
+ IF a<3.5
+  CONTINUE
+ ENDIF
+ ..
+ ....
+ ...
+UNTIL a=b
+..
+</PRE>
+See also BREAK.
+<P>
+<A NAME = "COPY"><A HREF="psi-prog.htm"><H3><HR>COPY</H3></A>
+<B>Usage:</B> <CODE>COPY src$,dest$</CODE></DT><P>
+Copies the file src$, which may be of any type, to the file 
+dest$. Any existing file with the name dest$ is deleted. 
+You can copy across devices. 
+<P>
+Use the appropriate file extensions to indicate the type of file, 
+and wildcards if you wish to copy more than one file at a time: 
+<P>
+<UL><LI> If src$ contains wildcards, dest$ must not specify </LI> 
+a filename, just the device and directory to which the files are to 
+be copied under their original names. 
+</UL>
+<UL><LI> You must specify either an extension or .* on the </LI> 
+first filename. The file type extensions are listed in the User Guide.
+</UL>
+Example:
+To copy all the OPL files from internal memory (in \OPL) to 
+B:\ME\:
+<P>
+COPY M:\OPL\*.OPL,B:\ME\
+<P>
+(Remember the final backslash on the directory name.)
+<P>
+See COMPRESS for more control over copying data files. If you 
+use COPY to copy a data file, deleted records are copied 
+and you cannot append to another data file.
+<P>
+There are more details of full file specifications in the Advanced 
+Topics chapter.
+<P>
+<A NAME = "COS"><A HREF="psi-prog.htm"><H3><HR>COS</H3></A>
+<B>Usage:</B> <CODE>c=COS(x)</CODE></DT><P>
+Returns the cosine of x, where x is an angle in radians. 
+<P>
+<P>
+To convert from degrees to radians, use the RAD function.
+<P>
+<A NAME = "COUNT"><A HREF="psi-prog.htm"><H3><HR>COUNT</H3></A>
+<B>Usage:</B> <CODE>c%=COUNT</CODE></DT><P>
+Returns the number of records in the current data file. 
+<P>
+This number will be 0 if the file is empty.
+<P>
+<A NAME = "CREATE"><A HREF="psi-prog.htm"><H3><HR>CREATE</H3></A>
+<B>Usage:</B> <CODE>CREATE file$,log,f1,f2,...</CODE></DT><P>
+Creates a data file called file$.
+<P>
+<UL><LI> The filename may be a full file specification of up to 128 </LI> 
+characters. Field names may be up to 8 letters/numbers.
+</UL>
+<UL><LI> The file may have up to 32 fields, as specified by f1, </LI> 
+f2... (if viewed in the Database application, field f1 
+starts on the top line of the window, f2 is below it, etc.)
+</UL>
+<UL><LI> log specifies the logical file name  A, </LI> 
+B, C or D. This is used as an abbreviation for the 
+file name when you use other data file commands such as USE. 
+</UL>
+<P>
+Immediately after the CREATE statement, the file is open and 
+can be accessed.
+<P>
+Example:
+<P>
+CREATE CLIENTS,B,NM$,PHON$
+<P>
+would create a data file in the internal memory with the name CLIENTS 
+and the logical name B.
+<P>
+<A NAME = "CREATESPRITE"><A HREF="psi-prog.htm"><H3><HR>CREATESPRITE</H3></A>
+<B>Usage:</B> <CODE>id%=CREATESPRITE</CODE></DT><P>
+Creates a sprite, returning the sprite ID.
+<P>
+<A NAME = "CURSOR"><A HREF="psi-prog.htm"><H3><HR>CURSOR</H3></A>
+<B>Usage - one of:</B><DD><CODE>CURSOR ON<BR>
+<DD>CURSOR OFF<BR>
+<DD>CURSOR id%,asc%,w%,h%<BR>
+<DD>CURSOR id%,asc%,w%,h%,type%<BR>
+<DD>CURSOR id%<BR>
+</CODE></DT><P>
+<P>
+CURSOR ON switches the text cursor on at the current cursor 
+position. Initially, no cursor is displayed.
+<P>
+You can switch on a graphics cursor in a window by following CURSOR 
+with the ID of the window. This replaces any text cursor. At 
+the same time, you can also specify the cursor's shape, and its position 
+relative to the baseline of text.
+<P>
+asc% is the ascent  the number of pixels (-128 
+to 127) by which the top of the cursor should be above the baseline 
+of the current font. h% and w% (both from 0 to 255) are 
+the cursor's height and width.
+<P>
+If you do not specify them, the following default values are used:
+asc%	=font ascent
+h%	=font height
+w%	=2
+<P>
+If type% is given, it can have these effects:
+1	obloid
+2	not flashing
+4	grey
+<P>
+You can add these values together to combine effects  eg if 
+type% is 6 a grey non-flashing cursor is drawn.
+<P>
+An error is raised if id% specifies a bitmap rather than a window.
+<P>
+CURSOR OFF switches off any cursor.
+<P>
+<A NAME = "DATETOSECS"><A HREF="psi-prog.htm"><H3><HR>DATETOSECS</H3></A>
+<B>Usage:</B> <CODE>s&=DATETOSECS(yr%,mo%,dy%,hr%,mn%,sc%)</CODE></DT><P>
+Returns the number of seconds since 00:00 on 1 January 1970 at the 
+date/time specified.
+<P>
+Raises an error for dates before 1 January 1970.
+<P>
+The value returned is an unsigned long integer. (Values up to 
++2,147,483,647, which is 03:14:07 on 19/1/2038, are returned as expected. 
+Those from +2,147,483,648 upwards are returned as negative numbers, 
+starting from -2,147,483,648 and increasing towards zero.)
+<P>
+See also SECSTODATE, HOUR, MINUTE, SECOND.
+<P>
+<A NAME = "DATIM$"><A HREF="psi-prog.htm"><H3><HR>DATIM$</H3></A>
+<B>Usage:</B> <CODE>d$=DATIM$</CODE></DT><P>
+Returns the current date and time from the system clock as a string  
+for example:
+Fri 16 Oct 1992 16:25:30
+The string returned always has this format  3 mixed-case characters 
+for the day, then a space, then 2 digits for the day of the month, 
+and so on.
+<P>
+<A NAME = "DAY"><A HREF="psi-prog.htm"><H3><HR>DAY</H3></A>
+<B>Usage:</B> <CODE>d%=DAY</CODE></DT><P>
+Returns the current day of the month (1 to 31) from the system clock.
+<P>
+<A NAME = "DAYNAME$"><A HREF="psi-prog.htm"><H3><HR>DAYNAME$</H3></A>
+<B>Usage:</B> <CODE>d$=DAYNAME$(x%)</CODE></DT><P>
+Converts x%,a number from 1 to 7, to the day of the week, expressed 
+as a three letter string.
+<P>
+Eg d$=DAYNAME$(1) returns MON.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC Birthday:</B>
+ LOCAL d&,m&,y&,dWk%
+ DO
+  dINIT
+  dTEXT ,Date of birth,2
+dTEXT ,eg 23 12 1963,$202
+  dLONG d&,Day,1,31
+  dLONG m&,Month,1,12
+  dLONG y&,Year,1900,2155
+  IF DIALOG=0 :BREAK :ENDIF
+  dWk%=DOW(d&,m&,y&)
+  CLS :PRINT DAYNAME$(dWk%),
+  PRINT d&,m&,y&
+  dINIT
+  dTEXT ,Again?,$202
+  dBUTTONS No,%N,Yes,%Y
+ UNTIL DIALOG<>%y
+<B>ENDP </B>
+</PRE></UL>
+<P>
+See also DOW.
+<P>
+<A NAME = "DAYS"><A HREF="psi-prog.htm"><H3><HR>DAYS</H3></A>
+<B>Usage:</B> <CODE>d&=DAYS(day%,month%,year%)</CODE></DT><P>
+Returns the number of days since 01/01/1900. 
+<P>
+Use this to find out the number of days between two dates.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC deadline:</B>
+ LOCAL a%,b%,c%,deadlin&
+ LOCAL today&,togo%
+ PRINT What day? (1-31)
+ INPUT a%
+ PRINT What month? (1-12)
+ INPUT b%
+ PRINT What year? (19??)
+ INPUT c%
+ deadlin&=DAYS(a%,b%,1900+c%)
+ today&=DAYS(DAY,MONTH,YEAR)
+ togo%=deadlin&-today&
+ PRINT togo%,days to go
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+See also dDATE, SECSTODATE.
+<P>
+<A NAME = "dBUTTONS"><A HREF="psi-prog.htm"><H3><HR>dBUTTONS</H3></A>
+<B>Usage - one of:</B><DD><CODE>dBUTTONS p1$,k1%,p2$,k2%,p3$,k3%<BR>
+<DD>dBUTTONS p1$,k1%,p2$,k2%<BR>
+<DD>dBUTTONS p1$,k1%<BR>
+</CODE></DT><P>
+Defines exit keys to go at the bottom of a dialog.
+<P>
+From one to three exit keys may be defined. Each pair of p$ 
+and k% specifies an exit key; p$ is the text to be displayed 
+above it, while k% is the keycode of the key. DIALOG 
+returns the keycode of the key pressed (in lower case for letters).
+<P>
+For alphabetic keys, use the % sign  %A means `the 
+code of A', and so on. An appendix lists the codes for keys 
+(such as Tab) which are not part of the character set. If you use 
+the code for one of these keys, its name (eg `Tab', or `Enter') will 
+be shown in the key.
+<P>
+If you use a negative value for a k% argument, that key is a 
+`Cancel' key. The corresponding positive value is used for the key 
+to display and the value for DIALOG to return, but if you do 
+press this key to exit, the var variables used in the commands 
+like dEDIT, dTIME etc. will not be set. 
+<P>
+The Esc key will always cancel a dialog box, with DIALOG returning 
+0. If you want to show the Esc key as one of the exit keys, use -27 
+as the k% argument (its keycode is 27) so that the var 
+variables will not be set if Esc is pressed.
+<P>
+There can be only one dBUTTONS item per dialog, and it takes 
+up three lines on the screen. dBUTTONS must be the last dialog 
+command you use before DIALOG itself.
+<P>
+Some keypresses, such as those using the Control key, cannot be specified.
+<P>
+This example presents a simple query, returning `True' 
+for Yes, or `False' for No.
+<P>
+<UL><PRE>
+<B>PROC query:</B>
+ dINIT
+ dTEXT ,FORGET CHANGES,2
+ dTEXT ,Sure?,$202
+ dBUTTONS No,%N,Yes,%Y
+ RETURN DIALOG=%y
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "dCHOICE"><A HREF="psi-prog.htm"><H3><HR>dCHOICE</H3></A>
+<B>Usage:</B> <CODE>dCHOICE var choice%,p$,list$</CODE></DT><P>
+Defines a choice list to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line. list$ 
+should contain the possible choices, separated by commas  for 
+example, Yes,No. One of these will be displayed on the right 
+side of the line, and  LEFT   RIGHT  can be used to move between 
+the choices.
+<P>
+choice% must be a LOCAL or a GLOBAL variable. 
+It specifies which choice should initially be shown  1 for 
+the first choice, 2 for the second, and so on. When you finish using 
+the dialog, choice% is given a value indicating which choice 
+was selected  again, 1 for the first choice, and so on.
+<P>
+<A NAME = "dDATE"><A HREF="psi-prog.htm"><H3><HR>dDATE</H3></A>
+<B>Usage:</B> <CODE>dDATE var lg&,p$,min&,max&</CODE></DT><P>
+Defines an edit box for a date, to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+lg&, which must be a LOCAL or a GLOBAL variable, 
+specifies the date to be shown initially. Although it will appear 
+on the screen like a normal date, for example 15/03/92, lg& 
+must be specified as days since 1/1/1900.
+<P>
+min& and max& give the minimum and maximum values which 
+are to be allowed. Again, these are in days since 1/1/1900. An error 
+is raised if min& is higher than max&. 
+<P>
+When you finish using the dialog, the date you entered is returned 
+in lg&, in days since 1/1/1900.
+<P>
+The system setting determines whether years, months or days are displayed 
+first.
+<P>
+See also DAYS, SECSTODATE.
+<P>
+<A NAME = "dEDIT"><A HREF="psi-prog.htm"><H3><HR>dEDIT</H3></A>
+<B>Usage:</B><DD><CODE>dEDIT var str$,p$,len%<BR>
+<DD>dEDIT var str$,p$<BR>
+</CODE></DT><P>
+Defines a string edit box, to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+str$ is the string variable to edit. Its initial contents will 
+appear in the dialog. The length used when str$ was defined 
+is the maximum length you can type in.
+<P>
+len%, if supplied, gives the width of the edit box (allowing 
+for widest possible character in the font). The string will scroll 
+inside the edit box, if necessary. If len% is not supplied, 
+the edit box is made wide enough for the maximum width str$ 
+could possibly be.
+<P>
+See also dTEXT.
+<P>
+<A NAME = "DEFAULTWIN"><A HREF="psi-prog.htm"><H3><HR>DEFAULTWIN</H3></A>
+<B>Usage:</B> <CODE>DEFAULTWIN mode%</CODE></DT><P>
+Change the default window (ID=1) to enable or disable the use of grey. 
+Initially grey cannot be used in that window.
+<P>
+mode%=1 enables the use of grey.
+mode%=0 disables the use of grey.
+<P>
+A side-effect of DEFAULTWIN is to clear the default window.
+<P>
+Using grey does use more memory than using black only.
+<P>
+You are advised to call DEFAULTWIN once and for all near the 
+start of your program if you need to use grey. If it fails with `Out 
+of memory' error, the program can then exit cleanly without losing 
+vital information.
+<P>
+See also gGREY and gCREATE.
+<P>
+<A NAME = "DEG"><A HREF="psi-prog.htm"><H3><HR>DEG</H3></A>
+<B>Usage:</B> <CODE>d=DEG(x)</CODE></DT><P>
+Converts from radians to degrees. 
+<P>
+Returns x, an angle in radians, as a number of degrees. The 
+formula used is: 180*x/PI
+<P>
+All the trigonometric functions (SIN,COS etc.) work in radians, 
+not degrees. You can use DEG to convert an angle returned by 
+a trigonometric function back to degrees:
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC xarctan:</B>
+ LOCAL arg,angle
+ PRINT Enter argument:;
+ INPUT arg
+ PRINT ARCTAN of,arg,is
+ angle=ATAN(arg)
+ PRINT angle,radians
+ PRINT DEG(angle),degrees
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+To convert from degrees to radians, use RAD. 
+<P>
+<A NAME = "DELETE"><A HREF="psi-prog.htm"><H3><HR>DELETE</H3></A>
+<B>Usage:</B> <CODE>DELETE filename$</CODE></DT><P>
+Deletes any type of file.
+<P>
+You can use wildcards  for example, to delete all the OPL files 
+in B:\OPL
+DELETE B:\OPL\*.OPL
+<P>
+The file type extensions are listed in the User Guide.
+<P>
+See also RMDIR.
+<P>
+<A NAME = "dFILE"><A HREF="psi-prog.htm"><H3><HR>dFILE</H3></A>
+<B>Usage:</B> <CODE>dFILE var str$,p$,f%</CODE></DT><P>
+Defines a filename edit box, to go in a dialog. A `Disk' selector 
+is automatically added on the line below.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+f% controls the type of file editor, and the kind of input allowed. 
+You can add together any of the following values:
+ 
+<PRE>
+value	meaning
+1	use an edit box
+2	allow directory names
+4	directory names only
+8	disallow existing files
+16	query existing files
+32	allow null string input
+64	don't display extension
+128	obey/allow wildcards
+</PRE>
+<P>
+The first of the list is the most crucial. If you add 1 into f%, 
+you will see an file edit box, as when creating a new file. If you 
+do not add 1, you will see the `matching file' selector, used when 
+choosing an existing file.
+<P>
+If performing a `copy to' operation, you might use 1+2+16, to specify 
+a file edit box, in which you can type the name of a directory 
+to copy to, and which will produce a query if you type the name of 
+an existing file.
+<P>
+If asking for the name of a directory to remove, you might use 4, 
+to allow an existing directory name only.
+<P>
+`Query existing' is ignored if `disallow existing' is set. These two, 
+as well as `allow null string input', only work with file edit boxes, 
+not `matching file' selectors.
+<P>
+str$ is the string variable to edit. Its initial contents always 
+control the initial drive and directory used. For a file edit box, 
+any filename part of str$ is shown. For a `matching file' selector, 
+you can use wildcards in the filename part (such as *.tmp) to 
+control which filenames are matched. To do this, you must add 128 
+to f%. 128 also allows wildcard specifications to be entered 
+(returned in str$), for both `matching' and `new file' selectors.
+<P>
+If str$ does not contain any drive or directory information, 
+the path as set by SETPATH is used. If SETPATH has not 
+been used, the \OPD directory on the default drive (usually 
+M:, `Internal') is used.
+<P>
+With a matching file selector (as opposed to an edit box) the 
+value 8 restricts the selection to files which match the filename/extension 
+in str$. Matching file selectors can also use 64, in which case 
+files with the same extension as that in str$ are shown without 
+this extension. (Many Series 3a file selectors are like this.)
+<P>
+You can always press Tab to produce the full file selector with a 
+dFILE item.
+<P>
+str$ must be declared to be at least 128 bytes long, or an error 
+will be raised.
+<P>
+<A NAME = "dFLOAT"><A HREF="psi-prog.htm"><H3><HR>dFLOAT</H3></A>
+<B>Usage:</B> <CODE>dFLOAT var fp,p$,min,max</CODE></DT><P>
+Defines an edit box for a floating-point number, to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+min and max give the minimum and maximum values which 
+are to be allowed. An error is raised if min is higher than 
+max.
+<P>
+fp must be a LOCAL or a GLOBAL variable. It specifies 
+the value to be shown initially. When you finish using the dialog, 
+the value you entered is returned in fp.
+<P>
+<A NAME = "DIALOG"><A HREF="psi-prog.htm"><H3><HR>DIALOG</H3></A>
+<B>Usage:</B> <CODE>n%=DIALOG</CODE></DT><P>
+Presents the dialog prepared by dINIT and commands such as 
+dTEXT and dCHOICE. If you complete the dialog by pressing 
+Enter, your settings are stored in the variables specified in dTEXT, 
+dCHOICE etc., although you can prevent this with dBUTTONS.
+<P>
+If you used dBUTTONS when preparing the dialog, the keycode 
+which ended the dialog is returned. Otherwise, DIALOG returns 
+the line number of the item which was current when Enter was pressed. 
+The top item (or the title line, if present), has line number 1.
+<P>
+If you cancel the dialog by pressing Esc, the variables are not changed, 
+and 0 is returned.
+<P>
+<A NAME = "DIAMINIT"><A HREF="psi-prog.htm"><H3><HR>DIAMINIT</H3></A>
+<B>Usage:</B> <CODE>DIAMINIT pos%,str1$,str2$...</CODE></DT><P>
+Initialises the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list (discarding any existing list). str1$, 
+str2$ etc. contain the text to be displayed in the status window 
+for each item in the list.
+<P>
+pos% is the initial item on to which the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> indicator should 
+be positioned, with pos%=1 specifying the first item. (Any value 
+greater than the number of strings specifies the final item.) If 
+pos%>=1 you must supply at least this many strings.
+<P>
+If pos% is not supplied or if pos%=0, or if DIAMINIT 
+is used on its own with no arguments, no bar is defined.
+<P>
+If pos%=-1 the list is replaced by the icon instead in the large 
+status window.
+<P>
+<A NAME = "DIAMPOS"><A HREF="psi-prog.htm"><H3><HR>DIAMPOS</H3></A>
+<B>Usage:</B> <CODE>DIAMPOS pos%</CODE></DT><P>
+Positions the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> indicator on the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list.
+<P>
+Positioning outside the range of the items wraps around in the appropriate 
+way. pos%=0 causes the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> symbol to disappear.
+<P>
+<A NAME = "dINIT"><A HREF="psi-prog.htm"><H3><HR>dINIT</H3></A>
+<B>Usage:</B> <CODE>dINIT title$ or dINIT</CODE></DT><P>
+Prepares for definition of a dialog, cancelling any existing one. 
+Use dTEXT, dCHOICE etc. to define each item in the dialog, 
+then DIALOG to display the dialog.
+<P>
+If title$ is supplied it will be displayed at the top of the 
+dialog, centred and with a line across the dialog below it.
+<P>
+<A NAME = "DIR$"><A HREF="psi-prog.htm"><H3><HR>DIR$</H3></A>
+<B>Usage:</B><DD><CODE>d$=DIR$(filespec$) then<BR>
+<DD>d$=DIR$()<BR>
+</CODE></DT><P>
+Lists filenames, including subdirectory names, matching a file specification. 
+You can include wildcards in the file specification. If filespec$ 
+is just a directory name, include the final backslash on the end  
+for example, M:\TEMP\ . Use the function like this:
+<P>
+<UL><LI> DIR$(filespec$) returns the name of the first </LI> 
+file matching the file specification. 
+</UL>
+<UL><LI> DIR$() then returns the name of the second file </LI> 
+in the directory.
+</UL>
+<UL><LI> DIR$() again returns the third, and so on.</LI> 
+</UL>
+<UL><LI> When there are no more matching files in the directory, </LI> 
+DIR$() returns a null string.
+</UL>
+Example, listing all the .DBF files in M:\DAT:
+<P>
+<UL><PRE>
+<B>PROC dir:</B>
+ LOCAL d$(128)
+ d$=DIR$(M:\DAT\*.DBF)
+ WHILE d$<>
+  PRINT d$
+  d$=DIR$()
+ ENDWH
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "dLONG"><A HREF="psi-prog.htm"><H3><HR>dLONG</H3></A>
+<B>Usage:</B> <CODE>dLONG var lg&,p$,min&,max&</CODE></DT><P>
+Defines an edit box for a long integer, to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+min& and max& give the minimum and maximum values which 
+are to be allowed. An error is raised if min& is higher than 
+max&.
+<P>
+lg& must be a LOCAL or a GLOBAL variable. It specifies 
+the value to be shown initially. When you finish using the dialog, 
+the value you entered is returned in lg&.
+<P>
+<A NAME = "DO...UNTIL"><A HREF="psi-prog.htm"><H3><HR>DO...UNTIL</H3></A>
+<B>Usage:</B><DD><CODE>DO<BR>
+<DD> statement<BR>
+<DD> statement<BR>
+<DD> .<BR>
+<DD> .<BR>
+<DD> .<BR>
+<DD>UNTIL condition<BR>
+</CODE></DT><P>
+DO forces the set of statements which follow it to execute 
+repeatedly until the condition specified by UNTIL is 
+met.
+<P>
+This is the easiest way to repeat an operation a certain number of 
+times.
+<P>
+<UL><LI> Every DO must have its matching UNTIL to end </LI> 
+the loop.
+</UL>
+<UL><LI> If you set a condition which is never met, the program </LI> 
+will go round and round, locked in the loop forever. You can escape 
+by pressing Psion-Esc, provided you haven't set ESCAPE OFF. 
+If you have set ESCAPE OFF, you will have to return to the 
+System screen, move to the program name under the RunOpl icon, and 
+press Delete.
+</UL>
+<A NAME = "DOW"><A HREF="psi-prog.htm"><H3><HR>DOW</H3></A>
+<B>Usage:</B> <CODE>d%=DOW(day%,month%,year%)</CODE></DT><P>
+Returns the day of the week  from 1 (Monday) to 7 (Sunday)  
+given the date. 
+<P>
+day% must be between 1 and 31, month% from 1 to 12 and 
+year% from 1900 to 2155.
+<P>
+For example, D%=DOW(4,7,1992) returns 6, meaning Saturday.
+<P>
+<A NAME = "dPOSITION"><A HREF="psi-prog.htm"><H3><HR>dPOSITION</H3></A>
+<B>Usage:</B> <CODE>dPOSITION x%,y%</CODE></DT><P>
+Positions a dialog. Use dPOSITION at any time between dINIT 
+and DIALOG.
+<P>
+dPOSITION uses two integer values. The first specifies the 
+horizontal position, and the second, the vertical. dPOSITION -1,-1 
+positions to the top left of the screen; dPOSITION 1,1 to 
+the bottom right; dPOSITION 0,0 to the centre, the usual position 
+for dialogs.
+<P>
+dPOSITION 1,0, for example, positions to the right-hand edge 
+of the screen, and centres the dialog half way up the screen.
+<P>
+<A NAME = "DRAWSPRITE"><A HREF="psi-prog.htm"><H3><HR>DRAWSPRITE</H3></A>
+<B>Usage:</B> <CODE>DRAWSPRITE x%,y%</CODE></DT><P>
+Draws the current sprite in the current window with top-left at pixel 
+position x%,y%.
+<P>
+<A NAME = "dTEXT"><A HREF="psi-prog.htm"><H3><HR>dTEXT</H3></A>
+<B>Usage:</B> <CODE>dTEXT p$,body$,t%  or dTEXT p$,body$</CODE></DT><P>
+Defines a line of text to be displayed in a dialog.
+<P>
+p$ will be displayed on the left side of the line, and body$ 
+on the right side. If you only want to display a single string, use 
+a null string () for p$, and pass the desired string 
+in body$. It will then have the whole width of the dialog to 
+itself. An error is raised if body$ is a null string.
+<P>
+body$ is normally displayed left aligned (although usually in 
+the right column). You can override this by specifying t%:
+<PRE>
+t%	effect
+0	left align body$
+1	right align body$
+2	centre body$
+</PRE>
+In addition, you can add any or all of the following three values 
+to t%, for these effects:
+<PRE>
+t%	effect
+$100	use bold text for body$
+$200	draw a line below this
+	item
+$400	(allow this item to
+	be selected)
+</PRE>
+Only one line can be drawn across a dialog. It will be below the last 
+item which asks for it, whether the title from dINIT or a dTEXT 
+item.
+<P>
+See also dEDIT.
+<P>
+<A NAME = "dTIME"><A HREF="psi-prog.htm"><H3><HR>dTIME</H3></A>
+<B>Usage:</B> <CODE>dTIME var lg&,p$,t%,min&,max&</CODE></DT><P>
+Defines an edit box for a time, to go in a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+lg&, which must be a LOCAL or a GLOBAL variable, 
+specifies the time to be shown initially. Although it will appear 
+on the screen like a normal time, for example 18:27, lg& 
+must be specified as seconds after 00:00. A value of 60 means one 
+minute past midnight; 3600 means one o'clock, and so on.
+<P>
+min& and max& give the minimum and maximum values which 
+are to be allowed. Again, these are in seconds after 00:00. An error 
+is raised if min& is higher than max&. 
+<P>
+When you finish using the dialog, the time you entered is returned 
+in lg&, in seconds after 00:00.
+<P>
+t% specifies the type of display required, as follows:
+<P>
+t%	time display
+0	absolute time no seconds
+1	absolute time with seconds
+2	duration no seconds
+3	duration with seconds
+<P>
+For example, 03:45 represents an absolute time while 3 hours 
+45 minutes represents a duration.
+<P>
+Absolute times are displayed in 24-hour or am/pm format according 
+to the current system setting.
+<P>
+<A NAME = "dXINPUT"><A HREF="psi-prog.htm"><H3><HR>dXINPUT</H3></A>
+<B>Usage:</B> <CODE>dXINPUT var str$,p$</CODE></DT><P>
+Defines a secret string edit box, such as for a password, to go in 
+a dialog.
+<P>
+p$ will be displayed on the left side of the line.
+<P>
+str$ is the string variable to take the string you type. Important: 
+str$ must be at least eight characters long.
+<P>
+Initially the dialog does not show any characters for the string; 
+the initial contents of str$ are ignored. A special symbol will 
+be displayed for each character you type, to preserve the secrecy 
+of the string.
+<P>
+<A NAME = "EDIT"><A HREF="psi-prog.htm"><H3><HR>EDIT</H3></A>
+<B>Usage:</B> <CODE>EDIT a$</CODE></DT><P>
+Displays a string variable which you can edit directly on the screen. 
+All the usual editing keys are available  the arrow keys move 
+along the line, Esc clears the line, and so on.
+<P>
+When you have finished editing, press Enter to confirm the changes. 
+If you press Enter before you have made any changes, then the string 
+will be unaltered.
+<P>
+If you use EDIT in conjunction with a PRINT 
+statement, use a comma at the end of the PRINT statement, so 
+that the string to be edited appears on the same line as the displayed 
+string:
+<P>
+...
+PRINT Edit address:,
+EDIT A.address$
+UPDATE
+....
+<P>
+TRAP EDIT 
+If the Esc key is pressed while no text is on the input line, the 
+`Escape key pressed' error (number -114) will be returned by ERR  
+provided that the EDIT has been trapped. You can use this feature 
+to enable someone to press the Esc key to escape from inputting a 
+string.
+<P>
+See also INPUT, dEDIT.
+<P>
+ELSE(IF)/ENDA/ENDIF/ENDV/
+ENDWH
+<P>
+See IF/APP/VECTOR/WHILE
+<P>
+ENTERSEND
+<P>
+Usage:
+<P>
+ret%=ENTERSEND(pobj%,m%,var p1,...)
+<P>
+This is the same as SEND except that, if the method leaves, 
+the error code is returned to the caller. Otherwise the value returned 
+is as returned by the method.
+<P>
+<A NAME = "ENTERSEND0"><A HREF="psi-prog.htm"><H3><HR>ENTERSEND0</H3></A>
+<B>Usage:</B> <CODE>ret%=ENTERSEND0(pobj%,m%,var p1,...)</CODE></DT><P>
+This is the same as ENTERSEND except that, if the method does 
+not leave, zero is returned.
+<P>
+<A NAME = "EOF "><A HREF="psi-prog.htm"><H3><HR>EOF </H3></A>
+<B>Usage:</B> <CODE>e%=EOF</CODE></DT><P>
+Finds out whether you're at the end of a file yet. 
+<P>
+Returns -1 (true) if the end of the file has been reached, or 0 (false) 
+if it hasn't. 
+<P>
+When reading records from a file, you should test whether there are 
+still records left to read, otherwise you may get an error.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC eoftest:</B>
+OPEN myfile,A,a$,b%
+DO
+ PRINT A.a$
+ PRINT A.b%
+ NEXT
+ PAUSE -40
+UNTIL  EOF
+PRINT The last record
+GET
+RETURN
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "ERASE"><A HREF="psi-prog.htm"><H3><HR>ERASE</H3></A>
+<B>Usage:</B> <CODE>ERASE</CODE></DT><P>
+Erases the current record in the current file.
+<P>
+The next record is then current. If the erased record was the last 
+record in a file, then following this command the current record will 
+be null and EOF will return true.
+<P>
+<A NAME = "ERR"><A HREF="psi-prog.htm"><H3><HR>ERR</H3></A>
+<B>Usage:</B> <CODE>e%=ERR</CODE></DT><P>
+Returns the number of the last error which occurred, or 0 if there 
+has been no error.
+<P>
+Example:
+<PRE>
+..
+PRINT Enter age in years
+age::
+TRAP INPUT age%
+IF ERR=-1
+ PRINT Number please:
+ GOTO age
+ENDIF
+...
+</PRE>
+See also ERR$.
+<P>
+See the Error handling chapter for full details, including the list 
+of error numbers and messages.
+<P>
+<A NAME = "ERR$"><A HREF="psi-prog.htm"><H3><HR>ERR$</H3></A>
+<B>Usage:</B> <CODE>e$=ERR$(x%)</CODE></DT><P>
+Returns the error message for the specified error code x%. 
+<P>
+ERR$(ERR) gives the message for the last error which occurred. 
+Example:
+<PRE>
+TRAP OPEN B:\FILE,A,field1$
+IF ERR
+ PRINT ERR$(ERR)
+ RETURN
+ENDIF
+</PRE>
+See also ERR.
+<P>
+See the Error handling chapter for full details, including the list 
+of error numbers and messages.
+<P>
+<A NAME = "ESCAPE OFF"><A HREF="psi-prog.htm"><H3><HR>ESCAPE OFF</H3></A>
+<B>Usage:</B> <CODE>ESCAPE OFF...ESCAPE ON</CODE></DT><P>
+ESCAPE OFF stops Psion-Esc being used to break out of the 
+program when it is running. ESCAPE ON enables this feature again.
+<P>
+ESCAPE OFF takes effect only in the procedure in which it occurs, 
+and in any sub-procedures that are called. Psion-Esc is always enabled 
+when a program begins running.
+<P>
+If your program enters a loop which has no logical exit, and ESCAPE 
+OFF has been used, you will have to return to the System screen, 
+move to the program name under the RunOpl icon, and press the Delete 
+key.
+<P>
+<A NAME = "EVAL"><A HREF="psi-prog.htm"><H3><HR>EVAL</H3></A>
+<B>Usage:</B> <CODE>d=EVAL(s$)</CODE></DT><P>
+Evaluates the mathematical string expression s$ and returns 
+the floating-point result. s$ may include any mathematical function 
+or operator (eg. sin(x)/(2**3)). Note that floating-point arithmetic 
+is always performed.
+<P>
+For example:
+<PRE>
+DO 
+AT 10,5 :PRINT Calc:,
+TRAP INPUT n$
+IF n$= :CONTINUE :ENDIF
+IF ERR=-114 :BREAK :ENDIF
+CLS :AT 10,4
+PRINT n$;=;EVAL(n$)
+UNTIL 0
+</PRE>
+See also VAL.
+<P>
+<A NAME = "EXIST"><A HREF="psi-prog.htm"><H3><HR>EXIST</H3></A>
+<B>Usage:</B> <CODE>e%=EXIST(filename$) </CODE></DT><P>
+Checks to see that a file exists.
+<P>
+Returns -1 (`True') if the file exists and 0 (`False') if it doesn't.
+<P>
+Use this function when creating a file to check that 
+a file of the same name does not already exist, or when opening a 
+file to check that it has already been created:
+<PRE>
+IF NOT EXIST(CLIENTS)
+ CREATE CLIENTS,A,names$
+ELSE
+ OPEN CLIENTS,A,names$
+ENDIF
+...
+</PRE>
+<A NAME = "EXP"><A HREF="psi-prog.htm"><H3><HR>EXP</H3></A>
+<B>Usage:</B> <CODE>e=EXP(x)</CODE></DT><P>
+Returns ex  that is, the value of the arithmetic 
+constant e (2.71828...) raised to the power of x. 
+<P>
+<A NAME = "EXT"><A HREF="psi-prog.htm"><H3><HR>EXT</H3></A>
+<B>Usage:</B> <CODE>EXT name$</CODE></DT><P>
+Gives the file extension of files used by an OPA.
+<P>
+This can only be used between APP and ENDA.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+<A NAME = "FIND"><A HREF="psi-prog.htm"><H3><HR>FIND</H3></A>
+<B>Usage:</B> <CODE>f%=FIND(a$)</CODE></DT><P>
+Searches the current data file for fields matching a$. The search 
+starts from the current record, so use NEXT to progress to 
+subsequent records. FIND makes the next record containing a$ 
+the current record and returns the number of the record found. Capitals 
+and lower-case letters match.
+<PRE>
+You can use wildcards:
+? 	matches any single character
+* 	matches any group of characters.
+</PRE>
+To find a record with a field containing  Dr and either BROWN or BRAUN,
+use: F%=FIND(*DR*BR??N*)
+<P>
+FIND(BROWN) will find only those records with a field consisting 
+solely of the string BROWN.
+<P>
+You can only search string fields.
+<P>
+See also FINDFIELD.
+<P>
+<A NAME = "FINDFIELD"><A HREF="psi-prog.htm"><H3><HR>FINDFIELD</H3></A>
+<B>Usage:</B> <CODE>f%=FINDFIELD(a$,start%,no%,flags%)</CODE></DT><P>
+FINDFIELD, like FIND, finds a string, makes the record 
+with this string the current record, and returns the number of this 
+record.
+<P>
+You may experience some problems in using FINDFIELD with some 
+versions of OPL. To ensure that problems are avoided use the line:
+<P>
+POKEB(peekw($1c)+7),0
+<P>
+immediately before each call to FINDFIELD.
+<P>
+a$ is the string to look for, as for FIND. start% 
+is the number of the field to start looking in (1 for the first field), 
+and no% is the number of fields to search in (starting from 
+the field specified by the start%). If you want to search in 
+all fields, use start%=1 and for no% use the number of 
+fields you used in the OPEN/CREATE command.
+<P>
+flags% adds together two values:
+<P>
+<UL><LI> 0 for a case independent match, where capitals and </LI> 
+lower-case letters match, or 1 for a case dependent match. This 
+value should be multiplied by 16 (Hex $00 or $10).
+</UL>
+<UL><LI> 0 to search backwards from the current record, 1 to search </LI> 
+forwards from the current record, 2 to search backwards from the end 
+of the file, or 3 to search forwards from the start of the file.
+</UL>
+<A NAME = "FINDLIB"><A HREF="psi-prog.htm"><H3><HR>FINDLIB</H3></A>
+<B>Usage:</B> <CODE>ret%=FINDLIB(var cat%, name$)</CODE></DT><P>
+Find DYL category name$ (including .DYL extension) in 
+the ROM. On success returns zero and writes the category handle to 
+cat%.
+<P>
+FIRST
+<P>
+Usage:
+<P>
+FIRST
+<P>
+Positions to the first record in the current data file.
+<P>
+<A NAME = "FIX$"><A HREF="psi-prog.htm"><H3><HR>FIX$</H3></A>
+<B>Usage:</B> <CODE>f$=FIX$(x,y%,z%)</CODE></DT><P>
+Returns a string representation of the number x, to y% 
+decimal places. The string will be up to z% characters long.
+<P>
+Example: FIX$(123.456,2,7) returns 123.46.
+<P>
+<UL><LI> If z% is negative then the string is right-justified  </LI> 
+for example FIX$(1,2,-6) returns
+   1.00 where there are two spaces to the left of the 1.
+</UL>
+<UL><LI> If z% is positive then no spaces are added  </LI> 
+for example FIX$(1,2,6) returns 1.00.
+</UL>
+<UL><LI> If the number x will not fit in the width specified </LI> 
+by z%, then the string will just be asterisks, for example FIX$(256.99,2,4) 
+returns ****.
+</UL>
+See also GEN$, NUM$, SCI$.
+<P>
+<A NAME = "FLT"><A HREF="psi-prog.htm"><H3><HR>FLT</H3></A>
+<B>Usage:</B> <CODE>f=FLT(x&)</CODE></DT><P>
+Converts an integer expression (either integer or long integer) into 
+a floating-point number. Example:
+<P>
+<UL><PRE>
+<B>PROC gamma:(v)</B>
+ LOCAL c
+ c=3E8
+ RETURN 1/SQR(1-(v*v)/(c*c))
+<B>ENDP</B>
+</PRE></UL>
+<P>
+You could call this procedure like this: gamma:(FLT(a%)) if 
+you wanted to pass it the value of an integer variable without having 
+first to assign the integer value to a floating-point variable.
+<P>
+See also INT and INTF.
+<P>
+<A NAME = "FONT"><A HREF="psi-prog.htm"><H3><HR>FONT</H3></A>
+<B>Usage:</B> <CODE>FONT id%,style%</CODE></DT><P>
+Sets the text window font and style.
+<P>
+See `The text and graphics windows' at the end of the `Graphics' chapter 
+for more details.
+<P>
+<A NAME = "FREEALLOC"><A HREF="psi-prog.htm"><H3><HR>FREEALLOC</H3></A>
+<B>Usage:</B> <CODE>FREEALLOC pcell%</CODE></DT><P>
+Frees a previously allocated cell at pcell%.
+<P>
+<A NAME = "gAT"><A HREF="psi-prog.htm"><H3><HR>gAT</H3></A>
+<B>Usage:</B> <CODE>gAT x%,y%</CODE></DT><P>
+Sets the current position using absolute co-ordinates. gAT 0,0 
+moves to the top left of the current drawable.
+<P>
+See also gMOVE.
+<P>
+<A NAME = "gBORDER"><A HREF="psi-prog.htm"><H3><HR>gBORDER</H3></A>
+<B>Usage:</B><DD><CODE>gBORDER flags%,width%,height%<BR>
+<DD>gBORDER flags%<BR>
+</CODE></DT><P>
+Draws a one-pixel wide border around the edge of the current drawable. 
+If width% and height% are supplied, a border shape of 
+this size is drawn with the top left corner at the current position. 
+If they are not supplied, the border is drawn around the whole of 
+the current drawable.
+<P>
+flags% controls three attributes of the border  a shadow 
+to the right and beneath, a one-pixel gap all around, and the type 
+of corners used:
+<PRE>
+flags%		effect
+1		single pixel shadow
+2		gap for single pixel 
+		shadow
+3		double pixel shadow
+4		gap for double pixel 
+		shadow
+$100		one-pixel gap all round
+$200		more rounded corners
+</PRE>
+You can combine the values to control the three different effects. 
+(1, 2, 3 and 4 are mutually exclusive  
+you cannot use more than one of them.) For example, for rounded corners 
+and a gap for a double pixel shadow, use flags%=$204.
+<P>
+Set flags%=0 for no shadow, no gap, and sharper corners.
+<P>
+For example, to de-emphasise a previously emphasised 
+border, use gBORDER with the shadow turned off:
+<P>
+gBORDER 3 REM show border
+<P>
+GET
+<P>
+gBORDER 4 REM border off
+<P>
+...
+<P>
+See also gXBORDER.
+<P>
+<A NAME = "gBOX"><A HREF="psi-prog.htm"><H3><HR>gBOX</H3></A>
+<B>Usage:</B> <CODE>gBOX width%,height%</CODE></DT><P>
+Draws a box from the current position, width% to the right and 
+height% down. The current position is unaffected.
+<P>
+<A NAME = "gBUTTON"><A HREF="psi-prog.htm"><H3><HR>gBUTTON</H3></A>
+<B>Usage:</B> <CODE>gBUTTON text$,type%,w%,h%,st%</CODE></DT><P>
+Draws a 3-D black and grey button (a key, not an application button) 
+at the current position in a rectangle of the supplied width w% 
+and height h%, which fully encloses the button in all its states. 
+text$ specifies up to 64 characters to be drawn in the button 
+in the current font and style. You must ensure that the text will 
+fit in the button.
+<P>
+type%=0 it draws a Series 3 style button; type%=1 draws 
+a Series 3a button.
+<P>
+The meaning of state% varies according to type%:
+<P>
+<UL><LI> For type%=0, state%=0 for a raised button and </LI> 
+state%=1 for a depressed (flat) button.
+</UL>
+<UL><LI> For type%=1, state%=0 for a raised button, state%=1 </LI> 
+for a semi-depressed (flat) button and state%=2 for a fully-depressed 
+(sunken) button. An error is raised if the current window has no grey 
+plane.
+</UL>
+<A NAME = "gCLOCK"><A HREF="psi-prog.htm"><H3><HR>gCLOCK</H3></A>
+<B>Usage - one of:</B><DD><CODE>gCLOCK ON/OFF<BR>
+<DD>gCLOCK ON,mode%<BR>
+<DD>gCLOCK ON,mode%,offset%<BR>
+<DD>gCLOCK ON,mode%,offset%,format$<BR>
+<DD>gCLOCK ON,mode%,offset%,format$,font%<BR>
+<DD>gCLOCK ON,mode%,offset%,format$,font%,style%<BR>
+</CODE></DT><P>
+Displays or removes a clock showing the system time. The current position 
+in the current window is used. Only one clock may be displayed in 
+each window.
+<P>
+mode% controls the type of clock. Modes 1 to 5 are provided 
+for Series 3 compatibility, and produce Series 3 clocks: small 
+(digital), medium (system setting), medium (analog), medium (digital), 
+and large (analog) respectively. Other values are:
+<PRE>
+6  black and grey medium, system setting
+7  black and grey medium, analog
+8  second type medium, digital
+9  black and grey extra large 
+10 formatted digital (described below)
+</PRE>
+<P>
+You can OR the value with any of these:
+<P>
+$10 shows the date in all except the extra large and formatted clocks
+<P>
+$20 shows seconds in small digital, large analog, black and grey
+ medium analog and extra large clocks
+<P>
+$40 shows am/pm in small digital and black medium clocks only.
+  
+$80 specifies that a clock is to be drawn in the grey plane 
+(only for clocks that do not contain both black and grey: ie. all 
+except the black and grey, medium, analog clock and the extra large 
+clock).
+<P>
+format$, font% and style% are used only for formatted 
+digital clocks as described below.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Do not use gSCROLL to scroll the region containing  
+a clock. When the time is updated, the old position would be used. 
+The whole window may, however, be moved using gSETWIN.
+</DL>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> It is possible to draw clocks that include grey in windows  
+that have no grey plane.
+</DL>
+Digital clocks display in 24-hour or 12-hour mode according to the 
+system-wide setting in Time. The `am/pm' flag ($40) can be used 
+with digital clocks in 12-hour mode, and with medium analog clocks.
+<P>
+offset% specifies an offset in minutes from the system time 
+to the time displayed. This allows you to display a clock showing 
+a time other than the system time.
+<P>
+If these arguments are not supplied, mode% is taken as 1, and 
+offset% as 0.
+<P>
+<B>For the formatted digital clock</B> (mode%=10), you may optionally 
+specify font% and style% with values as for gFONT 
+and gSTYLE. The default font for gCLOCK is the system 
+font (value $9a). The default style is normal (0).
+<P>
+<B>For the formatted digital clock</B>, a format string (up 
+to 255 characters long) specifies how the clock is to be displayed. 
+The format string contains a number of format specifiers in 
+the form of a % followed by a letter. (Upper or lower case may 
+be used.) For example, %H means hours and %T means minutes; 
+gCLOCK ON,10,0,h:%H, m:%T, at 11:05 pm, displays a running 
+clock as h:23, m:05.
+<P>
+To make each item as abbreviated as possible, you can use a * 
+after the %. For example, %*T at 11:05 pm abbreviates 
+`05' to `5'. In the following list of specifiers, those which produce 
+numbers will do so without any leading zero, if you use %* instead 
+of %. Other abbreviations are marked, appropriately, by Abbrev:
+<P>
+<P>
+ %% =a % character
+<P>
+ %:, %/ =time and date separators, as set in the Time 
+application
+<P>
+ %A =`am' or `pm' text (Abbrev: 1st letter)
+<P>
+ %D,%W,%M =day/week/month number as two digits, 01-31, 01-53 and 01-12
+<P>
+ %E,%N =day/month name (Abbrev: shorter form, eg 1st 3 characters in English)
+<P>
+ %H,%I =hour in 24-hour or 12-hour format, 00-23 and 01-12
+<P>
+ %S,%T =seconds/minutes, 00-59
+<P>
+ %X =suffix string for day number, eg st in `1st', nd in `2nd'
+<P>
+ %Y =year as a four digit number (Abbrev: discards the century)
+<P>
+ %1,%2,%3 =day,month,year as ordered in the Time 
+ application. Eg Europe is Day/month/year, so %1=%D, %2=%M, 
+%3=%Y. So to display a date in correct format use %1/%2/%3. (Abbrev: see %G/%P/%U.)
+<P>
+ %4,%5 =day,month as ordered in the Time application.
+<P>
+ %F,%O =toggles days/months (displayed by %1, %2 and %3) between 
+ numeric and name formats. On 9th March 1993, with European date type, %1%F%1%F%1 gives 09Tuesday09
+<P>
+ %G,%P, %U =toggles %1, %2 and %3 between long form and abbreviation.
+ On 9th March 1993, with European date type, %F%1%G%1%G%1 gives  
+ TuesdayTueTuesday
+<P>
+ %L =toggles the suffix on the day number for %1/%2/%3 (in numeric form only). 
+On 9th March 1993, with European date type, %G%1%L%1%L%1 gives 99th9
+<P>
+ %6,%7 =hour and am/pm text according to the format 
+selected in the Time application. With am-pm format, %6=%I and 
+%7=%A. With 24-hour format, %6=%H and %7 gives no 
+`am/pm' characters.
+<P>
+So the format string %1%/%2%/%3 automatically generates a 
+clock with day, month and year in the order as selected in the Time 
+application. %4%/%5 gives a clock with just day and month 
+in selected order. Similarly, %6%:%T%:%S%7 gives a clock with 
+hour, minute and second automatically conforming to the system configuration.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Note that for those specifiers that toggle between two different  
+options (eg. %F), the state of toggle is remembered only within 
+one format string and not from one string to the next  ie the 
+toggle state is restored to the default setting when displaying a 
+new clock.
+</DL>
+As a final example, assuming that the settings in the Time application 
+are for `Day/month/year' date format, `am-pm' time format and `:' 
+time separator and that the time is  11:30:05 pm on 9th March 1993,
+ 
+%G%L%P%O%*E, %1 %2 %3 %6%:%T:%S% 
+<P>
+generates Tue, 9th Mar 1993 11:30:05pm. With the same setup 
+except for `Month/day/year' date format in `24-hour' mode, the same 
+string generates Tue, Mar 9th 1993 23:30:05.
+<P>
+<A NAME = "gCLOSE"><A HREF="psi-prog.htm"><H3><HR>gCLOSE</H3></A>
+<B>Usage:</B> <CODE>gCLOSE id%</CODE></DT><P>
+Closes the specified drawable that was previously opened by gCREATE, 
+gCREATEBIT or gLOADBIT.
+<P>
+If the drawable closed was the current drawable, the default window 
+(ID=1) becomes current.
+<P>
+An error is raised if you try to close the default window.
+<P>
+<A NAME = "gCLS"><A HREF="psi-prog.htm"><H3><HR>gCLS</H3></A>
+<B>Usage:</B> <CODE>gCLS</CODE></DT><P>
+Clears the whole of the current drawable and sets the current position 
+to 0,0, its top left corner.
+<P>
+<A NAME = "gCOPY"><A HREF="psi-prog.htm"><H3><HR>gCOPY</H3></A>
+<B>Usage:</B> <CODE>gCOPY id%,x%,y%,w%,h%,mode%</CODE></DT><P>
+Copies a rectangle of the specified size (width w%, height h%) 
+from the point x%,y% in drawable id%, to the current 
+position in the current drawable.
+<P>
+As this command can copy both set and clear pixels, the same modes 
+are available as when displaying text. Set mode% = 0 for set, 
+1 for clear, 2 for invert or 3 for replace. 0, 1 and 2 act only on 
+set pixels in the pattern; 3 copies the entire rectangle, with set 
+and clear pixels.
+<P>
+The current position is not affected in either window.
+<P>
+gCOPY is affected by the setting of gGREY (in the current 
+window) as follows: with gGREY 0 it copies black to black; 
+with gGREY 1 it copies grey to grey, or black to grey if source 
+is black only; with gGREY 2 it copies grey to grey and black 
+to black, or black to both if source is black only.
+<P>
+<A NAME = "gCREATE"><A HREF="psi-prog.htm"><H3><HR>gCREATE</H3></A>
+<B>Usage:</B><DD><CODE>id%=gCREATE(x%,y%,w%,h%,v%)<BR>
+<DD>id%=gCREATE(x%,y%,w%,h%,v%,grey%)<BR>
+</CODE></DT><P>
+Creates a window with specified position and size (width w%, 
+height h%), and makes it both current and foreground. Sets the 
+current position to 0,0, its top left corner. If v% is 1, the 
+window will immediately be visible; if 0, it will be invisible.
+<P>
+If grey% is not given or is 0, the window will not have a grey 
+plane. If grey% is 1, it will have one.
+<P>
+Returns id% (2 to 8) which identifies this window for other 
+keywords.
+<P>
+See also gCLOSE, gGREY, DEFAULTWIN.
+<P>
+<A NAME = "gCREATEBIT"><A HREF="psi-prog.htm"><H3><HR>gCREATEBIT</H3></A>
+<B>Usage:</B> <CODE>id%=gCREATEBIT(w%,h%)</CODE></DT><P>
+Creates a bitmap with the specified width and height, and makes it 
+the current drawable. Sets the current position to 0,0, its top left 
+corner.
+<P>
+Returns id% (2 to 8) which identifies this bitmap for other 
+keywords.
+<P>
+See also gCLOSE.
+<P>
+<A NAME = "gDRAWOBJECT"><A HREF="psi-prog.htm"><H3><HR>gDRAWOBJECT</H3></A>
+<B>Usage:</B> <CODE>gDRAWOBJECT type%,flags%,w%,h%</CODE></DT><P>
+Draws the scaleable graphics object specified by type%, scaled 
+to fit in the rectangle with top left at the current graphics cursor 
+position and with the specified width w% and height h%.
+<P>
+The Series 3a has only one object type (set type%=0)  
+a `lozenge'. This is a 3-D rounded box lit from the top left, with 
+a shadow at bottom right and a grey body. (For an example, see the 
+text 'City' in the top left of the World application.)
+<P>
+For type%=0, flags% specifies the corner roundness:
+0 for normal roundness
+1 for more rounded
+2 for a single pixel removed from each corner.
+<P>
+An error is raised if the current window has no grey plane.
+<P>
+<A NAME = "GEN$"><A HREF="psi-prog.htm"><H3><HR>GEN$</H3></A>
+<B>Usage:</B> <CODE>g$=gen$(x,y%)</CODE></DT><P>
+Returns a string representation of the number x. The string 
+will be up to y% characters long.
+<P>
+Example GEN$(123.456,7) returns 123.456 and GEN$(243,5) 
+returns 243
+<P>
+<UL><LI> If y% is negative then the string is right-justified  </LI> 
+for example GEN$(1,-6) returns 1 where there are five spaces
+ to the left of the 1.
+</UL>
+<UL><LI> If y% is positive then no spaces are added for example GEN$(1,6) returns 1.</LI> 
+</UL>
+<UL><LI> If the number x will not fit in the width specified </LI> 
+by y%, then the string will just be asterisks, for example GEN$(256.99,4) 
+returns ****.
+</UL>
+See also FIX$, NUM$, SCI$.
+<P>
+<A NAME = "GET"><A HREF="psi-prog.htm"><H3><HR>GET</H3></A>
+<B>Usage:</B> <CODE>g%=GET</CODE></DT><P>
+Waits for a key to be pressed and returns the character code for that 
+key. 
+<P>
+For example, if the `A' key is pressed with Caps Lock off, the integer 
+returned is 97 (a), or 65 (A) if `A' was pressed with 
+the Shift key down. 
+<P>
+The character codes of special keys, such as `Pg Dn', are given 
+in an appendix at the back of this manual.
+<P>
+You can use KMOD to check whether modifier keys (Shift, 
+Control, Psion and Caps Lock) were used.
+<P>
+See the User Guide for the full character set.
+<P>
+See also KEY.
+<P>
+<A NAME = "GET$"><A HREF="psi-prog.htm"><H3><HR>GET$</H3></A>
+<B>Usage:</B> <CODE>g$=GET$</CODE></DT><P>
+Waits until a key is pressed and then returns which key was pressed, 
+as a string. 
+<P>
+For example, if the `A' key is pressed in lower case mode, the string 
+returned is a.
+<P>
+You can use KMOD to check whether any modifier keys 
+(Shift, Control, Psion and Caps Lock) were used.
+<P>
+See also KEY$.
+<P>
+<A NAME = "GETCMD$"><A HREF="psi-prog.htm"><H3><HR>GETCMD$</H3></A>
+<B>Usage:</B> <CODE>w$=GETCMD$</CODE></DT><P>
+Returns new command-line arguments to an OPA, after a change 
+files or quit event has occurred. The first character of the returned 
+string is C, O or X. If it is C or 
+O, the rest of the string is a filename.
+<P>
+The first character has the following meaning:
+<P>
+C  close down the current file, and create the specified 
+new file.
+<P>
+O  close down the current file, and open the specified 
+existing file.
+<P>
+X  close down the current file (if any) and quit the 
+OPA.
+<P>
+You can only call GETCMD$ once for each system message.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+See also CMD$.
+<P>
+<A NAME = "GETEVENT"><A HREF="psi-prog.htm"><H3><HR>GETEVENT</H3></A>
+<B>Usage:</B> <CODE>*** GETEVENT var a%()</CODE></DT><P>
+Waits for an event to occur. Returns with a%() specifying the 
+event. The data returned in a%() depends on the type of event 
+that occurred. If the event is a key-press, (a%(1) AND $400) 
+is guaranteed to be zero. For other events (a%(1) AND $400) 
+is guaranteed to be non-zero.
+<P>
+If a key has been pressed:
+<P>
+  a%(1)= keycode (as for GET)
+<P>
+  a%(2) AND $00ff= modifier (as for KMOD)
+<P>
+  a%(2)/256= auto-repeat count (ignored by GET)
+<P>
+If a program has moved to foreground: a%(1)= $401
+<P>
+If a program has moved to background: a%(1)= $402
+<P>
+If the machine has switched on:a%(1)= $403
+<P>
+If the Series 3a wants an OPA to change files or exit:a%(1)= $404
+<P>
+If the date changes:a%(1)= $405
+<P>
+Note: events are ignored while you are using keywords which 
+wait for keypresses  GET, GET$, EDIT, 
+INPUT, MENU and DIALOG. If you need to use these 
+keywords in OPAs, use LOCK ON / LOCK OFF around them.
+<P>
+If you do use GETEVENT you should allow for other events to 
+be specified in the future.
+<P>
+For a key-press event, the modifier is returned in a%(2) and 
+is not returned by KMOD.
+<P>
+Note: If a non-key event such as `foreground' occurs while a keyboard 
+keyword such as GET, INPUT, MENU or DIALOG 
+is being used, the event is discarded. So GETEVENT must be 
+used if non-key events are to be monitored. (OPAs can still handle 
+the $404 event correctly  see the LOCK command for more 
+details.)
+<P>
+The array (or string of integers) must be at least 6 integers 
+long.
+<P>
+See also TESTEVENT, GETCMD$.
+<P>
+<A NAME = "GETLIBH"><A HREF="psi-prog.htm"><H3><HR>GETLIBH</H3></A>
+<B>Usage:</B> <CODE>cat%=GETLIBH(num%)</CODE></DT><P>
+Convert a category number num% to a handle. If num% is 
+zero, gets the handle for OPL.DYL.
+<P>
+<A NAME = "gFILL"><A HREF="psi-prog.htm"><H3><HR>gFILL</H3></A>
+<B>Usage:</B> <CODE>gFILL width%,height%,gMode%</CODE></DT><P>
+Fills a rectangle of the specified size from the current position, 
+according to the graphics mode specified.
+<P>
+The current position is unaffected.
+<P>
+<A NAME = "gFONT"><A HREF="psi-prog.htm"><H3><HR>gFONT</H3></A>
+<B>Usage:</B> <CODE>gFONT fontId%</CODE></DT><P>
+Sets the font for current drawable to fontId%. The font may 
+be one of the predefined fonts in the ROM or a user-defined font. 
+See the `Graphics' chapter for more details of fonts.
+<P>
+User-defined fonts must first be loaded by gLOADFONT, which 
+returns the fontId% needed for gFONT.
+<P>
+See also gLOADFONT, FONT.
+<P>
+<A NAME = "gGMODE"><A HREF="psi-prog.htm"><H3><HR>gGMODE</H3></A>
+<B>Usage:</B> <CODE>gGMODE mode%</CODE></DT><P>
+Sets the effect of all subsequent drawing commands  gLINEBY, 
+gBOX etc.  on the current drawable.
+<PRE>
+mode%		Pixels will be:
+0		set
+1		cleared
+2		inverted
+</PRE>
+When you first use drawing commands on a drawable, they set pixels 
+in the drawable. Use gGMODE to change this. For example, if 
+you have drawn a black background, you can draw a white box outline 
+inside it with either gGMODE 1 or gGMODE 2, followed 
+by gBOX.
+<P>
+<A NAME = "gGREY"><A HREF="psi-prog.htm"><H3><HR>gGREY</H3></A>
+<B>Usage:</B> <CODE>gGREY mode%</CODE></DT><P>
+Controls whether all subsequent graphics drawing and graphics text 
+in the current window draw to the grey plane, the black plane 
+or to both.
+<P>
+mode%=0 for black plane only (default)
+<P>
+mode%=1 for grey plane only
+<P>
+mode%=2 for both planes
+<P>
+It is helpful to think of the black plane being in front of the grey 
+plane, so a pixel set in both planes will appear black. See the `Graphics' 
+chapter for details.
+<P>
+To enable the use of grey in the default window (ID=1) use DEFAULTWIN 1 
+at the start of your program. If grey is required in other windows 
+you must create the windows with a grey plane using gCREATE.
+<P>
+gGREY cannot be used with bitmaps which have only one plane.
+<P>
+See also DEFAULTWIN and gCREATE.
+<P>
+<A NAME = "gHEIGHT"><A HREF="psi-prog.htm"><H3><HR>gHEIGHT</H3></A>
+<B>Usage:</B> <CODE>height% = gHEIGHT</CODE></DT><P>
+Returns the height of the current drawable.
+<P>
+<A NAME = "gIDENTITY"><A HREF="psi-prog.htm"><H3><HR>gIDENTITY</H3></A>
+<B>Usage:</B> <CODE>id%=gIDENTITY</CODE></DT><P>
+Returns the ID of the current drawable.
+<P>
+The default window has ID=1.
+<P>
+<A NAME = "gINFO"><A HREF="psi-prog.htm"><H3><HR>gINFO</H3></A>
+<B>Usage:</B> <CODE>gINFO var i%()</CODE></DT><P>
+Gets general information about the current drawable and about the 
+graphics cursor (whichever window it is in). The information is returned 
+in the array i%() which must be at least 32 integers long.
+<P>
+The information is about the drawable in its current state, so eg 
+the font information is for the current font in the current style.
+<P>
+The following information is returned:
+<PRE>
+i%(1)		lowest character code
+i%(2)		highest character code
+i%(3)		height of font
+i%(4)		descent of font
+i%(5)		ascent of font
+i%(6)		width of '0' character
+i%(7)		maximum character width
+i%(8)		flags for font (see below)
+i%(9-17)	name of font
+i%(18)		current graphics mode(gGMODE)
+i%(19)		current text mode (gTMODE)
+i%(20)		current style (gSTYLE)
+i%(21)		cursor state (ON=1,OFF=0)
+i%(22)		ID of window containingcursor (-1 for text cursor)
+i%(23)		cursor width
+i%(24)		cursor height
+i%(25)		cursor ascent
+i%(26)		cursor x position in window
+i%(27)		cursor y position in window
+i%(28)		1 if drawable is a bitmap
+i%(29)		cursor effects
+i%(30)		gGREY setting
+i%(31)		reserved (window server ID of drawable)
+i%(32)		reserved
+<P>
+i%(8) specifies a combination of the following font characteristics:
+<P>
+Value:	Meaning:
+1	font uses standard ASCII characters (32-126)
+2	font uses Code Page 850 characters (128-255)
+4	font is bold
+8	font is italic
+16	font is serifed
+32	font is monospaced
+$8000	font is stored expanded for quick drawing
+</PRE>
+(See HEX$ for an explanation of hexadecimal numbers.)
+<P>
+Use PEEK$(ADDR(i%(9))) to read the name of the font as a string.
+<P>
+If the cursor is on (i%(21)=1), it is visible in the window 
+identified by i%(22).
+<P>
+i%(29) has bit 0 set (i%(29) AND 1) if the cursor 
+is obloid, bit 1 set (i%(29) AND 2) if not flashing, and 
+bit 2 set (i%(29) AND 4) if grey.
+<P>
+If the cursor is off (i%(21)=0), or is a text cursor (i%(22)=-1), 
+i%(23) to i%(27) and i%(29) should be ignored.
+<P>
+<A NAME = "gINVERT"><A HREF="psi-prog.htm"><H3><HR>gINVERT</H3></A>
+<B>Usage:</B> <CODE>gINVERT width%,height%</CODE></DT><P>
+Inverts the rectangle width% to the right and height% 
+down from the cursor position, except for the four corner pixels.
+<P>
+<A NAME = "GIPRINT"><A HREF="psi-prog.htm"><H3><HR>GIPRINT</H3></A>
+<B>Usage:</B> <CODE>GIPRINT str$,c% or GIPRINT str$</CODE></DT><P>
+GIPRINT displays an information message for about two seconds, 
+in the bottom right corner of the screen. For example, GIPRINT Not Found 
+displays Not Found. The string you specify can be up to 64 
+characters. If a string is too long for the screen, it will be clipped.
+<P>
+If c% is given, it controls the corner in which the message 
+appears:
+<PRE>
+c%	corner
+0	top left
+1	bottom left
+2	top right
+3	bottom right (default)
+</PRE>
+<P>
+Only one message can be shown at a time. You can make the message 
+go away  for example, if a key has been pressed  with GIPRINT .
+<P>
+<A NAME = "gLINEBY"><A HREF="psi-prog.htm"><H3><HR>gLINEBY</H3></A>
+<B>Usage:</B> <CODE>gLINEBY dx%,dy%</CODE></DT><P>
+Draws a line from the current position to a point dx% to the 
+right and dy% down. Negative dx% and dy% mean left 
+and up respectively.
+<P>
+For horizontal lines, the line includes the pixel with the lower x 
+coordinate and excludes the pixel with the higher x coordinate. Similarly 
+for vertical lines, the line includes the pixel with the lower y coordinate 
+and excludes the pixel with the higher y coordinate. For oblique lines 
+(where the x and y coordinates change), the line is drawn minus one 
+or both end points.
+<P>
+The current position moves to the end of the line drawn.
+<P>
+gLINEBY 0,0 sets the pixel at the current position.
+<P>
+See also gLINETO, gPOLY.
+<P>
+<A NAME = "gLINETO"><A HREF="psi-prog.htm"><H3><HR>gLINETO</H3></A>
+<B>Usage:</B> <CODE>gLINETO x%,y%</CODE></DT><P>
+Draws a line from the current position to the point x%,y%. The 
+current position moves to x%,y%.
+<P>
+For horizontal lines, the line includes the pixel with the lower x 
+coordinate and excludes the pixel with the higher x coordinate. Similarly 
+for vertical lines, the line includes the pixel with the lower y coordinate 
+and excludes the pixel with the higher y coordinate. For oblique lines 
+(where the x and y coordinates change), the line is drawn minus one 
+or both end points.
+<P>
+To plot a single point, use gLINETO to the current position 
+(or gLINEBY 0,0).
+<P>
+See also gLINEBY, gPOLY.
+<P>
+<A NAME = "gLOADBIT"><A HREF="psi-prog.htm"><H3><HR>gLOADBIT</H3></A>
+<B>Usage - one of:</B><DD><CODE>id%=gLOADBIT(name$,write%,i%)<BR>
+<DD>id%=gLOADBIT(name$,write%)<BR>
+<DD>id%=gLOADBIT(name$)<BR>
+</CODE></DT><P>
+Loads a bitmap from the named bitmap file and makes it the current 
+drawable. Sets the current position to 0,0, its top left corner. If 
+name$ has no file extension .PIC is used. The bitmap is 
+kept as a local copy in memory.
+<P>
+Returns id% (2 to 8) which identifies this bitmap for other 
+keywords.
+<P>
+write%=0 sets read-only access. Attempts to write to the bitmap 
+in memory will be ignored, but the bitmap can be used by other programs 
+without using more memory. write%=1 allows you to write to and 
+re-save the bitmap. This is the default case.
+<P>
+For bitmap files which contain more than one bitmap, i% specifies 
+which one to load. For the first bitmap, use i%=0. This is also 
+the default value. Bitmap files saved with gSAVEBIT have only one 
+bitmap, and this argument is not needed for them.
+<P>
+See also gCLOSE.
+<P>
+<A NAME = "gLOADFONT"><A HREF="psi-prog.htm"><H3><HR>gLOADFONT</H3></A>
+<B>Usage:</B> <CODE>fontId%=gLOADFONT(name$)</CODE></DT><P>
+Loads the user-defined font name$. It returns a font ID; 
+use this with gFONT to make the current drawable use this font. 
+If name$ does not contain a file extension, .FON is used. 
+<P>
+<P>
+gFONT itself is very efficient, so you should normally load 
+all required fonts at the start of a program.
+<P>
+Note that the built-in Series 3/Series 3a fonts are automatically 
+available, and do not need loading.
+<P>
+See also gUNLOADFONT.
+<P>
+<A NAME = "GLOBAL"><A HREF="psi-prog.htm"><H3><HR>GLOBAL</H3></A>
+<B>Usage:</B> <CODE>GLOBAL variables</CODE></DT><P>
+Declares variables to be used in the current procedure (as does the 
+LOCAL command) and (unlike LOCAL) in any procedures 
+called by the current procedure, or procedures called by them.
+<P>
+The variables may be of 4 types, depending on the symbol they end 
+with:
+<P>
+<UL><LI> Variable names not ending with $ % & or () </LI> 
+are floating-point variables, for example price, x
+</UL>
+<UL><LI> Those ending with a % are integer variables, </LI> 
+for example x%, sales92%
+</UL>
+<UL><LI> Those ending with an &  are long integer variables, </LI> 
+for example x&, sales92&.
+</UL>
+<UL><LI> Those ending with a $ are string variables. </LI> 
+String variable names must be followed by the maximum length of the 
+string in brackets  for example names$(12), a$(3)
+</UL>
+Array variables have a number immediately following them in 
+brackets which specifies the number of elements in the array. Array 
+variables may be of any type, for example: x(6),y%(5),f$(5,12),z&(3)
+<P>
+When declaring string arrays, you must give two numbers in the brackets. 
+The first declares the number of elements, the second declares their 
+maximum length. For example surname$(5,8) declares five elements, 
+each up to 8 characters long.
+<P>
+Variable names may be any combination of up to 8 numbers and alphabetic 
+letters. They must start with a letter. The length includes 
+the % & or $ sign, but not the () in string and 
+array variables.
+<P>
+More than one GLOBAL or LOCAL statement may be used, 
+but they must be on separate lines, immediately after the procedure 
+name. 
+<P>
+See also LOCAL.
+<P>
+<A NAME = "gMOVE"><A HREF="psi-prog.htm"><H3><HR>gMOVE</H3></A>
+<B>Usage:</B> <CODE>gMOVE dx%,dy%</CODE></DT><P>
+Moves the current position dx% to the right and dy% downwards, 
+in the current drawable.
+<P>
+A negative dx% causes movement to the left; a negative dy% 
+causes upward movement.
+<P>
+See also gAT.
+<P>
+<A NAME = "gORDER"><A HREF="psi-prog.htm"><H3><HR>gORDER</H3></A>
+<B>Usage:</B> <CODE>gORDER id%,position%</CODE></DT><P>
+Sets the window specified by id% to the selected foreground/background 
+position, and redraws the screen. Position 1 is the foreground window, 
+position 2 is next, and so on. Any position greater than the number 
+of windows is interpreted as the end of the list.
+<P>
+On creation, a window is at position 1 in the list.
+<P>
+Raises an error if id% is a bitmap.
+<P>
+See also gRANK.
+<P>
+<A NAME = "gORIGINX"><A HREF="psi-prog.htm"><H3><HR>gORIGINX</H3></A>
+<B>Usage:</B> <CODE>x%=gORIGINX</CODE></DT><P>
+Returns the gap between the left side of the screen and the left side 
+of the current window.
+<P>
+Raises an error if the current drawable is a bitmap.
+<P>
+<A NAME = "gORIGINY"><A HREF="psi-prog.htm"><H3><HR>gORIGINY</H3></A>
+<B>Usage:</B> <CODE>y%=gORIGINY</CODE></DT><P>
+Returns the gap between the top of the screen and the top of the current 
+window.
+<P>
+Raises an error if the current drawable is a bitmap.
+<P>
+<A NAME = "GOTO "><A HREF="psi-prog.htm"><H3><HR>GOTO </H3></A>
+<B>Usage:</B><DD><CODE>GOTO label or GOTO label::<BR>
+<DD>..<BR>
+<DD>..<BR>
+<DD>label::<BR>
+</CODE></DT><P>
+Goes to the line following the label:: and continues from there. 
+The label 
+<P>
+<UL><LI> Must be in the current procedure</LI> 
+</UL>
+<UL><LI> Must start with a letter and end with a double colon, although </LI> 
+the double colon is not necessary in the GOTO statement
+</UL>
+<UL><LI> May be up to 8 characters long excluding the colons.</LI> 
+</UL>
+<A NAME = "gPATT"><A HREF="psi-prog.htm"><H3><HR>gPATT</H3></A>
+<B>Usage:</B> <CODE>gPATT id%,width%,height%,mode%</CODE></DT><P>
+Fills a rectangle of the specified size from the current position 
+with repetitions of the drawable id%.
+<P>
+As with gCOPY, this command can copy both set and clear pixels, 
+so the same modes are available as when displaying text. Set mode% 
+= 0 for set, 1 for clear, 2 for invert or 3 for replace. 0, 1 and 
+2 act only on set pixels in the pattern; 3 copies the entire rectangle, 
+with set and clear pixels.
+<P>
+If you set id%=-1 a pre-defined grey pattern is used.
+<P>
+The current position is unaffected.
+<P>
+gPATT is affected by the setting of gGREY (in the current 
+window) in the same way as gCOPY: with gGREY 0 it 
+copies black to black; with gGREY 1 it copies grey to grey, 
+or black to grey if source is black only; with gGREY 2 it 
+copies grey to grey and black to black, or black to both if source 
+is black only.
+<P>
+<A NAME = "gPEEKLINE"><A HREF="psi-prog.htm"><H3><HR>gPEEKLINE</H3></A>
+<B>Usage:</B> <CODE>gPEEKLINE id%,x%,y%,d%(),ln%</CODE></DT><P>
+Reads a horizontal line from the black plane of the drawable id%, 
+length ln%, starting at x%,y%. The leftmost 16 pixels 
+are read into d%(1), with the first pixel read into the least 
+significant bit.
+<P>
+The array d%() must be long enough to hold the data. You can 
+work out the number of integers required with ((ln%+15)/16) 
+(using whole-number division).
+<P>
+If you set id% to 0, this just reads from the whole screen, 
+not from any particular window.
+<P>
+If you add $8000 to id%, the grey plane (not the black plane) 
+will be peeked. 
+<P>
+<A NAME = "gPOLY"><A HREF="psi-prog.htm"><H3><HR>gPOLY</H3></A>
+<B>Usage:</B> <CODE>gPOLY a%()</CODE></DT><P>
+Draws a sequence of lines, as if by gLINEBY and gMOVE 
+commands.
+<P>
+The array is set up as follows:
+<PRE>
+a%(1)	starting x position
+a%(2)	starting y position
+a%(3)	number of pairs of offsets
+a%(4)	dx1%
+a%(5)	dy1%
+a%(6)	dx2%
+a%(7)	dy2% etc.
+</PRE>
+Each pair of numbers  dx1%,dy1%, for example  
+specifies a line or a movement. To draw a line, dy% is the amount 
+to move down, while dx% is the amount to move to the right multiplied 
+by two.
+<P>
+To specify a movement (ie without drawing a line) work out the dx%,dy% 
+as for a line, then add 1 to dx%.
+<P>
+(For drawing/movement up or left, use negative numbers.)
+<P>
+gPOLY is quicker than combinations of gAT, gLINEBY 
+and gMOVE.
+<P>
+Example, to draw three horizontal lines 50 pixels 
+long at positions 20,10, 20,30 and 20,50:
+<PRE>
+a%(1)=20 :a%(2)=10 REM 20,10
+a%(3)=5 REM 5 operations
+REM draw right 50
+a%(4)=50*2   :a%(5)=0
+REM move down 20
+a%(6)=0*2+1  :a%(7)=20
+REM draw left 50
+a%(8)=-50*2  :a%(9)=0
+REM move down 20
+a%(10)=0*2+1 :a%(11)=20
+REM draw right 50
+a%(12)=50*2  :a%(13)=0
+gPOLY a%()
+</PRE>
+<A NAME = "gPRINT"><A HREF="psi-prog.htm"><H3><HR>gPRINT</H3></A>
+<B>Usage:</B> <CODE>gPRINT  list of expressions</CODE></DT><P>
+Displays a list of expressions at the current position in the current 
+drawable. All variable types are formatted as for PRINT.
+<P>
+Unlike PRINT, gPRINT does not end by moving to a new 
+line. A comma between expressions is still displayed as a space, but 
+a semi-colon has no effect. gPRINT without a list of expressions 
+does nothing.
+<P>
+See also gPRINTB, gPRINTCLIP, gTWIDTH, gXPRINT, 
+gTMODE.
+<P>
+<A NAME = "gPRINTB"><A HREF="psi-prog.htm"><H3><HR>gPRINTB</H3></A>
+<B>Usage  any of:</B><DD><CODE>gPRINTB t$,w%,al%,tp%,bt%,m%<BR>
+<DD>gPRINTB t$,w%,al%,tp%,bt%<BR>
+<DD>gPRINTB t$,w%,al%,tp%<BR>
+<DD>gPRINTB t$,w%,al%<BR>
+<DD>gPRINTB t$,w%<BR>
+</CODE></DT><P>
+Displays text t$ in a cleared box of width w% pixels. 
+The current position is used for the left side of the box and for 
+the baseline of the text.
+<P>
+al% controls the alignment of the text in the box  1 
+for right aligned, 2 for left aligned, or 3 for centred.
+<P>
+tp% and bt% are the clearances between the text and the 
+top/bottom of the box. Together with the current font size, they control 
+the height of the box. An error is raised if tp% plus the font 
+ascent is greater than 255.
+<P>
+m% controls the margins. For left alignment, m% is an 
+offset from the left of the box to the start of the text. For right 
+alignment, m% is an offset from the right of the box to the 
+end of the text. For centering, m% is an offset from the left 
+or right of the box to the region in which to centre, with positive 
+m% meaning left and negative meaning right.
+<P>
+If values are not supplied for some arguments, these defaults are 
+used:
+<P>
+al%	left<BR>
+tp%	0<BR>
+bt%	0<BR>
+m%	0<BR>
+<P>
+See also gPRINT, gPRINTCLIP, gTWIDTH, gXPRINT.
+<P>
+<A NAME = "gPRINTCLIP"><A HREF="psi-prog.htm"><H3><HR>gPRINTCLIP</H3></A>
+<B>Usage:</B> <CODE>w%=gPRINTCLIP(text$,width%)</CODE></DT><P>
+Displays text$ at the current position, displaying only as many 
+characters as will fit inside width% pixels. Returns the number 
+of characters displayed.
+<P>
+See also gPRINT, gPRINTB, gTWIDTH, gXPRINT, 
+gTMODE.
+<P>
+<A NAME = "gRANK"><A HREF="psi-prog.htm"><H3><HR>gRANK</H3></A>
+<B>Usage:</B> <CODE>rank%=gRANK</CODE></DT><P>
+Returns the foreground/background position, from 1 to 8, of the current 
+window.
+<P>
+Raises an error if the current drawable is a bitmap.
+<P>
+See also gORDER.
+<P>
+<A NAME = "gSAVEBIT"><A HREF="psi-prog.htm"><H3><HR>gSAVEBIT</H3></A>
+<B>Usage:</B><DD><CODE>gSAVEBIT name$,width%,height%<BR>
+<DD>gSAVEBIT name$<BR>
+</CODE></DT><P>
+Saves the current drawable as the named bitmap file. If width% 
+and height% are given, then only the rectangle of that size 
+from the current position is copied. If name$ has no file extension 
+.PIC is used.
+<P>
+Saving a window to file when it includes grey will save both planes 
+to the file  black bitmap first followed by grey.
+<P>
+<A NAME = "gSCROLL"><A HREF="psi-prog.htm"><H3><HR>gSCROLL</H3></A>
+<B>Usage:</B> <CODE>gSCROLL dx%,dy%,x%,y%,wd%,ht% or gSCROLL dx%,dy%</CODE></DT><P>
+Scrolls pixels in the current drawable by offset dx%,dy%. Positive 
+dx% means to the right, and positive dy% means down. The 
+drawable itself does not change its position.
+<P>
+If you specify a rectangle in the current drawable, at x%,y% 
+and of size wd%,ht%, only this rectangle is scrolled.
+<P>
+The areas dx% wide and dy% deep which are left behind 
+by the scroll are cleared.
+<P>
+The current position is not affected.
+<P>
+<A NAME = "gSETWIN"><A HREF="psi-prog.htm"><H3><HR>gSETWIN</H3></A>
+<B>Usage:</B><DD><CODE>gSETWIN x%,y%,width%,height%<BR>
+<DD>gSETWIN x%,y%<BR>
+</CODE></DT><P>
+Changes position and, optionally, the size of the current window.
+<P>
+An error is raised if the current drawable is a bitmap.
+<P>
+The current position is unaffected.
+<P>
+If you use this command on the default window, you must also 
+use the SCREEN command to ensure that the area for PRINT 
+commands to use is wholly contained within the default window.
+<P>
+<A NAME = "gSTYLE"><A HREF="psi-prog.htm"><H3><HR>gSTYLE</H3></A>
+<B>Usage:</B> <CODE>gSTYLE style%</CODE></DT><P>
+Sets the style of text displayed in subsequent gPRINT, gPRINTB 
+and gPRINTCLIP commands on the current drawable.
+<PRE>
+style%		Text style:
+0		normal
+1		bold
+2		underlined
+4		inverse
+8		double height
+16		mono
+32		italic
+</PRE>
+You can combine these styles by adding their values  for example, 
+to set bold, underlined and double height, use gSTYLE 11, 
+as 11=1+2+8.
+<P>
+This command does not affect non-graphics commands, like PRINT.
+<P>
+<A NAME = "gTMODE"><A HREF="psi-prog.htm"><H3><HR>gTMODE</H3></A>
+<B>Usage:</B> <CODE>gTMODE mode%</CODE></DT><P>
+Sets the way characters are displayed by subsequent gPRINT 
+and gPRINTCLIP commands on the current drawable.
+<PRE>
+mode%		Pixels will be:
+0		set
+1		cleared
+2		inverted
+3		replaced
+</PRE>
+When you first use graphics text commands on a drawable, each dot 
+in a letter causes a pixel to be set in the drawable. This is mode%=0.
+<P>
+When mode% is 1 or 2, graphics text commands work in a similar 
+way, but the pixels are cleared or inverted. When mode% is 3, 
+entire character boxes are drawn on the screen  pixels are 
+set in the letter and cleared in the background box.
+<P>
+This command does not affect other text display commands.
+<P>
+<A NAME = "gTWIDTH"><A HREF="psi-prog.htm"><H3><HR>gTWIDTH</H3></A>
+<B>Usage:</B> <CODE>width%=gTWIDTH(text$)</CODE></DT><P>
+Returns the width of text$ in the current font and style.
+<P>
+See also gPRINT, gPRINTB, gPRINTCLIP, gXPRINT.
+<P>
+<A NAME = "gUNLOADFONT"><A HREF="psi-prog.htm"><H3><HR>gUNLOADFONT</H3></A>
+<B>Usage:</B> <CODE>gUNLOADFONT fontId%</CODE></DT><P>
+Unloads a user-defined font that was previously loaded using gLOADFONT. 
+Raises an error if the font has not been loaded.
+<P>
+The built-in Series 3/Series 3a fonts are not held in memory and 
+cannot be unloaded.
+<P>
+See also gLOADFONT.
+<P>
+<A NAME = "gUPDATE"><A HREF="psi-prog.htm"><H3><HR>gUPDATE</H3></A>
+<B>Usage one of:</B><DD><CODE>gUPDATE ON<BR>
+<DD>gUPDATE OFF<BR>
+<DD>gUPDATE<BR>
+</CODE></DT><P>
+The Series 3a screen is usually updated whenever you display anything 
+on it. gUPDATE OFF switches off this feature. The screen will 
+then be updated as few times as possible (though note that some keywords 
+will always cause an update.) You can still force an update by using 
+the gUPDATE command on its own.
+<P>
+This can result in a considerable speed improvement in some cases. 
+You might, for example, use gUPDATE OFF, then a sequence of 
+graphics commands, followed by gUPDATE. You should certainly 
+use gUPDATE OFF if you are about to write exclusively to 
+bitmaps.
+<P>
+gUPDATE ON returns to normal screen updating.
+<P>
+gUPDATE affects anything that displays on the screen. If you 
+are using a lot of PRINT commands, gUPDATE OFF may 
+make a noticeable difference in speed.
+<P>
+Note that with gUPDATE OFF, the location of errors which 
+occur while the procedure is running may be incorrectly reported. 
+For this reason, gUPDATE OFF is best used in the final stages 
+of program development, and even then you may have to remove it to 
+locate some errors.
+<P>
+<A NAME = "gUSE"><A HREF="psi-prog.htm"><H3><HR>gUSE</H3></A>
+<B>Usage:</B> <CODE>gUSE id%</CODE></DT><P>
+Makes the drawable id% current. Graphics drawing commands will 
+now go to this drawable. gUSE does not bring a drawable 
+to the foreground (see gORDER).
+<P>
+<A NAME = "gVISIBLE ON/OFF"><A HREF="psi-prog.htm"><H3><HR>gVISIBLE ON/OFF</H3></A>
+<B>Usage:</B> <CODE>gVISIBLE ON/OFF</CODE></DT><P>
+Makes the current window visible or invisible.
+<P>
+Raises an error if the current drawable is a bitmap.
+<P>
+<A NAME = "gWIDTH"><A HREF="psi-prog.htm"><H3><HR>gWIDTH</H3></A>
+<B>Usage:</B> <CODE>width%=gWIDTH</CODE></DT><P>
+Returns the width of the current drawable.
+<P>
+<A NAME = "gX"><A HREF="psi-prog.htm"><H3><HR>gX</H3></A>
+<B>Usage:</B> <CODE>x%=gX</CODE></DT><P>
+Returns the x current position (in from the left) in the current 
+drawable.
+<P>
+<A NAME = "gXBORDER"><A HREF="psi-prog.htm"><H3><HR>gXBORDER</H3></A>
+<B>Usage:</B><DD><CODE>gXBORDER type%,flags%,w%,h%<BR>
+<DD>gXBORDER type%,flags%<BR>
+</CODE></DT><P>
+Draws a border in the current drawable of a specified type, fitting 
+inside a rectangle of the specified size or with the size of the current 
+drawable if no size is specified.
+<P>
+type%=0 for drawing the Series 3 type border; flags% 
+are then as for gBORDER.
+<P>
+type%=1 for drawing the Series 3a 3-D grey and black border. 
+A shadow or a gap for a shadow is always assumed. flags%=1,2,3,4 
+are as for gBORDER. When the shadow is enabled (1 or 3) only 
+the grey and black parts of the border are drawn; you should pre-clear 
+the background for the white parts. When the shadow is disabled (2 
+or 4) the outer and inner border lines are drawn, but the areas covered 
+by grey/black when the shadow is enabled are now cleared. (This allows 
+a shadow to be turned off simply by calling gXBORDER again.)
+<P>
+The following values of flags% apply to all border types:
+<PRE>
+0 for normal corners
+OR with $100 leaves 1 pixel gap around the border.
+OR with $200 for more rounded corners
+OR with $400 for losing a single pixel.
+</PRE>
+If both $400 and $200 are mistakenly supplied, $200 has priority.
+<P>
+An error is raised if the current window has no grey plane.
+<P>
+See also gBORDER.
+<P>
+<A NAME = "gXPRINT"><A HREF="psi-prog.htm"><H3><HR>gXPRINT</H3></A>
+<B>Usage:</B> <CODE>gXPRINT string$,flags%</CODE></DT><P>
+Displays string$ at the current position, with precise highlighting 
+or underlining. The current font and style are still used, even if 
+the style itself is inverse or underlined. Text mode 3 (replace) is 
+used  both set and cleared pixels in the text are drawn.
+<P>
+flags% has the following effect:
+<PRE>
+flags%		effect
+0		normal, as with gPRINT
+1		inverse
+2		inverse, except corner pixels
+3		thin inverse
+4		thin inverse, except corner pixels
+5		underlined
+6		thin underlined
+</PRE>
+Where lines of text are separated by a single pixel, the thin 
+options maintain the separation between lines.
+<P>
+gXPRINT does not support the display of a list of expressions 
+of various types.
+<P>
+<A NAME = "gY"><A HREF="psi-prog.htm"><H3><HR>gY</H3></A>
+<B>Usage:</B> <CODE>y%=gY</CODE></DT><P>
+Returns the y current position (down from the top) in the current 
+drawable.
+<P>
+<A NAME = "HEX$"><A HREF="psi-prog.htm"><H3><HR>HEX$</H3></A>
+<B>Usage:</B> <CODE>h$=HEX$(x&)</CODE></DT><P>
+Returns a string containing the hexadecimal (base 16) representation 
+of integer or long integer x&. 
+<P>
+For example HEX$(255) returns the string FF. 
+<P>
+Notes
+ 
+To enter integer hexadecimal constants (16 bit) put a $ in front 
+of them. For example $FF is 255 in decimal. (Don't confuse this 
+use of $ with string variable names.)
+<P>
+To enter long integer hexadecimal constants (32 bit) put a & 
+in front of them. For example &FFFFF is 1048575 in decimal.
+<P>
+Counting in hexadecimal is like this: 0 1 2 3 4 5 6 7 8 9 A B C 
+D E F 10...  A stands for decimal 10, B for decimal 
+11, C for decimal 12 ... up to F for decimal 15. After 
+F comes 10, which is equivalent to decimal 16. To understand 
+numbers greater than hexadecimal 10, again compare hexadecimals with 
+decimals. In these examples, 10^2 means 10x10, 10^3 means 
+10x10x10 and so on.
+<PRE>
+253 in decimal is:
+(2x10^2)+(5x10^1)+(3x10^0)
+= (2x100)+(5x10)+(3x1)
+= 200+50+3
+<P>
+By analogy, &253 in hexadecimal is:
+(&2x16^2)+(&5x16^1)+(&3x16^0)
+=(2x256)+(5x16)+(3x1)
+=512+80+3 = 595 in decimal.
+<P>
+Similarly, &A6B in hexadecimal is:
+(&Ax16^2)+(&6x16^1)+(&Bx16^0)
+=(10x256)+(6x16)+(11x1)
+=2560+96+11 = 2667 in decimal.
+<P>
+You may also find this table useful for converting between hex and 
+decimal:
+<P>
+    hex  decimal		
+    &1    1      =16^0
+   &10    16     =16^1
+  &100    256    =16^2
+ &1000    4096   =16^3
+</PRE>
+For example, &20F9 is (2x&1000)+(0x&100)+(15x&10)+9<BR>
+which in decimal is: (2x4096)+(0x256)+(15x16)+9 = 8441.
+<P>
+All hexadecimal constants are integers ($) or long integers 
+(&). So arithmetic operations involving hexadecimal numbers 
+behave in the usual way. For example, &3/&2 returns 1, 
+&3/2.0 returns 1.5, 3/$2 returns 1.
+<P>
+<A NAME = "HOUR"><A HREF="psi-prog.htm"><H3><HR>HOUR</H3></A>
+<B>Usage:</B> <CODE>h%=HOUR</CODE></DT><P>
+Returns the number of the current hour from the system clock as an 
+integer between 0 and 23. 
+<P>
+<A NAME = "IABS"><A HREF="psi-prog.htm"><H3><HR>IABS</H3></A>
+<B>Usage:</B> <CODE>i&=IABS(x&)</CODE></DT><P>
+Returns the absolute value, ie without any sign, of the integer or 
+long integer expression x&. 
+<P>
+For example IABS(-10) is 10. 
+<P>
+See also ABS, which returns the absolute value as a floating-point 
+value.
+<P>
+<A NAME = "ICON"><A HREF="psi-prog.htm"><H3><HR>ICON</H3></A>
+<B>Usage:</B> <CODE>ICON name$</CODE></DT><P>
+Gives the name of the bitmap file to use as the icon for an OPA.
+<P>
+This can only be used between APP and ENDA.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+<A NAME = "IF...ENDIF "><A HREF="psi-prog.htm"><H3><HR>IF...ENDIF </H3></A>
+<B>Usage:</B><DD><CODE>IF condition1<BR>
+<DD> ..<BR>
+<DD> ...<BR>
+<DD> .<BR>
+<DD>ELSEIF condition2<BR>
+<DD> ...<BR>
+<DD> ....<BR>
+<DD>ELSE<BR>
+<DD> ..<BR>
+<DD>ENDIF<BR>
+</CODE></DT><P>
+Does either 
+<P>
+<UL><LI> the statements following the IF condition</LI> 
+</UL>
+or
+<P>
+<UL><LI> the statements following one of the ELSEIF conditions </LI> 
+(there may be as many ELSEIF statements as you like  
+none at all if you want)
+</UL>
+or
+<P>
+<UL><LI> the statements following ELSE (or, if there is no </LI> 
+ELSE, nothing at all). There may be either one ELSE 
+statement or none.
+</UL>
+After the ENDIF statement, the lines following ENDIF 
+carry on as normal.
+<P>
+IF, ELSEIF, ELSE and ENDIF must be in that order.
+<P>
+Every IF must be matched with a closing ENDIF.
+<P>
+You can also have an IF...ENDIF structure within another, for 
+example:
+<PRE>
+IF condition1
+ ..
+ ...
+ .
+ELSE
+ ...
+ IF condition2
+ ....
+ ENDIF
+ ..
+ENDIF
+</PRE>
+condition is an expression returning a logical value  
+for example a<b. If the expression returns logical true (non-zero) 
+then the statements following are executed. If the expression returns 
+logical false (zero) then those statements are ignored. For more details 
+about logical expressions, see Appendix B.
+<P>
+<A NAME = "INPUT"><A HREF="psi-prog.htm"><H3><HR>INPUT</H3></A>
+<B>Usage:</B><DD><CODE>INPUT variable<BR>
+<DD>INPUT log.field<BR>
+</CODE></DT><P>
+Waits for a value to be entered at the keyboard, and then assigns 
+the value entered to a variable or data file field.
+<P>
+You can edit the value as you type it in. All the usual editing keys 
+are available  the arrow keys move along the line, Esc clears 
+the line and so on.
+<P>
+If inappropriate input is entered, for example a string when the input 
+was to be assigned to an integer variable, a ? is displayed 
+and you can try again. However, if you used TRAP INPUT, control 
+passes on to the next line of the procedure, with the appropriate 
+error condition being set and the value of the variable remaining 
+unchanged.
+<P>
+INPUT is usually used in conjunction with a 
+PRINT statement:
+<P>
+<UL><PRE>
+<B>PROC exch:</B>
+LOCAL pds,rate
+DO
+ PRINT Pounds Sterling?,
+ INPUT pds
+ PRINT Rate (DM)?,
+ INPUT rate
+ PRINT =,pds*rate,DM
+ GET
+UNTIL 0
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Note the commas at the end of the PRINT statements, used so 
+that the cursor waiting for input appears on the same line as the 
+messages.
+<P>
+<B>TRAP INPUT</B><BR> 
+If a bad value is entered (for example abc for a%) in 
+response to a TRAP INPUT, the ? is not displayed, but 
+the ERR function can be called to return the value of the error 
+which has occurred. If the Esc key is pressed while no text is on 
+the input line, the `Escape key pressed' error (number -114) will 
+be returned by ERR (provided that the INPUT has been 
+trapped). You can use this feature to enable someone to press the 
+Esc key to escape from inputting a value.
+<P>
+See also EDIT. This works like INPUT, except that it 
+displays a string to be edited and then assigned to a variable or 
+field. It can only be used with strings.
+<P>
+<A NAME = "INT"><A HREF="psi-prog.htm"><H3><HR>INT</H3></A>
+<B>Usage:</B> <CODE>i&=INT(x)</CODE></DT><P>
+Returns the integer (in other words the whole number) part of the 
+floating-point expression x. The number is returned as a long 
+integer.
+<P>
+Positive numbers are rounded down, and negative numbers are rounded 
+up  for example INT(-5.9) returns -5 and INT(2.9) 
+returns 2. If you want to round a number to the nearest integer, 
+add 0.5 to it (or subtract 0.5 if it is negative) before you use INT.
+<P>
+In the Calculator, you need to use INT to pass a number to 
+a procedure which requires a long integer parameter. This is because 
+the Calculator passes all numbers as floating-point by default.
+<P>
+See also INTF. 
+<P>
+<A NAME = "INTF"><A HREF="psi-prog.htm"><H3><HR>INTF</H3></A>
+<B>Usage:</B> <CODE>i=INTF(x)</CODE></DT><P>
+Used in the same way as the INT function, but the value returned 
+is a floating-point number. For example, INTF(1234567890123.4) 
+returns 1234567890123.0
+<P>
+You may also need this when an integer calculation may exceed integer 
+range.
+<P>
+See also INT.
+<P>
+I/O functions
+<P>
+These functions are covered in detail in the Advanced Topics chapter.
+<P>
+r%=IOA(h%,f%,var status%,var a1,var a2)
+<P>
+The device driver opened with handle h% performs the 
+asynchronous I/O function f% with two further arguments, a1 
+and a2. The argument status% is set by the device driver. 
+An IOWAIT must be performed for each IOA.
+<P>
+r%=IOC(h%,f%,var status%,var a1,var a2)
+<P>
+Make an I/O request with guaranteed completion. This has 
+the same form as IOA etc but it returns zero always.
+<P>
+r%=IOCANCEL(h%)
+<P>
+Cancels any outstanding asynchronous I/O request (IOC or IOA).
+<P>
+r%=IOCLOSE(h%)
+<P>
+Closes a file with the handle h%.
+<P>
+r%=IOOPEN(var h%,name$,mode%)
+<P>
+Creates or opens a file called name$. Defines h% 
+for use by other I/O functions. mode% specifies how to open 
+the file. For unique file creation, use
+IOOPEN(var h%,addr%,mode%)
+<P>
+r%=IOREAD(h%,addr%,maxLen%)
+<P>
+Reads from the file with the handle h%. address% 
+is the address of a buffer large enough to hold a maximum of maxLen% 
+bytes. The value returned to r% is the actual number of bytes 
+read or, if negative, is an error value.
+<P>
+r%=IOSEEK(h%,mode%,var off&)
+<P>
+Seeks to a position in a file that has been opened for random 
+access. mode% specifies how the offset argument off& is 
+to be used.
+<P>
+IOSIGNAL
+<P>
+Signals an I/O function's completion.
+<P>
+r%=IOW(h%,func%,var a1,var a2)
+<P>
+The device driver opened with handle h% performs the 
+synchronous I/O function func% with the two further arguments.
+<P>
+<A NAME = "IOWAIT"><A HREF="psi-prog.htm"><H3><HR>IOWAIT</H3></A>
+<B>Waits for an asynchronous I/O function to signal completion.</B><DD><CODE><BR>
+<DD>IOWAITSTAT var stat%<BR>
+</CODE></DT><P>
+Waits for an asynchronous function, called with IOA, 
+to complete.
+<P>
+r%=IOWRITE(h%,addr%,length%)
+<P>
+Writes length% bytes in a buffer at address% 
+to the file with the handle h%.
+<P>
+<A NAME = "IOYIELD"><A HREF="psi-prog.htm"><H3><HR>IOYIELD</H3></A>
+<B>Ensures that any asynchronous handler set up with IOA </B> <CODE></CODE></DT><P>
+<A NAME = "KEY"><A HREF="psi-prog.htm"><H3><HR>KEY</H3></A>
+<B>Usage:</B> <CODE>k%=KEY</CODE></DT><P>
+Returns the character code of the last key pressed, if there has been 
+one since the last call to the keyboard. These functions count as 
+calling to the keyboard: INPUT, EDIT, GET, GET$, KEY and KEY$.
+<P>
+If no key has been pressed, zero is returned. 
+<P>
+See Appendix D for a list of special key codes. You can use KMOD 
+to check whether modifier keys (Shift, Control, Psion and 
+Caps Lock) were used.
+<P>
+This command does not wait for a key to be pressed, unlike GET.
+<P>
+<A NAME = "KEY$"><A HREF="psi-prog.htm"><H3><HR>KEY$</H3></A>
+<B>Usage:</B> <CODE>k$=KEY$</CODE></DT><P>
+Returns the last key pressed as a string, if there has been a keypress 
+since the last use of the keyboard by INPUT, EDIT, GET, GET$, 
+KEY or KEY$.
+<P>
+If no key has been pressed, a null string () is returned. 
+<P>
+See Appendix D for a list of special key codes. You can use KMOD 
+to check whether modifier keys (Shift, Control, Psion and 
+Caps Lock) were used.
+<P>
+This command does not wait for a key to be pressed, unlike GET$.
+<P>
+<A NAME = "KEYA"><A HREF="psi-prog.htm"><H3><HR>KEYA</H3></A>
+<B>Usage:</B> <CODE>err%=KEYA(var stat%,var key%(1))</CODE></DT><P>
+This is an asynchronous keyboard read function.
+<P>
+See the Advanced Topics chapter for details.
+<P>
+Cancel with KEYC.
+<P>
+<A NAME = "KEYC"><A HREF="psi-prog.htm"><H3><HR>KEYC</H3></A>
+<B>Usage:</B> <CODE>err%=KEYC(var stat%)</CODE></DT><P>
+Cancels the previously called KEYA function with status stat%.
+<P>
+See the Advanced Topics chapter for details.
+<P>
+<A NAME = "KMOD"><A HREF="psi-prog.htm"><H3><HR>KMOD</H3></A>
+<B>Usage:</B> <CODE>k%=KMOD</CODE></DT><P>
+Returns a code representing the state of the modifier keys (whether 
+they were pressed or not) at the time of the last keyboard access, 
+such as a KEY function. The modifiers have these codes:
+<PRE>
+			binary
+2	Shift down	    10
+4	Control down	   100
+8	Psion down	  1000
+16	Caps Lock on	 10000
+</PRE>
+If there was no modifier, the function returns 0. If a combination 
+of modifiers was pressed, the sum of their codes is returned  
+for example 20 is returned if Control (4) was held down and Caps Lock 
+(16) was on.
+<P>
+Always use immediately after a KEY/KEY$/GET/GET$ statement.
+<P>
+The value returned by KMOD has one binary bit set for each 
+modifier, as shown above. By using the logical operator AND 
+on the value returned by KMOD you can check which of the bits 
+are set, in order to see which modifier keys were held down. For more 
+details on AND, see Appendix B.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC modifier:</B>
+LOCAL k%,mod%
+PRINT Press a key :k%=GET
+CLS :mod%=KMOD
+PRINT Key code,k%,with
+IF mod%=0
+ PRINT no modifier
+ENDIF
+IF mod% AND 2
+ PRINT Shift down
+ENDIF
+IF mod% AND 4
+ PRINT Control down
+ENDIF
+IF mod% AND 8
+ PRINT Psion down
+ENDIF
+IF mod% AND 16
+ PRINT Caps Lock on
+ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "LAST"><A HREF="psi-prog.htm"><H3><HR>LAST</H3></A>
+<B>Usage:</B> <CODE>LAST</CODE></DT><P>
+Positions to the last record in a data file.
+<P>
+<A NAME = "LCLOSE"><A HREF="psi-prog.htm"><H3><HR>LCLOSE</H3></A>
+<B>Usage:</B> <CODE>LCLOSE</CODE></DT><P>
+Closes the device opened with LOPEN. (The device is also closed 
+automatically when a program ends.)
+<P>
+<A NAME = "LEFT$"><A HREF="psi-prog.htm"><H3><HR>LEFT$</H3></A>
+<B>Usage:</B> <CODE>b$=LEFT$(a$,x%)</CODE></DT><P>
+Returns the leftmost x% characters from the string a$.
+<P>
+For example if n$ has the value Charles, then b$=LEFT$(n$,3) 
+assigns Cha to b$.
+<P>
+<A NAME = "LEN"><A HREF="psi-prog.htm"><H3><HR>LEN</H3></A>
+<B>Usage:</B> <CODE>a%=LEN(a$)</CODE></DT><P>
+Returns the number of characters in a$.
+<P>
+Eg if a$ has the value
+34 Kopechnie Drive then LEN(a$) returns 18. 
+<P>
+<P>
+You might use this function to check that a data file string field 
+is not empty before displaying:
+<P>
+<PRE>
+IF LEN(A.client$)
+  PRINT A.client$
+ENDIF
+</PRE>
+<A NAME = "LENALLOC"><A HREF="psi-prog.htm"><H3><HR>LENALLOC</H3></A>
+<B>Usage:</B> <CODE>len%=LENALLOC(pcell%)</CODE></DT><P>
+Returns the length of the previously allocated cell at pcell%.
+<P>
+<A NAME = "LINKLIB"><A HREF="psi-prog.htm"><H3><HR>LINKLIB</H3></A>
+<B>Usage:</B> <CODE>LINKLIB cat%</CODE></DT><P>
+Link any libraries that have been loaded using LOADLIB.
+<P>
+<A NAME = "LN"><A HREF="psi-prog.htm"><H3><HR>LN</H3></A>
+<B>Usage:</B> <CODE>a=LN(x)</CODE></DT><P>
+Returns the natural (base e) logarithm of x. 
+<P>
+Use LOG to return the base 10 log of a number.
+<P>
+<A NAME = "LOADLIB"><A HREF="psi-prog.htm"><H3><HR>LOADLIB</H3></A>
+<B>Usage:</B> <CODE>ret%=LOADLIB(var cat%,name$,link%)</CODE></DT><P>
+Load and optionally link a DYL that is not in the ROM. If successful, 
+this writes the category handle to cat% and returns zero. The 
+DYL is shared in memory if already loaded by another process.
+<P>
+<A NAME = "LOADM"><A HREF="psi-prog.htm"><H3><HR>LOADM</H3></A>
+<B>Usage:</B> <CODE>LOADM module$</CODE></DT><P>
+Loads a translated OPL module so that procedures in that module can 
+be called. Until a module is loaded with LOADM, calls to procedures 
+in that module will give an error.
+<P>
+module$ is a string containing the name of the module. Specify 
+the full file name only where necessary.
+<P>
+Example LOADM MODUL2
+<P>
+Up to 4 modules can be in memory at any one time; if you try to LOADM 
+a fifth module, you get an error. Use UNLOADM to remove a module 
+from memory so that you can load a different one.
+<P>
+By default, LOADM always uses the directory of the initial 
+running program, or the one specified by a OPA application. 
+It is not affected by the SETPATH command.
+<P>
+<A NAME = "LOC"><A HREF="psi-prog.htm"><H3><HR>LOC</H3></A>
+<B>Usage:</B> <CODE>a%=LOC(a$,b$) </CODE></DT><P>
+Returns an integer showing the position in a$ where b$ 
+occurs, or zero if b$ doesn't occur in a$. The search 
+matches upper and lower case.
+<P>
+Example: LOC(STANDING,AND) would return the value 3 
+because the substring AND starts at the third character of the 
+string STANDING.
+<P>
+<A NAME = "LOCAL "><A HREF="psi-prog.htm"><H3><HR>LOCAL </H3></A>
+<B>Usage:</B> <CODE>LOCAL variables</CODE></DT><P>
+Used to declare variables which can be referenced only in the current 
+procedure. Other procedures may use the same variable names to create 
+new variables. Use GLOBAL to declare variables common to all 
+called procedures.
+<P>
+The variables may be of 4 types, depending on the symbol they end 
+with:
+<P>
+<UL><LI> Variable names not ending with $ % & or () </LI> 
+are floating-point variables, for example price, x
+</UL>
+<UL><LI> Those ending with a % are integer variables, </LI> 
+for example x%, sales92%
+</UL>
+<UL><LI> Those ending with an &  are long integer variables, </LI> 
+for example x&, sales92&.
+</UL>
+<UL><LI> Those ending with a $ are string variables. </LI> 
+String variable names must be followed by the maximum length of the 
+string in brackets, 
+ for example names$(12), a$(3)
+</UL>
+Array variables have a number immediately following them in 
+brackets which specifies the number of elements in the array. Array 
+variables may be of any type, for example: x(6),y%(5),f$(5,12),z&(3)
+<P>
+When declaring string arrays, you must give two numbers in the brackets. 
+The first declares the number of elements, the second declares their 
+maximum length. For example surname$(5,8) declares five elements, 
+each up to 8 characters long.
+<P>
+Variable names may be any combination of up to 8 numbers and alphabetic 
+letters. They must start with a letter. The length includes 
+the % & or $ sign, but not the () in string and 
+array variables.
+<P>
+More than one GLOBAL or LOCAL statement may be used, 
+but they must be on separate lines, immediately after the procedure 
+name.
+<P>
+See also GLOBAL and Chapter 2. 
+<P>
+<A NAME = "LOCK"><A HREF="psi-prog.htm"><H3><HR>LOCK</H3></A>
+<B>Usage:</B><DD><CODE>LOCK ON<BR>
+<DD>LOCK OFF<BR>
+</CODE></DT><P>
+Mark an OPA (OPL application) as locked or unlocked. When an OPA is 
+locked with LOCK ON, the System screen will not send it events 
+to change files or quit. If, for example, you move onto the file list 
+in the System screen and press Delete to try to stop that running 
+OPA, a message will appear, indicating that the OPA cannot close down 
+at that moment.
+<P>
+You should use LOCK ON if your OPA uses a command, such as 
+EDIT or DIALOG, which accesses the keyboard. You might 
+also use it when the OPA is about to go busy for a considerable length 
+of time, or at any other point where a clean exit is not possible. 
+Do not forget to use LOCK OFF as soon as possible afterwards.
+<P>
+`Foreground', `background' and `Machine on' events may still occur 
+while the OPA is accessing the keyboard, and will be discarded.
+<P>
+An OPA is initially unlocked.
+<P>
+<A NAME = "LOG"><A HREF="psi-prog.htm"><H3><HR>LOG</H3></A>
+<B>Usage:</B> <CODE>a=LOG(x)</CODE></DT><P>
+Returns the base 10 logarithm of x.
+<P>
+Use LN to find the base e (natural) log.
+<P>
+<A NAME = "LOPEN"><A HREF="psi-prog.htm"><H3><HR>LOPEN</H3></A>
+<B>Usage:</B> <CODE>LOPEN device$</CODE></DT><P>
+Opens the device to which LPRINTs are to be sent.
+<P>
+No LPRINTs can be sent until a device has been opened with 
+LOPEN.
+<P>
+You can open any of these devices:
+<P>
+<UL><LI> The parallel port, with LOPEN PAR:A</LI> 
+</UL>
+<UL><LI> The serial port, with LOPEN TTY:A</LI> 
+</UL>
+<UL><LI> A file on the Series 3a or an attached computer. LOPEN </LI> 
+the file name, eg on a PC:
+</UL>
+LOPEN REM::C:\BAK\MEMO.TXT
+<P>
+or on an Apple Macintosh:
+<P>
+LOPEN REM::HD40:ME:MEMO5
+<P>
+Any existing file of the name given will be overwritten 
+when you print to it.
+<P>
+Only one device may be open at any one time. Use LCLOSE to 
+close the device. (It also closes automatically when a program finishes 
+running.)
+<P>
+See Appendix C.
+<P>
+<A NAME = "LOWER$"><A HREF="psi-prog.htm"><H3><HR>LOWER$</H3></A>
+<B>Usage:</B> <CODE>b$=LOWER$(a$)</CODE></DT><P>
+Converts any upper case characters in the string a$ to lower 
+case and returns the completely lower case string.
+<P>
+Eg if a$=CLARKE, LOWER$(a$) returns the string clarke
+<P>
+Use UPPER$ to convert a string to upper case.
+<P>
+<A NAME = "LPRINT"><A HREF="psi-prog.htm"><H3><HR>LPRINT</H3></A>
+<B>Usage:</B> <CODE>LPRINT list of expressions</CODE></DT><P>
+Prints a list of items, in the same way as PRINT, except that 
+the data is sent to the device most recently opened with LOPEN.
+<P>
+The expressions may be quoted strings, variables, or the evaluated 
+results of expressions. The punctuation of the LPRINT statement 
+(commas, semi-colons and new lines) determines the layout of the printed 
+text, in the same way as PRINT statements.
+<P>
+If no device has been opened with LOPEN you will get an error.
+<P>
+See PRINT for displaying to the screen.
+<P>
+See LOPEN for opening a device for LPRINT.
+<P>
+See Appendix C for an overview of printing from OPL.
+<P>
+<A NAME = "MAX"><A HREF="psi-prog.htm"><H3><HR>MAX</H3></A>
+<B>Usage:</B><DD><CODE>m=MAX(list)<BR>
+<DD>m=MAX(array(),element)<BR>
+</CODE></DT><P>
+Returns the greatest of a list of numeric items.
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=MAX(arr(),3) would return the value of the largest 
+of elements arr(1), arr(2) and arr(3).
+<P>
+<A NAME = "mCARD"><A HREF="psi-prog.htm"><H3><HR>mCARD</H3></A>
+<B>Usage:</B><DD><CODE>mCARD title$,n1$,k1%<BR>
+<DD>mCARD title$,n1$,k1%,n2$,k2% etc.<BR>
+</CODE></DT><P>
+Defines a menu. When you have defined all of the menus, use MENU 
+to display them.
+<P>
+title$ is the name of the menu. From one to eight items on the 
+menu may be defined, each specified by two arguments. The first is 
+the item name, and the second the keycode for a hot-key. This specifies 
+a key which, when pressed together with the Psion key, will select 
+the option. If the keycode is for an upper case key, the hot-key will 
+use both the Shift and Psion keys.
+<P>
+The options can be divided into logical groups by displaying a grey 
+line under the final option in 
+a group. To do this, pass the negative value corresponding to the 
+hot-key keycode for the final option in the group. For example, -%A 
+specifies hot-key Shift-Psion-A and displays a grey line under the 
+associated option in the menu.
+<P>
+<A NAME = "MEAN"><A HREF="psi-prog.htm"><H3><HR>MEAN</H3></A>
+<B>Usage:</B><DD><CODE>m=MEAN(list)<BR>
+<DD>m=MEAN(array(),element)<BR>
+</CODE></DT><P>
+Returns the arithmetic mean (average) of a list of numeric items. 
+<P>
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=MEAN(arr(),3) would return the average of elements 
+arr(1), arr(2) and arr(3).
+<P>
+This example displays 15.0:
+<PRE>
+a(1)=10
+a(2)=15
+a(3)=20
+PRINT MEAN(a(),3)
+</PRE>
+<A NAME = "MENU"><A HREF="psi-prog.htm"><H3><HR>MENU</H3></A>
+<B>Usage:</B><DD><CODE>val%=MENU<BR>
+<DD>val%=MENU (var init%)<BR>
+</CODE></DT><P>
+Displays the menus defined by mINIT and mCARD, and waits 
+for you to select an item. Returns the hot-key keycode of the item 
+selected, as defined in mCARD, in lower case.
+<P>
+If you cancel the menu by pressing Esc, MENU returns 0.
+<P>
+If the name of a variable is passed is sets the initial menu and item 
+to be highlighted. init% should be 256*(menu%)+item%; 
+for both menu% and item%, 0 specifies the first, 1 the 
+second and so on. If init% is 517 (=256*2+5), for example, this 
+specifies the 6th item on the third menu.
+<P>
+If init% was passed, MENU writes back to init% 
+the value for the item which was last highlighted on the menu. You 
+can then use this value when calling the menu again. You only need 
+to use this technique if you have more than one menu in your program.
+<P>
+<A NAME = "MID$"><A HREF="psi-prog.htm"><H3><HR>MID$</H3></A>
+<B>Usage:</B> <CODE>m$=MID$(a$,x%,y%)</CODE></DT><P>
+Returns a string comprising y% characters of a$, starting 
+at the character at position x%.
+<P>
+Eg if name$=McConnell then MID$(name$,3,3) would return 
+the string Con.
+<P>
+<A NAME = "MIN"><A HREF="psi-prog.htm"><H3><HR>MIN</H3></A>
+<B>Usage:</B><DD><CODE>m=MIN(list)<BR>
+<DD>m=MIN(array(),element)<BR>
+</CODE></DT><P>
+Returns the smallest of a list of numeric items. 
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<P>
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=MIN(arr(),3) would return the minimum of elements 
+arr(1), arr(2) and arr(3).
+<P>
+<A NAME = "mINIT"><A HREF="psi-prog.htm"><H3><HR>mINIT</H3></A>
+<B>Usage:</B> <CODE>mINIT</CODE></DT><P>
+Prepares for definition of menus, cancelling any existing menus. Use 
+mCARD to define each menu, then MENU to display them.
+<P>
+<A NAME = "MINUTE"><A HREF="psi-prog.htm"><H3><HR>MINUTE</H3></A>
+<B>Usage:</B> <CODE>m%=MINUTE</CODE></DT><P>
+Returns the current minute number from the system clock (0 to 59). 
+<P>
+<P>
+Eg at 8.54am MINUTE returns 54.
+<P>
+<A NAME = "MKDIR"><A HREF="psi-prog.htm"><H3><HR>MKDIR</H3></A>
+<B>Usage:</B> <CODE>MKDIR name$</CODE></DT><P>
+Creates a new directory. For example, MKDIR M:\MINE\TEMP 
+creates a M:\MINE\TEMP directory, also creating M:\MINE 
+if it is not already there.
+<P>
+<A NAME = "MONTH"><A HREF="psi-prog.htm"><H3><HR>MONTH</H3></A>
+<B>Usage:</B> <CODE>m%=MONTH</CODE></DT><P>
+Returns the current month from the system clock as an integer between 
+1 and 12. 
+<P>
+Eg on 12th March 1992 m%=MONTH returns 3 to m%.
+<P>
+<A NAME = "MONTH$"><A HREF="psi-prog.htm"><H3><HR>MONTH$</H3></A>
+<B>Usage:</B> <CODE>m$=MONTH$(x%) </CODE></DT><P>
+Converts x%, a number from 1 to 12, to the month name, expressed 
+as a three-letter mixed case string.
+<P>
+Eg MONTH$(1) returns the string Jan.
+<P>
+<A NAME = "NEWOBJ"><A HREF="psi-prog.htm"><H3><HR>NEWOBJ</H3></A>
+<B>Usage:</B> <CODE>pobj%=NEWOBJ(num%,clnum%)</CODE></DT><P>
+Create a new object by category number num% belonging to the 
+class clnum%, returning the object handle on success or zero 
+if out of memory.
+<P>
+<A NAME = "NEWOBJH"><A HREF="psi-prog.htm"><H3><HR>NEWOBJH</H3></A>
+<B>Usage:</B> <CODE>pobj%=NEWOBJH(cat%,clnum%)</CODE></DT><P>
+Create a new object by category handle cat% belonging to the 
+class clnum%, returning the object handle on success or zero 
+if out of memory.
+<P>
+<A NAME = "NEXT"><A HREF="psi-prog.htm"><H3><HR>NEXT</H3></A>
+<B>Usage:</B> <CODE>NEXT</CODE></DT><P>
+Positions to the next record in the current data file.
+<P>
+If NEXT is used after the end of a file has been reached, no 
+error is reported but the current record is a null and the EOF 
+function returns true. 
+<P>
+<A NAME = "NUM$ "><A HREF="psi-prog.htm"><H3><HR>NUM$ </H3></A>
+<B>Usage:</B> <CODE>n$=NUM$(x,y%)</CODE></DT><P>
+Returns a string representation of the integer part of the floating-point 
+number x, rounded to the nearest whole number. The string will 
+be up to y% characters wide. 
+<P>
+<UL><LI> If y% is negative then the string is right-justified  </LI> 
+for example NUM$(1.9,-3) returns 
+  2 where there are two spaces to the left of the 2.
+</UL>
+<UL><LI> If y% is positive no spaces are added:  eg </LI> 
+NUM$(-3.7,3) returns -4.
+</UL>
+<UL><LI> If the string returned to n$ will not fit in the width </LI> 
+y%, then the string will just be asterisks; for example NUM$(256.99,2) 
+returns **.
+</UL>
+See also FIX$, GEN$, SCI$.
+<P>
+<A NAME = "ODBINFO"><A HREF="psi-prog.htm"><H3><HR>ODBINFO</H3></A>
+<B>Usage:</B> <CODE>ODBINFO var info%() </CODE></DT><P>
+Provided for advanced use only, this keyword allows you to use OS 
+and CALL to access data file interrupt functions not accessible 
+with OPL keywords. See the `Advanced topics' chapter for more details.
+<P>
+<A NAME = "OFF"><A HREF="psi-prog.htm"><H3><HR>OFF</H3></A>
+<B>Usage:</B><DD><CODE>OFF<BR>
+<DD>OFF x%<BR>
+</CODE></DT><P>
+Switches the Series 3a off.
+<P>
+When you switch back on, the statement following the OFF command 
+is executed, for example:
+OFF :PRINT Hello again 
+<P>
+If you specify an integer, x%, between 8 and 16383, the machine 
+switches off for that number of seconds and then automatically turns 
+back on and continues with the next line of the program (16383 is 
+about 4 1/2  hours). However, during this time the machine may be 
+switched on by an alarm, and of course you can turn it on with ON/Esc.
+<P>
+Warning: be careful how you use this command. If, due to a programming 
+mistake, a program uses OFF in a loop, you may find it impossible 
+to switch the Series 3a back on, and may have to reset the computer.
+<P>
+<A NAME = "ONERR"><A HREF="psi-prog.htm"><H3><HR>ONERR</H3></A>
+<B>Usage:</B><DD><CODE>ONERR label<BR>
+<DD>ONERR label::<BR>
+<DD>..<BR>
+<DD>..<BR>
+<DD>ONERR OFF<BR>
+</CODE></DT><P>
+ONERR label:: establishes an error handler in a procedure. 
+When an error is raised, the program jumps to the label:: instead 
+of the program stopping and an error message being displayed.
+<P>
+The label may be up to 8 characters long starting with a letter. It 
+ends with a double colon (::), although you don't need to use 
+this in the ONERR statement.
+<P>
+ONERR OFF disables the ONERR command, so that any errors 
+occurring after the ONERR OFF statement no longer jump to the 
+label. 
+<P>
+It is advisable to use the command ONERR OFF immediately after 
+the label:: which starts the error handling code.
+<P>
+See the Error handling chapter for full details.
+<P>
+<A NAME = "OPEN "><A HREF="psi-prog.htm"><H3><HR>OPEN </H3></A>
+<B>Usage:</B> <CODE>OPEN file$,log,f1,f2...</CODE></DT><P>
+Opens an existing data file  file$, giving it the logical file 
+name log, and giving the fields the names f1, f2..
+<P>
+You need only specify those fields which you intend to update or append, 
+though you cannot miss out a field.
+<P>
+The opened file is then referred to within the program by its logical 
+name (A, B, C or D).
+<P>
+Up to 4 files can be open at once. 
+<P>
+Example:
+<P>
+OPEN clients,A,name$,addr$
+<P>
+See also CREATE, USE and OPENR.
+<P>
+<A NAME = "OPENR"><A HREF="psi-prog.htm"><H3><HR>OPENR</H3></A>
+<B>This command works exactly like OPEN except that the opened </B> <CODE>or UPDATE the records it contains.</CODE></DT><P>
+This means that you can run two separate programs at the same time, 
+both sharing the same file.
+<P>
+<A NAME = "OS"><A HREF="psi-prog.htm"><H3><HR>OS</H3></A>
+<B>Usage:</B><DD><CODE>a%=OS(i%, addr1%)<BR>
+<DD>a%=OS(i%, addr1%, addr2%)<BR>
+</CODE></DT><P>
+Calls the Operating System interrupt i%, reading the values 
+of all returned 8086 registers and flags. The CALL function, although simpler to use, does not allow the AL register 
+to be passed and no flags are returned, making it suitable only for 
+certain interrupts.
+<P>
+The input registers are passed at the address addr1%. The output 
+registers are returned at the address addr2% if supplied, otherwise 
+they are returned at addr1%. Both addresses can be of an array, 
+or of six consecutive integers.
+<P>
+Register values are stored sequentially as 6 integers and represent 
+the register values in this order: AX, BX, CX, 
+DX, SI and DI. The interrupt's function number, 
+if required, is passed in AH.
+<P>
+The output array must be large enough to store the 6 integers returned 
+in all cases, irrespective of the interrupt being called.
+<P>
+The value returned by OS is the flags register. The Carry flag, 
+which is relevant in most cases, is in bit 0 of the returned value, 
+so (a% and 1) will be `True' if Carry is set. Similarly, 
+the Zero flag is in bit 6, the Sign flag in bit 7 and the Overflow 
+flag in bit 10.
+<P>
+For example, to find cos(pi/4):
+<P>
+<UL><PRE>
+<B>PROC add:</B>
+	local a%,b%,c%,d%,si%,di%
+	local result,cosArg,flags% 
+	cosArg=pi/4
+	si%=addr(cosArg)
+	di%=addr(result)
+	ax%=$0100 REM AH=1
+				 REM for cosine
+	flags%=os(140,addr(ax%))
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The OS function requires extensive knowledge of the 
+Operating System and related programming techniques.
+<P>
+See also CALL.
+<P>
+<A NAME = "PARSE$"><A HREF="psi-prog.htm"><H3><HR>PARSE$</H3></A>
+<B>Usage:</B> <CODE>p$=PARSE$(f$,rel$,var off%())</CODE></DT><P>
+Returns a full file specification from the filename f$, filling 
+in any missing information from rel$.
+<P>
+The offsets to the filename components in the returned string is returned 
+in off%() which must be declared with at least 6 integers:
+<PRE>
+off%(1)	filing system offset (1 always)
+off%(2)	device offset
+off%(3)	path offset
+off%(4)	filename offset
+off%(5)	file extension offset
+off%(6)	flags for wildcards in returned string
+<P>
+The flag values in offset%(6) are:
+<P>
+0 : no wildcards
+1 : wildcard in filename
+2 : wildcard in file extension
+3 : wildcard in both
+</PRE>
+If rel$ is not itself a complete file specification, the current 
+filing system, device and/or path are used as necessary to fill in 
+the missing parts.
+<P>
+f$ and rel$ should be separate strings.
+<P>
+Example:
+<P>
+p$=PARSE(NEW,LOC::M:\ODB\*.ODB,x%())
+<P>
+sets p$ to LOC::M:\ODB\NEW.ODB and x%() to (1,6,8,13,16,0).
+<P>
+<A NAME = "PATH"><A HREF="psi-prog.htm"><H3><HR>PATH</H3></A>
+<B>Usage:</B> <CODE>PATH name$</CODE></DT><P>
+Gives the directory to use for an OPA's files.
+<P>
+This can only be used between APP and ENDA.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+<A NAME = "PAUSE "><A HREF="psi-prog.htm"><H3><HR>PAUSE </H3></A>
+<B>Usage:</B> <CODE>PAUSE x%</CODE></DT><P>
+Pauses the program for a certain time, depending on the value of x%:
+<P>
+x%	result
+<P>
+0	waits for a key to be pressed.
+<P>
++ve	pauses for x%  twentieths of a second. 
+<P>
+-ve	pauses for x% twentieths of a second or until a key is pressed.
+<P>
+So PAUSE 100 would make the program pause for  100/20  = 5 
+seconds, and PAUSE -100 would make the program pause for 5 seconds 
+or until a key is pressed.
+<P>
+If x% is 0, a GET, GET$, KEY or KEY$ 
+will return the key press which terminated the pause. If you are not 
+interested in this keypress, but in the one which follows it, clear 
+the buffer after the PAUSE with a single KEY function: 
+PAUSE 0 :KEY
+<P>
+You should be especially careful about this if x% is negative, 
+since then you cannot tell whether the pause was terminated by a keypress 
+or by the time running out.
+<P>
+<A NAME = "PEEK functions"><A HREF="psi-prog.htm"><H3><HR>PEEK functions</H3></A>
+<B>The PEEK functions find the values stored in specific bytes.</B> <CODE>Usage:</CODE></DT><P>
+p%=PEEKB(x%) returns the integer value of the byte at address x%
+p%=PEEKW(x%) returns the integer at address x%
+p&=PEEKL(x%) returns the long integer value at address x%
+p=PEEKF(x%) returns the floating-point value at address x%
+p$=PEEK$(x%) returns the string at address x%
+<P>
+Usually you would find out the byte address with the ADDR function. 
+For example, if var% has the value 7, PEEKW(ADDR(var%))  returns 
+7.
+<P>
+The different types are stored in different ways across bytes:
+<P>
+<UL><LI> Integers are stored in two bytes. The first byte </LI> 
+is the least significant byte, for example:
+    (picture)
+</UL>
+ADDR returns the address of the first (least significant) 
+byte.
+<P>
+<UL><LI> Long integers are stored in four bytes, the least </LI> 
+significant first and the most significant last, for example:
+    (picture)
+</UL>
+ADDR returns the address of the first (least significant) 
+byte.
+<P>
+<UL><LI> Strings are stored with one character per byte, with </LI> 
+a leading byte containing the string length, eg:
+    (picture)
+</UL>
+Each letter is stored as its character code  for 
+example, A as 65. 
+<P>
+For example, if var$=ABC, PEEK$(ADDR(var$)) 
+will return the string ABC. ADDR returns the address 
+of the length byte.
+<P>
+<UL><LI> Floating-point numbers are stored under IEEE </LI> 
+format, across eight bytes. PEEKF automatically reads all eight 
+bytes and returns the number as a floating-point. For example if var=1.3 
+then PEEKF(ADDR(var)) returns 1.3.
+</UL>
+You can use ADDR to find the address of the first element in 
+an array, for example ADDR(x%()). You can also specify individual 
+elements of the array, for example ADDR(x%(2)).
+<P>
+See also the POKE commands and ADDR.
+<P>
+<A NAME = "PI"><A HREF="psi-prog.htm"><H3><HR>PI</H3></A>
+<B>Usage:</B> <CODE>p=PI</CODE></DT><P>
+Returns the value of Pi (3.14... ). 
+<P>
+<A NAME = "POKE commands"><A HREF="psi-prog.htm"><H3><HR>POKE commands</H3></A>
+<B>The POKE commands store values in specific bytes.</B> <CODE>Usage:</CODE></DT><P>
+POKEB x%,y% stores the integer value y% (less than 256) in the single byte at address x%
+POKEW x%,y% stores the integer y% across two consecutive bytes, with the least significant byte in the lower address, that is x%
+POKEL x%,y& stores the long-integer y& in bytes starting at address x%
+POKEF x%,y stores the floating-point value y in bytes starting at address x%
+POKE$ x%,y$ stores the string y$ in bytes starting at address x%
+<P>
+Use ADDR to find out the address of your declared variables. 
+<P>
+<B>Warning</B>: Casual use of these commands can result in the loss 
+of data in the Series 3a.
+<P>
+See PEEK for more details of how the different types are stored 
+across bytes.
+<P>
+<A NAME = "POS"><A HREF="psi-prog.htm"><H3><HR>POS</H3></A>
+<B>Usage:</B> <CODE>p%=POS</CODE></DT><P>
+Returns the number of the current record in the current data file, 
+from 1 (the first record) upwards.
+<P>
+A file can have up to 65534 records. However integers can only be 
+in the range -32768 to +32767. Record numbers above 32767 are therefore 
+returned like this:
+<PRE>
+record	value	returned by POS
+32767		 32767
+32768		-32768
+32769		-32767
+32770		-32766
+.		.
+.		.
+65534		-2
+<P>
+To display record numbers, you can use this check:
+<P>
+IF POS<0
+ PRINT 65536+POS
+ELSE PRINT POS
+ENDIF
+</pRE>
+<P>
+<A NAME = "POSITION "><A HREF="psi-prog.htm"><H3><HR>POSITION </H3></A>
+<B>Usage:</B> <CODE>POSITION x%</CODE></DT><P>
+Makes record number x% the current record in the current data 
+file. 
+<P>
+If x% is greater than the number of records in the file then 
+the EOF function will return true.
+<P>
+<A NAME = "POSSPRITE"><A HREF="psi-prog.htm"><H3><HR>POSSPRITE</H3></A>
+<B>Usage:</B> <CODE>POSSPRITE x%,y%</CODE></DT><P>
+Set the position of the current sprite to pixel x%,y%.
+<P>
+<A NAME = "PRINT "><A HREF="psi-prog.htm"><H3><HR>PRINT </H3></A>
+<B>Usage:</B> <CODE>PRINT list of expressions</CODE></DT><P>
+Displays a list of expressions on the screen. The list can be punctuated 
+in one of these ways:
+<P>
+<UL><LI> If items to be displayed are separated by commas, there </LI> 
+is a space between them when displayed.
+</UL>
+<UL><LI> If they are separated by semi-colons, there are no spaces.</LI> 
+</UL>
+<UL><LI> Each PRINT statement starts a new line, unless the </LI> 
+preceding PRINT ended with a semi-colon or comma.
+</UL>
+<UL><LI> There can be as many items as you like in this list. A single </LI> 
+PRINT on its own just moves to the next line.
+<PRE>
+Examples:
+</UL>
+On 1st January 1993, 
+PRINT TODAY is,
+PRINT DAY;.;MONTH 
+would display TODAY is 1.1
+<P>
+PRINT 1             1
+PRINT Hello       Hello
+PRINT Number,1    Number 1
+</PRE>
+See also LPRINT, gUPDATE, gPRINT, gPRINTB, 
+gPRINTCLIP, gXPRINT.
+<P>
+<A NAME = "RAD"><A HREF="psi-prog.htm"><H3><HR>RAD</H3></A>
+<B>Usage:</B> <CODE>r=RAD(x)</CODE></DT><P>
+Converts x from degrees to radians.
+<P>
+All the trigonometric functions assume angles are specified in radians, 
+but it may be easier for you to enter angles in degrees and then convert 
+with RAD. 
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC xcosine:</B>
+LOCAL angle
+PRINT Angle (degrees)?:;
+INPUT angle
+PRINT COS of,angle,is,
+angle=RAD(angle)
+PRINT COS(angle)
+GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+(The formula used is ^PI*x/180)
+<P>
+To convert from radians to degrees use DEG.
+<P>
+<A NAME = "RAISE  "><A HREF="psi-prog.htm"><H3><HR>RAISE  </H3></A>
+<B>Usage:</B> <CODE>RAISE x%</CODE></DT><P>
+Raises an error. 
+<P>
+The error raised is error number x%. This may be one of the 
+errors listed in the Error handling chapter, or a new error number 
+defined by you.
+<P>
+The error is handled by the error processing mechanism currently in 
+use  either OPL's own, which stops the program and displays 
+an error message, or the ONERR handler if you have ONERR 
+on.
+<P>
+For a full explanation, see the Error handling chapter.
+<P>
+<A NAME = "RANDOMIZE "><A HREF="psi-prog.htm"><H3><HR>RANDOMIZE </H3></A>
+<B>Usage:</B> <CODE>RANDOMIZE x&</CODE></DT><P>
+Gives a `seed' (start-value) for RND.
+<P>
+Successive calls of the RND function produce a sequence of 
+random numbers. If you use RANDOMIZE to set the seed back to 
+what it was at the beginning of the sequence, the same sequence will 
+be repeated.
+<P>
+For example, you might want to use the same `random' values to test 
+new versions of a procedure. To do this, precede the RND statement 
+with the statement RANDOMIZE value. Then to repeat the 
+sequence, use RANDOMIZE value again.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC SEQ:</B>
+LOCAL g$(1)
+WHILE 1
+ PRINT S: set seed to 1
+ PRINT Q: quit
+ PRINT other key: continue
+ g$=UPPER$(GET$)
+ IF g$=Q
+  BREAK
+ ELSEIF g$=S
+  PRINT Setting seed to 1
+  RANDOMIZE 1
+  PRINT First random no:
+ ELSE
+  PRINT Next random no:
+ ENDIF
+ PRINT RND
+ENDWH
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "REALLOC"><A HREF="psi-prog.htm"><H3><HR>REALLOC</H3></A>
+<B>Usage:</B> <CODE>pcelln%=REALLOC(pcell%,size%)</CODE></DT><P>
+Change the size of a previously allocated cell at pcell% to 
+size%, returning the new cell address or zero if there is not 
+enough memory.
+<P>
+<A NAME = "RECSIZE"><A HREF="psi-prog.htm"><H3><HR>RECSIZE</H3></A>
+<B>Usage:</B> <CODE>r%=RECSIZE</CODE></DT><P>
+Returns the number of bytes occupied by the current record. 
+<P>
+Use this function to check that a record may have data added to it 
+without overstepping the 1022-character limit. 
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC rectest:</B>
+LOCAL n$(20)
+OPEN name,A,name$
+PRINT Enter name:,
+INPUT n$
+IF RECSIZE<=(1022-LEN(n$))
+ A.name$=n$
+ APPEND
+ELSE
+ PRINT Won't fit in record
+ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "REM"><A HREF="psi-prog.htm"><H3><HR>REM</H3></A>
+<B>Usage:</B> <CODE>REM text</CODE></DT><P>
+Precedes a remark you include to explain how a program works. All 
+text after the REM up to the end of the line is ignored.
+<P>
+When you use REM at the end of a line you need only precede 
+it with a space, not a space and a colon.
+<P>
+Examples:
+<PRE>
+INPUT a
+b=a*.175 REM b=TAX
+INPUT a
+b=a*.175 :REM b=TAX
+</PRE>
+<P>
+<A NAME = "RENAME  "><A HREF="psi-prog.htm"><H3><HR>RENAME  </H3></A>
+<B>Usage:</B> <CODE>RENAME file1$,file2$</CODE></DT><P>
+Renames file1$ as file2$. You can rename any type of file.
+<P>
+You cannot use wildcards.
+<P>
+You can rename across directories  RENAME \dat\x.dbf,\x.dbf 
+is OK. If you do this, you can choose whether or not to change the 
+name of the file.
+<P>
+Example:
+<PRE>
+PRINT Old name: :INPUT a$
+PRINT New name: :INPUT b$
+RENAME a$,b$
+</PRE>
+<P>
+<A NAME = "REPT$ "><A HREF="psi-prog.htm"><H3><HR>REPT$ </H3></A>
+<B>Usage:</B> <CODE>r$=REPT$(a$,x%)</CODE></DT><P>
+Returns a string comprising x% repetitions of a$.
+<P>
+For example, if a$=ex, r$=REPT$(a$,5) returns exexexexex.
+<P>
+<A NAME = "RETURN "><A HREF="psi-prog.htm"><H3><HR>RETURN </H3></A>
+<B>Usage:</B> <CODE>RETURN or RETURN variable</CODE></DT><P>
+Terminates the execution of a procedure and returns control to the 
+point where that procedure was called (ENDP does this automatically).
+<P>
+RETURN variable does this as well, but also passes the value 
+of variable back to the calling procedure. The variable may 
+be of any type. You can return the value of any single array element  
+for example RETURN x%(3). You can only return one variable.
+<P>
+RETURN on its own, and the default return through ENDP, 
+causes the procedure to return the value 0 or a null string.
+<P>
+Example:
+    (picture)
+<P>
+<UL><PRE>
+<B>PROC price:</B>
+ LOCAL x
+ PRINT Enter price:,
+ INPUT x
+ x=tax:(x)
+ PRINT x
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC tax:(price)</B>
+ RETURN price+17.5%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "RIGHT$"><A HREF="psi-prog.htm"><H3><HR>RIGHT$</H3></A>
+<B>Usage:</B> <CODE>r$=RIGHT$(a$,x%)</CODE></DT><P>
+Returns the rightmost x% characters of a$. 
+<P>
+Example:
+<P>
+PRINT Enter name/ref,
+<P>
+INPUT c$
+<P>
+ref$=RIGHT$(c$,4)
+<P>
+name$=LEFT$(c$,LEN(c$)-4)
+<P>
+<A NAME = "RMDIR"><A HREF="psi-prog.htm"><H3><HR>RMDIR</H3></A>
+<B>Usage:</B> <CODE>RMDIR str$</CODE></DT><P>
+Removes the directory given by str$. You can only 
+remove empty directories.
+<P>
+<A NAME = "RND"><A HREF="psi-prog.htm"><H3><HR>RND</H3></A>
+<B>Usage:</B> <CODE>r=RND</CODE></DT><P>
+Returns a random floating-point number in the range 0 (inclusive) 
+to 1 (exclusive).
+<P>
+To produce random numbers between 1 and n  eg between 
+1 and 6 for a dice  use the following statement: f%=1+INT(RND*n)
+<P>
+RND produces a different number every time it is called within 
+a program. A fixed sequence can be generated by using RANDOMIZE. 
+You might begin by using RANDOMIZE with an argument generated 
+from MINUTE and SECOND (or similar), to seed the sequence 
+differently each time.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC rndvals:</B>
+LOCAL i%
+PRINT Random test values:
+DO
+ PRINT RND
+ i%=i%+1
+ GET
+UNTIL i%=10
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "SCI$"><A HREF="psi-prog.htm"><H3><HR>SCI$</H3></A>
+<B>Usage:</B> <CODE>s$=SCI$(x,y%,z%)</CODE></DT><P>
+Returns a string representation of x in scientific format, to 
+y% decimal places and up to z% characters wide. Examples:
+<P>
+SCI$(123456,2,8)=1.23E+05
+SCI$(1,2,8)=1.00E+00
+SCI$(1234567,1,-8)= 1.2E+06
+<P>
+If the number does not fit in the width specified then the returned 
+string contains asterisks.
+<P>
+If z% is negative then the string is right-justified.
+<P>
+See also FIX$, GEN$, NUM$.
+<P>
+<A NAME = "SCREEN"><A HREF="psi-prog.htm"><H3><HR>SCREEN</H3></A>
+<B>Usage:</B><DD><CODE>SCREEN width%,height%<BR>
+<DD>SCREEN width%,height%,x%,y%<BR>
+</CODE></DT><P>
+Changes the size of the window in which text is displayed. x%,y% 
+specify the character position of the top left corner; if they are 
+not given, the text window is centred in the screen.
+<P>
+An OPL program can initially display text to the whole screen.
+<P>
+<A NAME = "SCREENINFO"><A HREF="psi-prog.htm"><H3><HR>SCREENINFO</H3></A>
+<B>Usage:</B> <CODE>SCREENINFO var info%()</CODE></DT><P>
+Gets information on the text screen (as used by PRINT etc.)
+<P>
+This keyword allows you to mix text and graphics. It is required because 
+while the default window is the same size as the physical screen, 
+the text screen is slightly smaller and is centred in the default 
+window. The few pixels gaps around the text screen, referred to as 
+the left and top margins, depend on the font in use.
+<P>
+On return, the array info%(), which must have at least 10 elements, 
+contains this information:
+<PRE>
+info%(1) left margin in pixels
+info%(2) top margin in pixels
+info%(3) text screen width in character units
+info%(4) text screen height in character units
+info%(5) reserved (window server id for default window)
+info%(6) font id (FONT and gFONT)
+info%(7) pixel width of text window character cell
+info%(8) pixel height of text window line
+info%(9), info%(10) reserved
+</PRE>
+Initially SCREENINFO returns the values for the initial text 
+screen. Subsequently any keyword which changes the size of the text 
+screen font, such as FONT, will change some of these values 
+and SCREENINFO should therefore be called again.
+<P>
+See also FONT.
+<P>
+<A NAME = "SECOND"><A HREF="psi-prog.htm"><H3><HR>SECOND</H3></A>
+<B>Usage:</B> <CODE>s%=SECOND</CODE></DT><P>
+Returns the current time in seconds from the system clock (0 to 59). 
+<P>
+<P>
+Eg at 6:00:33 SECOND returns 33.
+<P>
+<A NAME = "SECSTODATE"><A HREF="psi-prog.htm"><H3><HR>SECSTODATE</H3></A>
+<B>Usage:</B> <CODE>SECSTODATE s&,var yr%,var mo%,var dy%,var hr%,var mn%,var sc%,var yrday%</CODE></DT><P>
+Sets the variables passed by reference to the date corresponding to 
+s&, the number of seconds since 00:00 on 1 January 1970. yrday% 
+is set to the day in the year (1-366).
+<P>
+s& is an unsigned long integer. To use values greater 
+than +2,147,483,647, subtract 4,294,967,296 from the value.
+<P>
+See also DATETOSECS, HOUR, MINUTE, SECOND, dDATE, DAYS.
+<P>
+<A NAME = "SEND"><A HREF="psi-prog.htm"><H3><HR>SEND</H3></A>
+<B>Usage:</B> <CODE>ret%=SEND(pobj%,m%,var p1,...)</CODE></DT><P>
+Send a message to the object pobj% to call the method number 
+m%, passing between zero and three arguments (p1...) depending 
+on the requirements of the method, and returning the value returned 
+by the selected method. 
+<P>
+<A NAME = "SETNAME"><A HREF="psi-prog.htm"><H3><HR>SETNAME</H3></A>
+<B>Usage:</B> <CODE>SETNAME name$</CODE></DT><P>
+Sets the name of the running OPA to name$ and redraws any status 
+window, using that name below the icon.
+<P>
+<A NAME = "SETPATH"><A HREF="psi-prog.htm"><H3><HR>SETPATH</H3></A>
+<B>Usage:</B> <CODE>SETPATH name$</CODE></DT><P>
+Sets the current directory for file access  for example, SETPATH a:\docs. 
+LOADM continues to use the directory of the initial program, 
+or the one specified by a OPA application, but all other file 
+access will be to the new directory.
+<P>
+<A NAME = "SIN"><A HREF="psi-prog.htm"><H3><HR>SIN</H3></A>
+<B>Usage:</B> <CODE>s=SIN(angle)</CODE></DT><P>
+Returns the sine of angle, an angle expressed in radians.
+<P>
+To convert from degrees to radians, use the RAD function.
+<P>
+<A NAME = "SPACE"><A HREF="psi-prog.htm"><H3><HR>SPACE</H3></A>
+<B>Usage:</B> <CODE>s&=SPACE</CODE></DT><P>
+Returns the number of free bytes on the device on which the current 
+(open) data file is held.
+<P>
+Example:
+<P>
+<UL><PRE>
+<B>PROC stock:</B>
+OPEN A:stock,A,a$,b%
+WHILE 1
+ PRINT Item name:;
+ INPUT A.a$
+ PRINT Number:;
+ INPUT A.b%
+ IF RECSIZE>SPACE
+  PRINT Disk full
+  CLOSE
+  BREAK
+ ELSE
+  APPEND
+ ENDIF
+ENDWH
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<A NAME = "SQR"><A HREF="psi-prog.htm"><H3><HR>SQR</H3></A>
+<B>Usage:</B> <CODE>s=SQR(x)</CODE></DT><P>
+Returns the square root of x. 
+<P>
+<A NAME = "STATUSWIN"><A HREF="psi-prog.htm"><H3><HR>STATUSWIN</H3></A>
+<B>Usage  one of:</B><DD><CODE>STATUSWIN ON,type%<BR>
+<DD>STATUSWIN ON<BR>
+<DD>STATUSWIN OFF<BR>
+</CODE></DT><P>
+Displays or removes a `permanent' status window.
+<P>
+If type%=1 the small status window is shown. If type%=2 
+the large status window is shown. STATUSWIN ON on its own 
+displays an appropriate status window; on the Series 3a this will 
+always be the large status window.
+<P>
+The permanent status window is behind all other OPL windows. 
+In order to see it, you must use FONT (or both SCREEN 
+and gSETWIN) to reduce the size of the text and graphics windows. 
+You should ensure that your program does not create windows over the 
+top of it.
+<P>
+<A NAME = "STATWININFO"><A HREF="psi-prog.htm"><H3><HR>STATWININFO</H3></A>
+<B>Usage:</B> <CODE>t%=STATWININFO(type%,var xy%())</CODE></DT><P>
+Sets xy%(1),xy%(2), xy%(3) and xy%(4) to the top left x, top left 
+y, width and height respectively of the specified type of status window. 
+type%=1 is the small status window; type%=2 is the large 
+status window; type%=3 is the Series 3 compatibility mode 
+status window; type%=-1 is whichever status window is current.
+<P>
+STATWININFO returns t%, the type of the current 
+status window (with values as for type%, or zero if there is 
+no current status window).
+<P>
+<A NAME = "STD"><A HREF="psi-prog.htm"><H3><HR>STD</H3></A>
+<B>Usage:</B><DD><CODE>s=STD(list)<BR>
+<DD>s=STD(array(),element)<BR>
+</CODE></DT><P>
+Returns the standard deviation of a list of numeric items. 
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<P>
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=STD(arr(),3) would return the standard deviation 
+of elements arr(1), arr(2) and arr(3).
+<P>
+This function gives the sample standard deviation, using the formula:
+<P>
+SQR((xi-x)^2/(n-1)) where 
+x means xi/n. To convert 
+to population standard deviation, multiply the result by SQR((n-1)/n).
+<P>
+<A NAME = "STOP"><A HREF="psi-prog.htm"><H3><HR>STOP</H3></A>
+<B>Usage:</B> <CODE>STOP</CODE></DT><P>
+Ends the running program.
+<P>
+<A NAME = "STYLE"><A HREF="psi-prog.htm"><H3><HR>STYLE</H3></A>
+<B>Usage:</B> <CODE>STYLE style%</CODE></DT><P>
+Sets the text window character style. style% can be 2 for underlined, 
+or 4 for inverse.
+<P>
+See `The text and graphics windows' at the end of the `Graphics' chapter 
+for more details.
+<P>
+<A NAME = "SUM"><A HREF="psi-prog.htm"><H3><HR>SUM</H3></A>
+<B>Usage:</B><DD><CODE>s=SUM(list)<BR>
+<DD>s=SUM(array(),element)<BR>
+</CODE></DT><P>
+Returns the sum of a list of numeric items. 
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<P>
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=SUM(arr(),3) would return the sum of elements 
+arr(1), arr(2) and arr(3).
+<P>
+<A NAME = "TAN"><A HREF="psi-prog.htm"><H3><HR>TAN</H3></A>
+<B>Usage:</B> <CODE>t=TAN(angle)</CODE></DT><P>
+Returns the tangent of angle, an angle expressed in radians.
+<P>
+To convert from radians to degrees, use the DEG function.
+<P>
+<A NAME = "TESTEVENT"><A HREF="psi-prog.htm"><H3><HR>TESTEVENT</H3></A>
+<B>Usage:</B> <CODE>t%=TESTEVENT</CODE></DT><P>
+Returns `True' if an event has occurred, otherwise returns `False'. 
+The event is not read by TESTEVENT  it may be read with 
+GETEVENT.
+<P>
+<A NAME = "TRAP "><A HREF="psi-prog.htm"><H3><HR>TRAP </H3></A>
+<B>Usage:</B> <CODE>TRAP command</CODE></DT><P>
+TRAP is an error handling command. It may precede any of these 
+commands:
+<P>
+Data file commands
+<P>
+APPEND, UPDATE
+BACK, NEXT, LAST, FIRST, POSITION
+USE, CREATE, OPEN, OPENR, CLOSE, DELETE
+<P>
+File commands
+<P>
+COPY, COMPRESS, ERASE, RENAME
+LOPEN, LCLOSE
+LOADM, UNLOADM
+<P>
+Directory commands
+<P>
+MKDIR, RMDIR
+<P>
+Data entry commands
+<P>
+EDIT, INPUT
+<P>
+Graphics commands
+<P>
+gSAVEBIT, gCLOSE, gUSE
+gUNLOADFONT, gFONT, gPATT, gCOPY
+<P>
+For example, TRAP FIRST. 
+<P>
+Any error resulting from the execution of the command will be trapped. 
+Program execution will continue at the statement after the TRAP 
+statement, but ERR will be set to the error code.
+<P>
+TRAP overrides any ONERR.
+<P>
+See the Error handling chapter for further details.
+<P>
+<A NAME = "TYPE"><A HREF="psi-prog.htm"><H3><HR>TYPE</H3></A>
+<B>Usage:</B> <CODE>TYPE num%</CODE></DT><P>
+Sets the type of an OPA, from 0 to 4, with num%. On the Series 3a 
+you should set num% from $1000 to $1004 to set type 0 to 4 respectively; 
+the $1000 allows a 48x48 black/grey icon to be used.
+<P>
+This can only be used between APP and ENDA.
+<P>
+See the Advanced Topics chapter for more details of OPAs.
+<P>
+<A NAME = "UADD"><A HREF="psi-prog.htm"><H3><HR>UADD</H3></A>
+<B>Usage:</B> <CODE>i%=UADD(val1%, val2%)</CODE></DT><P>
+Add val1% and val2%, as if both were unsigned integers 
+with values from 0 to 65535. Prevents integer overflow for pointer 
+arithmetic  eg UADD(ADDR(text$),1) should be used instead 
+of ADDR(text$)+1.
+<P>
+One argument would normally be a pointer and the other an offset expression.
+<P>
+See also USUB.
+<P>
+<A NAME = "UNLOADLIB"><A HREF="psi-prog.htm"><H3><HR>UNLOADLIB</H3></A>
+<B>Usage:</B> <CODE>ret%=UNLOADLIB(var cat%)</CODE></DT><P>
+Unload a DYL from memory. If successful, returns zero.
+<P>
+<A NAME = "UNLOADM"><A HREF="psi-prog.htm"><H3><HR>UNLOADM</H3></A>
+<B>Usage:</B> <CODE>UNLOADM module$</CODE></DT><P>
+Removes from memory the module module$ loaded with LOADM.
+<P>
+module$ is a string containing the name of the translated module.
+<P>
+The procedures in an unloaded module cannot then be called by another 
+procedure.
+<P>
+<A NAME = "UNTIL"><A HREF="psi-prog.htm"><H3><HR>UNTIL</H3></A>
+<B>See DO.</B> <CODE>*** UPDATE</CODE></DT><P>
+Usage:
+<P>
+UPDATE
+<P>
+Deletes the current record in the current data file and saves the 
+current field values as a new record at the end of the file.
+<P>
+This record, now the last in the file, remains the current record.
+<P>
+Example:
+<P>
+A.count=129
+<P>
+A.name$=Brown
+<P>
+UPDATE
+<P>
+Use APPEND to save the current field values as a new record. 
+<P>
+<P>
+<A NAME = "UPPER$"><A HREF="psi-prog.htm"><H3><HR>UPPER$</H3></A>
+<B>Usage:</B> <CODE>u$=UPPER$(a$)</CODE></DT><P>
+Converts any lower case characters in a$ to upper case, and 
+returns the completely upper case string.
+<P>
+Example:
+<P>
+<PRE>
+...
+CLS :PRINT Y to continue
+PRINT or N to stop.
+g$=UPPER$(GET$)
+IF g$=Y
+ nextproc:
+ELSEIF g$=N
+ RETURN
+ENDIF
+...
+</PRE>
+Use LOWER$ to convert to lower case.
+<P>
+<A NAME = "USE"><A HREF="psi-prog.htm"><H3><HR>USE</H3></A>
+<B>Usage:</B> <CODE>USE logical name</CODE></DT><P>
+Selects the data file with the logical name A, B, 
+C or D. The file must previously have been opened with 
+OPEN, OPENR or CREATE and not yet be closed.
+<P>
+All the record handling commands (such as POSITION or UPDATE) 
+then operate on this file.
+<P>
+<A NAME = "USR"><A HREF="psi-prog.htm"><H3><HR>USR</H3></A>
+<B>Usage:</B> <CODE>u%=USR(pc%,ax%,bx%,cx%,dx%) </CODE></DT><P>
+<P>
+Executes your machine code, returning an integer. The USR code 
+(ie the assembler code you have written) must return with a far 
+RET, otherwise the program will crash.
+<P>
+The values of of ax%,bx%... are passed to the AX, BX... 
+8086 registers. The microprocessor then executes the machine code 
+starting at pc%. At the end of the routine, the value in the 
+AX register is passed back to u%.
+<P>
+WARNING: Casual use of this function can result in the loss 
+of data in the Series 3a.
+<P>
+This example shows a simple operation, ending with a far RET:
+<P>
+<UL><PRE>
+<B>PROC trivial:</B>
+LOCAL t%(2),u%,ax%
+ t%(1)=$c032  REM xor al,al
+ t%(2)=$cb    REM retf
+ ax%=$1ab
+u%=usr(addr(t%(1)),ax%,0,0,0)
+ REM returns (ax% AND $FF00)
+ PRINT u% REM 256 ($100)
+ GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+See also USR$, ADDR, PEEK, POKE.
+<P>
+<A NAME = "USR$"><A HREF="psi-prog.htm"><H3><HR>USR$</H3></A>
+<B>Usage:</B> <CODE>u$=USR$(pc%,ax%,bx%,cx%,dx%) </CODE></DT><P>
+<P>
+Executes your machine code, returning a string. The USR$ code 
+you have written must return with a far RET, otherwise the 
+program will crash.
+<P>
+The values of of ax%,bx%... are passed to the ax, bx... 8086 
+registers. The microprocessor then executes the machine code starting 
+at pc%. At the end of the routine, the value in the ax register 
+must point to a length-byte preceded string. This string is then copied 
+to u$.
+<P>
+WARNING: Casual use of this function can result in the loss 
+of data in the Series 3a.
+<P>
+See USR for an example. See also ADDR, PEEK, 
+POKE.
+<P>
+<A NAME = "USUB"><A HREF="psi-prog.htm"><H3><HR>USUB</H3></A>
+<B>Usage:</B> <CODE>i%=USUB(val1%, val2%)</CODE></DT><P>
+Subtract val2% from val1%, as if both were unsigned integers 
+with values from 0 to 65535. Prevents integer overflow for pointer 
+arithmetic.
+<P>
+See also UADD.
+<P>
+<A NAME = "VAL"><A HREF="psi-prog.htm"><H3><HR>VAL</H3></A>
+<B>Usage:</B> <CODE>v=VAL(numeric string)</CODE></DT><P>
+Returns the floating-point number corresponding to a numeric string.
+<P>
+The string must be a valid number  eg not 5.6.7 or 
+196f. Expressions, such as 45.6*3.1, are not 
+allowed. Scientific notation such as 1.3E10, is OK.
+<P>
+Eg VAL(470.0) returns 470
+<P>
+See also EVAL.
+<P>
+<A NAME = "VAR"><A HREF="psi-prog.htm"><H3><HR>VAR</H3></A>
+<B>Usage:</B><DD><CODE>v=VAR(list)<BR>
+<DD>v=VAR(array(),element)<BR>
+</CODE></DT><P>
+Returns the variance of a list of numeric items. 
+<P>
+The list can be either:
+<P>
+<UL><LI> A list of variables, values and expressions, separated by </LI> 
+commas
+</UL>
+or
+<P>
+<UL><LI> The elements of a floating-point array. </LI> 
+</UL>
+When operating on an array, the first argument must be the array name 
+followed by (). The second argument, separated from the first 
+by a comma, is the number of array elements you wish to operate on  
+for example m=VAR(arr(),3) would return the variance of elements 
+arr(1), arr(2) and arr(3).
+<P>
+This function gives the sample variance, using the formula:
+<P>
+(xi-x)^2/(n-1) where 
+x means xi/n. 
+To convert to population variance, multiply the result by 
+(n-1)/n
+<P>
+<A NAME = "VECTOR"><A HREF="psi-prog.htm"><H3><HR>VECTOR</H3></A>
+<B>Usage:</B><DD><CODE>VECTOR I%<BR>
+<DD>label1,label2,...<BR>
+<DD>labelN<BR>
+<DD>ENDV<BR>
+</CODE></DT><P>
+VECTOR I% jumps to label number i% in the list  
+if i% is 1 this will be the first label, and so on. The list 
+is terminated by the ENDV statement. The list may spread over 
+several lines, with a comma separating labels in any one line but 
+no comma at the end of each line.
+<P>
+If i% is not in the range 1 to N, where N is the 
+number of labels, the program continues with the statement after the 
+ENDV statement.
+<P>
+See also GOTO.
+<P>
+<A NAME = "WEEK "><A HREF="psi-prog.htm"><H3><HR>WEEK </H3></A>
+<B>Usage:</B> <CODE>w%=WEEK(day%,month%,year%)</CODE></DT><P>
+Returns the week number in which the specified day falls, as an integer 
+between 1 and 53.
+<P>
+day% must be between 1 and 31, month% between 1 and 12, 
+year% between 1900 and 2155.
+<P>
+Each week is taken to begin on the `Start of week' day, as specified 
+in the Time application. When a year begins on a different day, it 
+counts as week 1 if there are four or more days before the next week 
+starts..
+<P>
+<A NAME = "WHILE...ENDWH"><A HREF="psi-prog.htm"><H3><HR>WHILE...ENDWH</H3></A>
+<B>Usage:</B><DD><CODE>WHILE expression<BR>
+<DD> ..<BR>
+<DD> ...<BR>
+<DD> ..<BR>
+<DD> ....<BR>
+<DD>ENDWH<BR>
+</CODE></DT><P>
+Repeatedly performs the set of instructions between the WHILE 
+and the ENDWH statement, so long as expression returns 
+logical true  non-zero.
+<P>
+If expression is not true, the program jumps to the line after 
+the ENDWH statement.
+<P>
+Every WHILE must be closed with a matching ENDWH.
+<P>
+See also DO...UNTIL and Chapter 3. 
+<P>
+<A NAME = "YEAR"><A HREF="psi-prog.htm"><H3><HR>YEAR</H3></A>
+<B>Usage:</B> <CODE>y%=YEAR</CODE></DT><P>
+Returns the current year as an integer between 1900 and 2155 from 
+the system clock. 
+<P>
+For example, on 5th May 1992 YEAR returns 1992.
+<P>
+ 
+<P>
+ 
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

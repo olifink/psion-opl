@@ -1,0 +1,104 @@
+
+<TITLE>PSION Programming Ref.: Chapter 8. OPL and Solid State Disks</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>OPL and Solid State Disks</CENTER></H1>
+<P>
+<P>
+<P>
+<H3>Types of Solid State Disk</H3> 
+<P>
+Solid State Disks (SSDs) are explained in detail in the User 
+guide. There are two main reasons for using them:
+<P>
+<UL><LI> To provide more room for storing information.</LI> 
+</UL>
+<UL><LI> To make backup copies of important information, in case </LI> 
+you accidentally change or delete it (or even lose your Series 3a).
+</UL>
+There are two types  Ram SSDs and Flash SSDs. 
+They fit into the SSD drives marked "A" and "B", 
+at either side of the Series 3a.
+<P>
+<UL><LI> Flash SSDs are for storing or backing up information which </LI> 
+is infrequently changed. This includes finished OPL programs.
+</UL>
+<UL><LI> Ram SSDs are for storing or backing up information which </LI> 
+changes frequently. This includes OPL programs you are still writing 
+or testing.
+</UL>
+You can, though, save programs and data files to either kind of SSD, 
+as you see fit.
+<P>
+<H3>How to put programs on an SSD</H3> 
+<P>
+To create a new OPL module on an SSD, use the `New file' option in 
+the System screen as before, but set the "Disk" line of the dialog 
+to "A" or "B" as required.
+<P>
+To copy an OPL module onto an SSD, move onto the module name where 
+it is listed under the Program icon, and use the `Copy file' option 
+on the `File' menu. Set the `To file: Disk' line to "A" or "B". 
+If you want this copy to have a different name to the original, type 
+the name to use, on the `To file: Name' line. The new copy will appear 
+in the list under the Program icon, but with "[A]" or "[B]" 
+after its name. 
+<P>
+To copy the translated version of an OPL module, move onto the 
+name in the list under the RunOpl icon (to the right of the Program 
+icon), then proceed as before. 
+<P>
+<H3>SSDs from inside OPL</H3> 
+<P>
+Your OPL programs can create or use data files on SSDs. To do so, 
+begin the name of the data file with "A:" or "B:"  
+for example:
+<P>
+CREATE "B:JKQ",A,X1$,X2$
+<P>
+tries to create a data file "JKQ" on an SSD in "B", while 
+<P>
+DELETE "A:X300"
+<P>
+tries to delete a data file "X300" on an SSD in "A".
+<P>
+Don't confuse the drive names "A" and "B" with the logical 
+names "A", "B", "C" and "D". Logical names are unaffected 
+by which drive a data file is on.
+<P>
+The internal memory can be referred to as "M:", if required. For 
+example:
+<P>
+<UL><PRE>
+<B>PROC delx300:</B>
+  LOCAL a$(3),c%
+  a$="MAB" :c%=1 REM default to "Internal"
+  dINIT "Delete X300 data file"
+  dCHOICE c%,"Disk:","Internal,A,B"
+  IF DIALOG REM returns 0 if cancelled
+    DELETE MID$(A$,c%,1)+":X300"
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+In this example, "MID$(A$,c%,1)" gives ""M"", ""A"" or 
+""B"", according to the choice made in the dialog. This is added 
+on the front of "":X300"" to give the name of the file to delete  
+""M:X300"", ""A:X300"" or ""B:X300"".
+<P>
+When using data files with SSDs, follow the same guidelines as with 
+OPL programs  Flash SSDs are for one-off or "finished" information, 
+while Ram SSDs are for information which is still being changed.
+<P>
+<H3>Directories and DOS structure</H3> 
+<P>
+The internal memory and SSDs use a DOS-compatible directory structure, 
+the same as that used by disks on business PCs. For more details, 
+see the `Advanced Topics' chapter.
+<P>
+ 
+<P>
+ 
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

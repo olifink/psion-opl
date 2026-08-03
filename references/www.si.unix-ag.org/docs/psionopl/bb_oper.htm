@@ -1,0 +1,282 @@
+
+<TITLE>PSION Programming Ref.: Chapter B. Operators and logical expressions</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Operators and logical expressions</CENTER></H1>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "B.1"><H2> Operators</H2></A>
+<P>
+These operators are available in OPL:
+<P>
+<H3>Arithmetic operators</H3> 
+<PRE>
++	add
+"-"	subtract
+*	multiply
+/ 	divide
+** 	raise to a power
+"-" 	unary minus (in negative numbers  for example, "-10")
+%	percent
+<P>
+<H3>Comparison operators</H3> 
+	greater than
+=	greater than or equal to
+<	less than
+<=	less than or equal to
+=	equal to
+<> 	not equal to
+<P>
+<H3>Logical and bitwise operators</H3> 
+AND
+OR
+NOT
+<P>
+<H3>The % operator </H3> 
+<P>
+The percentage operator can be used in expressions like this:
+<P>
+"60+5%"		ie 60 plus 5% of 60. Result: 63
+"605%"		ie 60 minus 5% of 60. Result: 57
+"60*5%"		ie 5% of 60. Result: 3
+"60/5%"		ie what number is 60 5% of. Result: 1200.
+<P>
+It can also be used like this:
+<P>
+"105>5%"	ie what number, when increased by 5%, becomes 105. Result: 
+100
+"105<5%"	ie how much of 105 was a 5% increase. Result: 5 
+<P>
+Examples
+<P>
+To add 15% tax to 345:
+<P>
+"345+15%"		Result = 396.75
+<P>
+To find out what the price was before tax:
+<P>
+"396.75>15%"		Result = 345
+<P>
+To find out how much of a total price is tax:
+<P>
+"396.75<15%"		Result = 51.75
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "B.2"><H2>Precedence</H2></A>
+<P>
+Highest:	**
+		- (unary minus)  NOT 
+		*   /
+		+   -
+		=   >   <   <>   >=   <=
+Lowest:	AND  OR
+</PRE>
+So "7+3*4" returns 19 (3 is first multiplied by 4, and 7 is added 
+to the result) not 40 (4 times 10).
+<P>
+<H3>When there is equal precedence</H3> 
+<P>
+In an expression where all operators have equal precedence, they are 
+evaluated from left to right (with the exception of powers). For example, 
+in "a+b-c", "a" is added to "b" and then "c" is subtracted 
+from the result. 
+<P>
+Powers are evaluated from right to left  for example, in "a%**b%**c%", 
+"b%" will first be raised to the power of "c%" and then "a%" 
+will be raised to the power of the result.
+<P>
+<H3>Changing precedence with brackets </H3> 
+<P>
+The result of an expression such as "a+b+c" is the same whether 
+you first add "a" to "b", or "b" to "c". But how is 
+"a+b*c/d" evaluated? You may want to use brackets to either:
+<P>
+<UL><LI> Make it obvious what the order of calculation is</LI> 
+</UL>
+or
+<P>
+<UL><LI> Change the order of calculation.</LI> 
+</UL>
+By default, "a+b*c/d"  is evaluated in the order: "b" multiplied 
+by "c", then divided by "d", then added to "a". To perform 
+the addition and the division before the multiplication, use brackets: 
+"(a+b)*(c/d)". When in doubt, simply use brackets.
+<P>
+<H3>Precedence of integer and floating-point values</H3> 
+<P>
+You are free to mix floating-point and integer values in expressions, 
+but be aware how OPL handles the mix:
+<P>
+<UL><LI> In each part of the calculation, OPL uses the simplest arithmetic </LI> 
+possible. Two integers will use integer arithmetic, and this can give 
+unexpected results: "7/2" gives the integer "3". 
+Otherwise floating-point arithmetic is used ("7.0" is a floating-point 
+number, so "7.0/2" gives the floating-point number "3.5").
+</UL>
+<UL><LI> Finally, the evaluted result of the right-hand side of an </LI> 
+expression is automatically converted to the same type as the variable 
+to which it is assigned.
+</UL>
+For example, your procedure might include the expression "a%=b%+c" 
+This is handled like this: "b%" is converted to floating-point 
+and added to "c". The resulting floating-point value is then automatically 
+converted to an integer in order to be assigned to the integer variable 
+"a%".
+<P>
+Such conversions may produce odd results  for example "a%=3.0*(7/2)" 
+makes "a%=9", but "a%=3.0*(7.0/2)" makes "a%=10". OPL 
+does not report this as an error, so it's up to you to ensure that 
+it doesn't happen  unless you want it to.
+<P>
+<H3>Type conversions and rounding down</H3> 
+<P>
+There are three numeric types  floating-point, integer and 
+long integer. You can assign any of these types to any other. The 
+value on the right-hand side will be automatically converted to the 
+type of the variable on the left-hand side. For example:
+<P>
+<UL><LI> If you assign an integer value to a floating-point variable, </LI> 
+there are no problems.
+</UL>
+<UL><LI> If you assign a floating-point value to an integer variable, </LI> 
+the value is converted to an integer, always rounded towards zero  
+for example, if you declare" LOCAL c%" and then say "c%=3.75", 
+the value "3.75" is converted to the value "3".
+</UL>
+Rounding down towards zero can sometimes cause unusual results. For 
+example, "a%=2.9" would give "a%" the value 2, and "a%=-2.3" 
+would give "a%" the value -2.
+<P>
+When you run a module, if the left-hand side of an assignment has 
+a narrower range than the right-hand side, you may get an error (for 
+example, if you had "x%=a&" where "a&" had the value 320000).
+<P>
+To control how floating-point numbers are rounded when converted, use the INT function.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "B.3"><H2> Logical expressions</H2></A>
+<P>
+The comparison operators and logical operators are based on the idea 
+that a certain situation can be evaluated as either true or 
+false. For example, if "a%=6" and "b%=8", "a%>b%" 
+would be `False'.
+<P>
+These operators are useful for setting up alternative paths in your 
+procedures. For example you could say: 
+<PRE>
+IF salary<expenses 
+  doBad: 
+ELSE
+  doGood:
+ENDIF
+</PRE>
+You can also make use of the fact that the result of these logical 
+expressions is represented by an integer:
+<P>
+<UL><LI> `True' is represented by the integer -1</LI> 
+</UL>
+<UL><LI> `False' is represented by the integer 0 (zero).</LI> 
+</UL>
+<PRE>
+<P>
+	Eg	Result returned				Return value 
+<	"a<b"	True if a less than b			-1
+		False if a greater than or equal to b	 0
+	"a>b" 	True if a greater than b		-1
+		False if a less than or equal to b	 0
+<=	"a<=b"	True if a less than or equal to b	-1
+		False if a greater than b		 0 
+=	"a>=b"	True if a greater than or equal to b	-1 
+		False if a less than b			 0
+<>	"a<>b"	True if a not equal to b		-1
+		False if a equal to b			 0
+=	"a=b" 	True if a equal to b			-1
+		False if a not equal to b		 0
+</PRE>
+These integers can be assigned to a variable or displayed on the screen 
+to tell you whether a particular condition is true or false, or used 
+in an IF statement.
+<P>
+For example, in a procedure you might arrive at two sub-totals, "a" 
+and "b". You want to find out which is the greater. So use the 
+statement, "PRINT a>b". If zero is displayed, "a" and "b" 
+are equal or "b" is the larger number; if -1 is displayed, "a>b" 
+is true  "a" is the larger.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "B.4"><H2> Logical and bitwise operators</H2></A>
+<P>
+The operators AND, OR and NOT have different 
+effects depending on whether they are used with floating-point numbers 
+or integers:
+<P>
+When used with floating-point numbers...
+... AND, OR and NOT are logical operators, 
+and have the following effects:
+<PRE>
+Example	Result					Integer returned
+"a AND b"	True if both "a" and "b" are non-zero		-1
+		False if either "a" or "b" are zero		 0
+"a OR b"	True if either "a" or "b" is non-zero		-1
+		False if both "a" and "b" are zero		 0
+"NOT a"		True if "a" is zero				-1
+		False if "a" is non-zero			 0
+</PRE>
+When used with integer or long integer values...
+... AND, OR and NOT are bitwise operators. 
+<P>
+<P>
+The way OPL holds integer numbers internally is as a binary code  
+16-bit for integers, 32-bit for long integers. Bitwise means that 
+an operation is performed on individual bits. A bit is set 
+if it has the value 1, and clear if it has the value 0. Long 
+integer values with AND, OR and NOT behave the same 
+as integer values.
+<P>
+AND  Sets the result bit if both input bits are set, 
+otherwise clears the result bit.
+<P>
+For example, the statement "PRINT 12 AND 10" displays 8. To understand 
+this, write 12 and 10 in binary:
+<PRE>
+"12	0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0
+10	0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0"
+</PRE>
+AND acts on each pair of bits. Thus, working from left to right  
+discounting the first 12 bits (since "0 AND 0" gives 0):
+<PRE>
+"1 AND 1	" RIGHT "	1
+1 AND 0	" RIGHT "	0 
+0 AND 1	" RIGHT "	0 
+0 AND 0	" RIGHT "	0"
+</PRE>
+The result is therefore the binary number 1000, or 8.
+<P>
+OR  Sets the result bit if either input bit is set, 
+otherwise clears the result bit.
+<P>
+What result would the statement "PRINT 12 OR 10" give? Again, 
+write down the numbers in binary and apply the operator to each pair 
+of digits: 
+<PRE>
+"1 OR 1	" RIGHT "	1
+1 OR 0	" RIGHT "	1
+0 OR 1	" RIGHT "	1
+0 OR 0	" RIGHT "	0"
+</PRE>
+The result is the binary number 1110, or 14 in decimal.
+<P>
+NOT  Sets the result bit if the input bit is not 
+set, otherwise clears the result bit.
+<P>
+NOT works on only one number. It returns the one's complement, 
+ie it replaces 0s with 1s and 1s with 0s.
+<P>
+So since 7 is 0000000000000111, "NOT 7" is 1111111111111000. 
+This is the binary representation of -8.
+<P>
+A quick way of calculating NOT for integers is to add 1 to 
+the original number and reverse its sign. So "NOT 23" is -24, 
+"NOT 0" is -1 and "NOT -1" is 0.
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

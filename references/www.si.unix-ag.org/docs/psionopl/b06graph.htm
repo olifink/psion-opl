@@ -1,0 +1,1132 @@
+
+<TITLE>PSION Programming Ref.: Chapter 6. Graphics</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Graphics</CENTER></H1>
+<P>
+OPL graphics allows you, for example, to:
+<P>
+<UL><LI> Draw lines and boxes.</LI> 
+</UL>
+<UL><LI> Fill areas with patterns.</LI> 
+</UL>
+<UL><LI> Display text in a variety of styles, at any position </LI> 
+on the screen.
+</UL>
+<UL><LI> Scroll areas of the screen.</LI> 
+</UL>
+<UL><LI> Manipulate windows and bit patterns.</LI> 
+</UL>
+<UL><LI> Read data back from the screen.</LI> 
+</UL>
+<P>
+You can draw using black, grey and white.
+<P>
+Graphics keywords begin a "G". In this manual a 
+lower case "g" is used  for example, "gBOX"  
+but you can type them using upper or lower case letters.
+<P>
+<B>IMPORTANT:</B> Some graphics keywords are mentioned only 
+briefly in this chapter. For more details about them, see the `Alphabetic 
+listing' chapter.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.1"><H2> Simple graphics</H2></A>
+<P>
+The Series 3a screen is made up of a regular pattern of 480 points 
+across by 160 down. These points are sometimes referred to as pixels. 
+<P>
+<P>
+Each pixel is identified 
+by two numbers, giving its position across and down from the top left 
+corner of the screen. 0,0 denotes the pixel in the top left corner; 
+2,1 is the pixel 2 points across and one down, and so on. 479,159 
+is the pixel in the bottom right corner.
+<P>
+Note that these co-ordinates are very different to the cursor positions 
+set by the AT command.
+<P>
+OPL maintains a current position on the screen. Graphics 
+commands which draw on the screen generally take effect at this position. 
+Initially, the current position is the top left corner, 0,0.
+<P>
+You can draw using black, grey and white although grey is not accessible 
+by default. See the section `Drawing in grey' below for further details.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.2"><H2> Screen positions</H2></A>
+<P>
+<H3>Drawing lines</H3> 
+<P>
+Here is a simple procedure to draw a horizontal line in the middle 
+of the screen:
+<P>
+<UL><PRE>
+<B>PROC lines:</B>
+  gMOVE 180,80
+  gLINEBY 120,0
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+gMOVE moves the current 
+position by the specified amount. In this case, it moves the current 
+position 180 pixels right and 80 down, from 0,0 to 180,80. It does 
+not display anything on the screen.
+<P>
+gLINEBY (g-Line-By) draws a line from the current position 
+(just set to 180,80) to a point at the distance you specify  
+in this case 120 to the right and 0 down, ie 300,80.
+<P>
+When drawing a horizontal line, as in the above example, the line 
+that is drawn includes the pixel with the lower x coordinate and excludes 
+the pixel with the higher x coordinate. Similarly, when drawing a 
+vertical line, the line includes the pixel with the lower y coordinate 
+and excludes the pixel with the higher y coordinate.
+<P>
+On the Series 3a screen the y coordinate decreases as you 
+move toward the top of the screen.
+<P>
+When drawing a diagonal line, the coordinates of the end pixels are 
+turned into a rectangle. The top left pixel lies inside the boundary 
+of this rectangle and the bottom right pixel lies outside it. The 
+line drawing algorithm then fills in those pixels that are intersected 
+by a mathematical line between the corners of the rectangle. Thus 
+the line will be drawn minus one or both end points.
+<P>
+gLINEBY also has the effect of moving the current position 
+to the end of the line it draws.
+<P>
+With both gMOVE and gLINEBY, you specify positions relative 
+to the current position. Most OPL graphics commands do likewise. 
+gMOVE and gLINEBY, however, do have corresponding commands 
+which use absolute pixel positions. gAT moves 
+to the pixel position you specify; gLINETO 
+draws a line from the current position to an absolute position. The 
+horizontal line procedure could instead be written:
+<P>
+<UL><PRE>
+<B>PROC lines:</B>
+  gAT 180,80
+  gLINETO 300,80
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+gAT and gLINETO may be useful in very short graphics 
+programs, and gAT is always the obvious command for moving 
+to a particular point on the screen, before you start drawing. But 
+once you do start drawing, use gMOVE and gLINEBY. They 
+make it much easier to develop and change programs, and allow you 
+to make useful graphics procedures which can display things anywhere 
+you set the current position. Almost all graphics drawing commands 
+use relative positioning for these reasons.
+<P>
+<H3>Drawing dots</H3> 
+<P>
+You can set the pixel at the current position with "gLINEBY 0,0".
+<P>
+<H3>Right and down, left and up</H3> 
+<P>
+gMOVE and gLINEBY find the position to use by adding 
+the numbers you specify onto the current position. If the numbers 
+are positive, it moves to the right and down the screen. If you use 
+negative numbers, however, you can specify positions to the left of 
+and/or above the current position. For example, this procedure draws 
+the same horizontal line as before, then another one above it:
+<P>
+<UL><PRE>
+<B>PROC lines2:</B>
+  gMOVE 180,80
+  gLINEBY 120,0
+  gMOVE 0,-20
+  gLINEBY -120,0
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The first two program lines are the same as before. gLINEBY 
+moves the current position to the end of the line it draws, so after 
+the first gLINEBY the current position is 300,80. The second 
+gMOVE moves the current position up by 20 pixels; the 
+second gLINEBY draws a line to a point 120 pixels to the left.
+<P>
+For horizontal and vertical lines, the right-hand/bottom pixel 
+is not set. For diagonal lines, the right-most and bottom-most pixels 
+are not set; these may be the same pixel.
+<P>
+<H3>Going off the screen</H3> 
+<P>
+No error is reported if you try to draw off the edge of the screen. 
+It is quite possible to leave the current position off the screen  
+for example, "gLINETO 600,80" will draw a line from the current 
+position to some point on the right-hand screen edge, but the current 
+position will finish as 600,80.
+<P>
+There's no harm in the current position being off the screen. It allows 
+you to write procedures to display a certain pattern at the current 
+position, and not have to worry whether that position is too close 
+to the screen edge for the whole pattern to fit on.
+<P>
+<H3>Clearing the screen</H3> 
+<P>
+"gCLS" clears the screen.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.3"><H2>  Drawing in grey</H2></A>
+<P>
+<H3>Initialising for the use of grey</H3> 
+<P>
+To draw in grey you need to use "DEFAULTWIN 1" 
+at the start of your program. (Note that this clears the screen.) 
+Grey is not automatically available because it requires twice the 
+memory (and takes longer to scroll or move) compared to having just 
+black. So programs that do not need to use grey are not unnecessarily 
+penalised. 
+<P>
+"DEFAULTWIN 0" disables the use of grey again, also clearing 
+the screen.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> It is not possible to have a screen using grey only.  
+</DL>
+"DEFAULTWIN 1" does not cause PRINT to print in grey  
+it applies only to graphics and graphics text (see gPRINT  later).
+<P>
+When you use "DEFAULTWIN 1" the existing black-only screen is 
+cleared and replaced by one which contains a black plane and 
+also a grey plane. The black plane is also sometimes called 
+the the normal plane. These are referred to as `planes' because 
+intuitively it is simplest to think of there being a plane of black 
+pixels in front of (or on top of) a plane of grey pixels, with 
+any grey only ever visible if the black pixel in front of it is clear.
+<P>
+<B>If you draw a pixel using both black and grey, it will appear black. 
+If you then clear the black plane only, the same pixel will appear 
+grey.</B> If you draw a pixel using grey only it will appear grey unless 
+it is already black, in which case it is effectively hidden behind 
+the black plane.
+<P>
+If you need to use grey, you are recommended to use "DEFAULTWIN 1" 
+once and for all at the start of your program. One reason is because 
+DEFAULTWIN can fail with a `No system memory' error and it is unlikely that you would 
+want to continue without grey after trying to enable it.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Note that gXBORDER, gBUTTON  and gDRAWOBJECT  all  
+use grey and therefore can only be used when grey in enabled. If grey 
+is not enabled, they raise a `General failure' error.
+</DL>
+<H3>Using grey</H3> 
+<P>
+Once you have used "DEFAULTWIN 1" you can use the gGREY 
+command to set which plane should be used for all subsequent graphics 
+drawing (until the next use of gGREY).
+<P>
+<PRE>
+gGREY 0 	draws to the black plane only.
+gGREY 1		draws to the grey plane only.
+gGREY 2 	draws to both planes.
+</PRE>
+"gGREY 1" and "gGREY 2" raise an error if the current 
+window does not have a grey plane.
+<P>
+As mentioned earlier, when you set a pixel using both black and grey, 
+the pixel appears black because the black plane is effectively in 
+front of the grey plane. So drawing to both planes is generally only 
+used for clearing pixels. For example, if your screen has both black 
+and grey pixels, gCLS will clear the pixels only in the plane 
+selected by gGREY. To clear the whole screen with gCLS, 
+you therefore need "gGREY 2".
+<P>
+To draw in grey when the pixels to which you are drawing are currently 
+black, you first need to clear the black.
+<P>
+A pixel will appear white only if it is clear in both planes.
+<P>
+<H3>Example</H3> 
+<P>
+The following procedure initialises the screen to allow grey, draws 
+a horizontal line in grey, another below it in black only and a third 
+below it in both black and grey. Pressing a key clears the black plane 
+only, revealing the grey behind the black in the bottom line and clearing 
+the middle line altogether.
+<P>
+<UL><PRE>
+<B>PROC exgrey:</B>
+  DEFAULTWIN 1                       REM enable grey
+  gAT 0,40  :gGREY 1 :gLINEBY 480,0  REM grey only
+  gAT 0,41  :gLINEBY 480,0
+  gAT 0,80  :gGREY 0 :gLINEBY 480,0  REM black only
+  gAT 0,81  :gLINEBY 480,0
+  gAT 0,120 :gGREY 2 :gLINEBY 480,0  REM both planes
+  gAT 0,121  :gLINEBY 480,0
+  GET
+  gGREY 0                            REM black only
+  gCLS                               REM clear it
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.4"><H2> Overwriting pixels</H2></A>
+<P>
+<H3>Drawing rectangles</H3> 
+<P>
+The gBOX command draws a box outline. For example, 
+"gBOX 100,20" draws a box from the current position to a point 
+100 pixels to the right and 20 down. If the current position were 
+200,40, the four corners of this box would be at 200,40, 300,40, 300,60 
+and 200,60.
+<P>
+If you have used "DEFAULTWIN 1" and gGREY as described 
+earlier, the box is drawn to the black and/or grey plane as selected.
+<P>
+gBOX does not change the current position.
+<P>
+gFILL draws a filled box in the same way as 
+gBOX draws a box outline, but it has a third argument to say 
+which pixels to set. If set to 0, the pixels which make up the box 
+would be set. If set to 1, pixels are cleared; if set to 2, they are 
+inverted, that is, pixels already set on the screen become cleared, 
+and vice versa. The values 1 and 2 are used when overwriting 
+areas of the screen which already have pixels set.
+<P>
+If you have used "DEFAULTWIN 1" and gGREY as described 
+earlier, the filled box will be set, cleared or inverted in the black 
+and/or grey plane as selected. Once again, it helps to think of the 
+pixels being set or clear in each plane independently: so clearing 
+the pixel in the black plane reveals the grey plane behind it where 
+the pixel may be set or clear.
+<P>
+So with "gGREY 1" set for drawing to the grey plane only, inverting 
+the pixels in the filled box will change the grey plane only  
+black pixels are left alone but clear or grey pixels are inverted 
+to grey and clear pixels respectively. Similarly, inverting the black 
+plane changes clear pixels to black, but "clearing" black pixels displays 
+grey if the pixel is set in the grey plane.
+<P>
+This procedure displays a "robot" face, using gFILL to draw 
+set and cleared boxes:
+<P>
+<UL><PRE>
+<B>PROC face:</B>
+  gFILL 120,120,0 REM set the entire face
+  gMOVE 10,20 :gFILL 30,20,1 REM left eye
+  gMOVE 70,0 :gFILL 30,20,1 REM right eye
+  gMOVE -30,30 :gFILL 20,30,1 REM nose
+  gMOVE -20,40 :gFILL 60,20,1 REM mouth
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Before calling such a procedure, you would set the current position 
+to be where you wanted the top left corner of the head.
+<P>
+You could make the robot wink with the following procedure, which 
+inverts part of one eye:
+<P>
+<UL><PRE>
+<B>PROC wink:</B>
+  gMOVE 10,20 REM move to left eye
+  gFILL 30,14,2 REM invert most of the eye
+  PAUSE 10
+  gFILL 30,14,2 REM invert it back again
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Again, you would set the current position before calling this.
+<P>
+The gPATT command can be used to draw a shaded 
+filled rectangle. To do this, use "-1" as its first argument, 
+then the same three arguments as for gFILL  width, height, 
+and overwrite method. Overwrite methods 0, 1 and 2 apply only to the 
+pixels which are `on' in the shading pattern. Whatever was on the 
+screen may still show through, as those pixels which are `clear' in 
+the shading pattern are left as they were.
+<P>
+To completely overwrite what was on the screen with the shaded pattern, 
+gPATT has an extra overwrite method of 3. So, for example, 
+"gPATT -1,120,120,3" in the first procedure would have displayed 
+a shaded robot head, whatever may have been on the screen.
+<P>
+Again, the shaded pattern will be drawn in grey if you have selected 
+the grey plane only using "gGREY 1". And again, if you are writing 
+to the black plane only, any pixels set in the grey plane can be seen 
+if the corresponding pixels in the black plane are clear.
+<P>
+<H3>Overwriting with any drawing command</H3> 
+<P>
+By using the gGMODE command, any drawing 
+command such as gLINEBY or gBOX can be made to clear 
+or invert pixels, instead of setting them. gGMODE determines 
+the effect of all subsequent drawing commands.
+<P>
+The values are the same as for gFILL: "gGMODE 1" for 
+clearing pixels, "gGMODE 2" for inverting pixels, and "gGMODE 0" 
+for setting pixels again. (0 is the initial setting.)
+<P>
+For example, some white lines can give the robot a furrowed brow:
+<P>
+<UL><PRE>
+<B>PROC brow:</B>
+  gGMODE 1 REM gLINEBY will now clear pixels
+  gMOVE 10,8 :gLINEBY 100,0
+  gMOVE 0,4 :gLINEBY -100,0
+  gGMODE 0
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The setting for gGMODE applies to the planes selected by gGREY. 
+With "gGREY 1" for instance, "gGMODE 1" would cause gLINEBY 
+to clear pixels in the grey plane and "gGMODE 0" to set pixels 
+in the grey plane.
+<P>
+<H3>Other drawing keywords</H3> 
+<P>
+<UL><LI> gBUTTON: draw a 3-D button (a picture of a key, not </LI> 
+of an application button) enclosing supplied text. The button can 
+be raised, depressed or sunken.
+</UL>
+<UL><LI> gBORDER, gXBORDER: draw 2-D/3-D borders.</LI> 
+</UL>
+<UL><LI> gINVERT: invert a rectangular area, except for its </LI> 
+four corner pixels.
+</UL>
+<UL><LI> gCOPY: copy a rectangular area from one position </LI> 
+on the screen to another. Both black and grey planes are copied.
+</UL>
+<UL><LI> gSCROLL: move a rectangular area from one position </LI> 
+on the screen to another, or scroll the contents of the screen in 
+any direction. Both black and grey planes are moved.
+</UL>
+<UL><LI> gPOLY: draw a sequence of lines.</LI> 
+</UL>
+<UL><LI> gDRAWOBJECT: draw a graphics object. This </LI> 
+can be used to draw the "lozenge" used to display the words `City' 
+and `Home' in the World application.
+</UL>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Note that commands such as gSCROLL,, which move existing  
+pixels, affect both black and grey planes. gGREY only restricts 
+drawing and clearing of pixels.
+</DL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.5"><H2> Graphical text</H2></A>
+<P>
+<H3>Displaying text with gPRINT</H3> 
+<P>
+The PRINT command displays text in one font, in a screen area 
+controlled by the FONT or SCREEN commands. You can, 
+however, display text in a variety of fonts and styles, at any pixel 
+position, with gPRINT. gPRINT also lets you draw text 
+to the grey plane, if you have used DEFAULTWIN and gGREY 
+(discussed earlier).
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> You <B>can</B> (to a lesser degree) control the font and style  
+used by OPL's other text-drawing keywords, such as PRINT and 
+EDIT. See "The text and graphics windows" at the end of this 
+chapter.
+</DL>
+gPRINT is a graphical version of PRINT, and displays 
+a list of expressions in a similar way. Some examples:
+<PRE>
+"gPRINT "Hello",name$"
+"gPRINT a$"
+"gPRINT "Sin(PI/3) is",sin(pi/3)"
+</PRE>
+Unlike PRINT, gPRINT does not end by moving to a new 
+line. A comma between expressions is still displayed as a space, but 
+a semi-colon has no effect. "gPRINT" used on its own does nothing.
+<P>
+The first character displayed has its left side 
+and baseline at the current position. The baseline is like 
+a line on lined notepaper  graphically, this is the horizontal 
+line which includes the lowest pixels of upper case characters. Some 
+characters, such as `g', `j', `p', `q' and `y', set pixels below the 
+baseline.
+<P>
+After using gPRINT, the current position is at the end of the 
+text so that you can print something else immediately beyond it. As 
+with other graphics keywords, no error is reported if you try to display 
+text off the edge of the screen.
+<P>
+While "CURSOR ON" displays a flashing cursor for ordinary text 
+displayed with PRINT, "CURSOR 1" switches on a cursor 
+for graphical text which is displayed at the current position. "CURSOR OFF" 
+removes either cursor.
+<P>
+<H3>Fonts</H3> 
+<P>
+The gFONT command sets the font to be used 
+by subsequent gPRINT commands.
+<P>
+A large set of fonts which can be used with gFONT is provided 
+in the Series 3a ROM. In the following list, Swiss fonts refer to 
+fonts without serifs while Roman fonts either have serifs (eg font 
+6) or are in a style designed for serifs but are too small to show 
+them (eg font 5). Mono-spaced fonts have characters which all 
+have the same width (and have their `pixel size' listed as width "x" height); 
+in proportional fonts each character can have a different width.
+<P>
+<PRE>
+font number	Description		pixel size
+1		Series 3 normal		8
+2		Series 3 bold		8
+3		Series 3 digits		6x6
+4		Mono			8x8
+5		Roman			8
+6		Roman			11
+7		Roman			13
+8		Roman			16
+9		Swiss			8
+10		Swiss			11
+11		Swiss			13
+12		Swiss			16
+13		Mono			6x6
+</PRE>
+The special font number "$9a" is set aside to give a machine's 
+default graphics font; this is the font used initially for graphics 
+text. The actual font may vary from machine to machine  eg 
+it is font 1 on the Series 3 and font 11 on the Series 3a. So 
+"gFONT 11" or "gFONT $9a" both set the Series 3a standard 
+font, which gPRINT normally uses.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Fonts 1,2 and 3 are the Series 3 fonts, used when running  
+in compatibility mode.
+</DL>
+See gINFO in the alphabetic listing if you need to find out 
+more information about fonts.
+<P>
+The following program shows you examples of the fonts. ("!!!" is displayed 
+to emphasise the mono-spaced fonts):
+<P>
+<UL><PRE>
+<B>PROC fonts:</B>
+    showfont:(4,15,"Mono 8x8")
+    showfont:(5,25,"Roman 8")
+    showfont:(6,38,"Roman 11")
+    showfont:(7,53,"Roman 13")
+    showfont:(8,71,"Roman 16")
+    showfont:(9,81,"Swiss 8")
+    showfont:(10,94,"Swiss 11")
+    showfont:(11,109,"Swiss 13")
+    showfont:(12,127,"Swiss 16")
+    showfont:(13,135,"Mono 6x6")
+    GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC showfont:(font%,y%,str$)</B>
+    gFONT font%
+    gAT 20,y% :gPRINT font%
+    gAT 50,y% :gPRINT str$
+    gAT 150,y% :gPRINT "!!!"
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<H3>Text style</H3> 
+<P>
+The gSTYLE command sets the text style to 
+be used by subsequent gPRINT commands.
+<P>
+Choose from these styles:
+<pre>
+"gSTYLE 1"	bold
+"gSTYLE 2"	underlined
+"gSTYLE 4"	inverse
+"gSTYLE 8"	double height
+"gSTYLE 16"	mono
+"gSTYLE 32"	italic
+</PRE>
+The `mono' style is not proportionally spaced  each character 
+is displayed with the same width, in the same way that PRINT 
+displays characters. A proportional font can be displayed as a mono-spaced 
+font by setting the `mono' style. See the previous section for the 
+list of mono-spaced and proportional fonts.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> It is inefficient to use the `mono' style to display a font  
+which is already mono-spaced. 
+</DL>
+You can combine these styles by adding the relevant numbers together. 
+"gSTYLE 12" sets the text style to inverse and double-height 
+(4+8=12). Here's an example of this style:
+<P>
+<UL><PRE>
+<B>PROC style:</B>
+  gAT 20,50 :gFONT 11
+  gSTYLE 12 :gPRINT "Attention!"
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Use "gSTYLE 0" to reset to normal style.
+<P>
+The bold style provides a way to make any font appear bolded. Except 
+for the smaller fonts, most Series 3a fonts look reasonably bold 
+already. Note that using the bold style sometimes causes a change 
+of font; if you use gINFO you may see the font name change.
+<P>
+<H3>Overwriting with gPRINT</H3> 
+<P>
+gPRINT normally displays text as if writing it with a pen  
+the pixels that make up each letter are set, and that is all. If you're 
+using areas of the screen which already have some pixels set, or even 
+have all the pixels set, use gTMODE to change 
+the way gPRINT displays the text.
+<P>
+gTMODE controls the display of text in the same way as gGMODE 
+controls the display of lines and boxes. The values you use with gTMODE 
+are similar to those for gGMODE: "gTMODE 1" for clearing 
+pixels, "gTMODE 2" for inverting pixels, and "gTMODE 0" 
+for setting pixels again. There is also "gTMODE 3" which sets 
+the pixels of each character while clearing the character's background. 
+This is very useful as it guarantees that the text is readable (as 
+far as the current plane is concerned).
+<P>
+As for gGMODE, the setting for gTMODE applies to the 
+planes selected by gGREY. With "gGREY 1" for instance, 
+"gTMODE 1" would cause gLINEBY to clear pixels in the 
+grey plane and "gTMODE 0" to set pixels in the grey plane.
+<P>
+This procedure shows the various effects possible via gTMODE:
+<P>
+<UL><PRE>
+<B>PROC tmode:</B>
+  DEFAULTWIN 1                REM enable grey
+  gFONT 11    :gSTYLE 0
+  gAT 160,0   :gFILL 160,80,0 REM Black box
+  gAT 220,0   :gFILL 40,80,1  REM White box
+  gAT 180,20  :gTMODE 0 :gPRINT "ABCDEFGHIJK"
+  gAT 180,35  :gTMODE 1 :gPRINT "ABCDEFGHIJK"
+  gAT 180,50  :gTMODE 2 :gPRINT "ABCDEFGHIJK"
+  gAT 180,65  :gTMODE 3 :gPRINT "ABCDEFGHIJK"
+  gGREY 1
+  gAT 160,80  :gFILL 160,80,0 REM Grey box
+  gAT 220,80  :gFILL 40,80,1  REM White box
+  gAT 180,100 :gTMODE 0 :gPRINT "ABCDEFGHIJK"
+  gAT 180,115 :gTMODE 1 :gPRINT "ABCDEFGHIJK"
+  gAT 180,130 :gTMODE 2 :gPRINT "ABCDEFGHIJK"
+  gAT 180,145 :gTMODE 3 :gPRINT "ABCDEFGHIJK"
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<H3>Other graphical text keywords</H3> 
+<P>
+<UL><LI> gPRINTB: Display text left aligned, right aligned </LI> 
+or centred, in a cleared box. The gTMODE setting is ignored. 
+With "gGREY 1", only grey background pixels in the box are cleared 
+and with "gGREY 0", only black pixels; with "gGREY 2" 
+all background pixels in the box are cleared.
+</UL>
+<UL><LI> gXPRINT: Display text underlined/highlighted.</LI> 
+</UL>
+<UL><LI> gPRINTCLIP: Display text clipped to whole characters.</LI> 
+</UL>
+<UL><LI> gTWIDTH: Find width required by text.</LI> 
+</UL>
+All of these keywords take the current font and style into account, 
+and work on a single string. They display the text in black 
+or grey according to the current setting of gGREY.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.6"><H2> Windows</H2></A>
+<P>
+So far, you've used the whole of the screen for displaying 
+graphics. You can, however, use windows  rectangular 
+areas of the screen.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Sprites (described in the `Advanced topics' chapter) can display  
+non-rectangular shapes.
+</DL>
+OPL allows a program to use up to eight windows at any one time.
+<P>
+<H3>Window IDs and the default window</H3> 
+<P>
+Each window has an ID number, allowing you to specify which 
+window you want to work with at any time.
+<P>
+When a program first runs, it has one window called the default window. 
+Its ID is 1, it 
+is the full size of the screen, and initially all graphics commands 
+operate on it. (This is why `0,0' has so far referred to the top left 
+of the screen: it is true for the default window.)
+<P>
+Other windows you create will have IDs from 2 to 8. <B>When 
+you make another window it becomes the current window, and all subsequent graphics commands operate on it.</B>
+<P>
+The first half of this chapter used only the default window. However, 
+everything actually applies to the current window. For example, if 
+you make a small window current and try to draw a very long line, 
+the current position moves off past the window edge, and only that 
+part of the line which fits in the window is displayed.
+<P>
+<H3>Graphics keywords and windows</H3> 
+<P>
+For OPL graphics keywords, positions apply to the window you are 
+using at any given time. The point 0,0 means the top left corner 
+of the current window, not the top left corner of the screen.
+<P>
+Each window can be created with a grey plane if required, in which 
+case gGREY is used 
+to specify whether the black plane, the grey plane or both should 
+be used for all subsequent graphics commands until the next call to 
+gGREY, exactly as described in the first half of this chapter.
+<P>
+For the default window, the special command DEFAULTWIN 
+is required to enable grey because that window is automatically created 
+for you with only a black plane; "DEFAULTWIN 1" closes the default 
+window and creates a new one which has a grey plane. All other windows 
+must be created with a grey plane if grey is required.
+<P>
+Once a window has been created with a grey plane, grey is used in 
+precisely the same way as in the default window with grey enabled: 
+"gGREY 0" directs all drawing to the black plane only, "gGREY 1" 
+to the grey plane only and "gGREY 2" to both planes. "gGREY 1" 
+and "gGREY 2" raise an error if the current window does not 
+have a grey plane.
+<P>
+gGREY, gGMODE, gTMODE, gFONT and gSTYLE can all be used with created windows in exactly 
+the same way as with the default window, as desribed earlier. They 
+change the settings for the current window only; all the settings 
+are remembered for each window.
+<P>
+<H3>Creating new windows</H3> 
+<P>
+The gCREATE function sets up a new window 
+on the screen. It returns an ID number for the window. Whenever 
+you want to change to this window, use gUSE 
+with this ID.
+<P>
+You can create a window with only a black plane or with both a black 
+and a grey plane. You cannot create a window with just a grey plane.
+<P>
+Here is an example using gCREATE and gUSE, contrasting 
+the point 20,20 in the created window with 20,20 in the default window.
+<P>
+<UL><PRE>
+<B>PROC windows:</B>
+  LOCAL id%
+  id%=gCREATE(60,40,240,30,1,1)
+  gBORDER 0 :gAT 20,20 :gLINEBY 0,0
+  gPRINT " 20,20 (new)"
+  GET
+  gUSE 1 :gAT 20,20 :gLINEBY 0,0
+  gPRINT " 20,20 (default)"
+  GET
+  gUSE id%
+  gGREY 1        REM draw grey
+  gPRINT " Back"
+  gGREY 0
+  gPRINT " (with grey)"
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The line "id%=gCREATE(60,40,180,30,1,1)" creates a window with 
+its top left corner at 60,40 on the screen. The window is set to be 
+180 pixels wide and 30 pixels deep. (You can use any integer values 
+for these arguments, even if it creates the window partially or even 
+totally off the screen.) The fifth argument to gCREATE specifies 
+whether the window should immediately be visible or not; 0 means invisible, 
+1 (as here) means visible. The sixth argument specifies whether the 
+window should have a grey plane or not; 0 means black only, 1 (as 
+here) means black and grey. If the sixth argument is not supplied 
+at all (eg. "id%=gCREATE(60,40,180,30,1)") the window will not 
+have a grey plane.
+<P>
+gCREATE automatically makes the created window the current 
+window, and sets the current position in it to 0,0. It returns an 
+ID number for this window, which in this example is saved in 
+the variable "id%".
+<P>
+The "gBORDER 0" command draws a border one pixel wide around the current 
+window. Here this helps show the position and size of the window. 
+(gBORDER can draw a variety of borders. You can even display 
+the Series 3a 3-D style borders seen in menus and dialogs, with 
+the gXBORDER keyword.)
+<P>
+The program then sets the pixel at 20,20 in this new window, using 
+"gLINEBY 0,0".
+<P>
+"gUSE 1" goes back to using the default window. The program 
+then shows 20,20 in this window.
+<P>
+Finally, "gUSE id%" goes back to the created window again, and 
+a final message is displayed, in grey and black. 
+<P>
+Note that each window has its own current position. The current 
+position in the created window is remembered while the program goes 
+back to the default window. All the other settings, such as the 
+font, style and grey setting are also remembered.
+<P>
+ 
+<P>
+<H3>Closing windows</H3> 
+<P>
+When you've finished with a particular window, close it with gCLOSE 
+followed by its ID  for example, "gCLOSE 2". 
+You can create and close as many windows as you like, as long as there 
+are only eight or fewer open at any one time.
+<P>
+If you close the current window, the default window (ID=1) 
+becomes current.
+<P>
+An error is raised if you try to close the default window.
+<P>
+<H3>When windows overlap</H3> 
+<P>
+Windows can overlap on the screen, or even hide each other entirely. 
+Use the gORDER command to control the foreground/background 
+positions of overlapping windows.
+<P>
+"gORDER 3,1" sets the window whose ID is 3 to be in the 
+foreground. This guarantees that it will be wholly visible. "gORDER 3,2" 
+makes it second in the list; unless the foreground window overlaps 
+it, it too will be visible.
+<P>
+Any position greater than the number of windows you have is interpreted 
+as the end of the list. "gORDER 3,9" will therefore always force 
+the window whose ID is 3 to the background, behind all others.
+<P>
+Note in particular that making a window the current window with 
+gUSE does not bring it to the foreground. You can make 
+a background window current and draw all kinds of things to it, but 
+nothing will happen on the screen until you bring it to the foreground 
+with gORDER.
+<P>
+When a window is first created with gCREATE it always becomes 
+the foreground window as well as the current window.
+<P>
+<H3>Hiding windows</H3> 
+<P>
+If you are going to use several drawing commands on a particular window, 
+you may like to make it invisible while doing so. When you then make 
+it visible again, having completed the drawing commands, the whole 
+pattern appears on the screen in one go, instead of being built up 
+piece by piece.
+<P>
+Use "gVISIBLE ON" and "gVISIBLE OFF" 
+to perform this function on the current window. You can also make 
+new windows invisible as you create them, by using 0 as the fifth 
+argument to the gCREATE command, and you can hide windows behind 
+other windows.
+<P>
+<H3>The graphics cursor in windows</H3> 
+<P>
+To make the graphics cursor appear in a particular window, use the 
+CURSOR command with the ID of the 
+window. It will appear flashing at the current position in that window, 
+provided it is not obscured by some other window.
+<P>
+The window you specify does not have to be the current window, and 
+does not become current; you can have the cursor in one window while 
+displaying graphical text in another. If you want to move to a different 
+window and put the graphics cursor in it, you must use both gUSE 
+and CURSOR.
+<P>
+Since the default window always has an ID of 1, "CURSOR 1" 
+will, as mentioned earlier, put the graphics cursor in it.
+<P>
+CURSOR OFF turns off the cursor, wherever it is.
+<P>
+<H3>Information about your windows</H3> 
+<P>
+You don't have to keep a complete copy of all the information pertaining 
+to each window you use. These functions return information about the 
+current window:
+<P>
+<UL><LI> gIDENTITY returns its ID number.</LI> 
+</UL>
+<UL><LI> gRANK returns its foreground/background position, </LI> 
+from 1 to 8.
+</UL>
+<UL><LI> gWIDTH and gHEIGHT return its size.</LI> 
+</UL>
+<UL><LI> gORIGINX and gORIGINY return its screen position.</LI> 
+</UL>
+<UL><LI> gINFO returns information about the font, style, </LI> 
+grey setting, overwrite modes and cursor in use.
+</UL>
+<UL><LI> gX and gY return the current position.</LI> 
+</UL>
+<H3>Other window keywords</H3> 
+<P>
+<UL><LI> gSETWIN changes the position, and optionally the </LI> 
+size, of the current window.
+</UL>
+You can use this command on the default window, if you 
+wish, but you must also use the SCREEN command to ensure 
+that the text window  the area for PRINT commands 
+to use  is wholly contained within the default window. See 
+`The text and graphics windows', later in this chapter.
+<P>
+<UL><LI> gSCROLL scrolls all or part of both black and grey </LI> 
+planes of the current window.
+</UL>
+<UL><LI> gPATT fills an area in the current window with repetitions </LI> 
+of another window, or with a shaded pattern.
+</UL>
+<UL><LI> gCOPY copies an area from another window into the </LI> 
+current window, or from one position in the current window to another.
+</UL>
+<UL><LI> gSAVEBIT saves part or all of a window as a bitmap file. </LI> 
+If a window has a grey plane, the planes are saved as two bitmaps 
+to the same file with the black plane saved first and the grey plane 
+saved next. gLOADBIT, described later, can be used to load 
+bitmap files.
+</UL>
+<UL><LI> gPEEKLINE reads back a horizontal line of data from </LI> 
+either the black or grey plane of a specified window.
+</UL>
+<H3>Copying grey between windows</H3> 
+<P>
+The commands gCOPY and gPATT can use two windows and 
+therefore special rules are needed for the cases when one window has 
+a grey plane and the other does not.
+<P>
+With "gGREY 0" in the destination window, only 
+the black plane of the source is copied.
+<P>
+With "gGREY 1" in the destination window, only the grey plane 
+of the source is copied, unless the source has only one plane in which 
+case that plane is used as the source.
+<P>
+With "gGREY 2" in the destination window, if the source has 
+both planes, they are copied to the appropriate planes in the destination 
+window (black to black, grey to grey); if the source has only one 
+plane, it is copied to both planes of the destination.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "6.7"><H2> Advanced graphics</H2></A>
+<P>
+This section should provide a taste of some of the more exotic things 
+you can do with OPL graphics.
+<P>
+<H3>Bitmaps</H3> 
+<P>
+A bitmap is an area in memory which acts just like an off-screen 
+window, except that it does not have two planes so that gGREY 
+cannot be used. You can create bitmaps with gCREATEBIT. They have the following uses:
+<P>
+<UL><LI> You can manipulate an image in a bitmap before copying it </LI> 
+with gPATT or gCOPY 
+to a window on the screen. This is generally faster than manipulating 
+an image in a hidden window.
+</UL>
+<UL><LI> You can load bitmap files into </LI> 
+bitmaps in memory using gLOADBIT, then copy them to on-screen 
+windows using gCOPY or gPATT. (If a black and grey window 
+was saved to file as two bitmaps using gSAVEBIT, you must load 
+them separately into two bitmaps in memory, and copy them one at a 
+time to the respective planes of a window.)
+</UL>
+OPL treats a bitmap as the equivalent of a window in most cases:
+<P>
+<UL><LI> Both are identified by ID numbers. Only one window </LI> 
+or bitmap is current at any one time, set by gUSE.
+</UL>
+<UL><LI> If you use bitmaps as well as windows, the total number </LI> 
+must be eight or fewer.
+</UL>
+<UL><LI> The top left corner of the current bitmap is still referred </LI> 
+to as 0,0, even though it is not on the screen at all.
+</UL>
+Together, windows and bitmaps are known as drawables  
+places you can draw to.
+<P>
+Most graphics keywords can be used with bitmaps in the same way as 
+with windows, but remember that a bitmap corresponds to only one plane 
+in a window. Once you have drawn to it, you might copy it to the appropriate 
+plane of a window.
+<P>
+The keywords that can be used with bitmaps include: gUSE, gBORDER, 
+gCLOSE, gCLS, gCOPY, gGMODE, gFONT, 
+gIDENTITY, gPATT, gPEEKLINE, gSAVEBIT, 
+gSCROLL, gTMODE, gWIDTH, gHEIGHT and gINFO. 
+These keywords are described earlier in this chapter.
+<P>
+<H3>Speed improvements</H3> 
+<P>
+The Series 3a screen is usually updated whenever you display anything 
+on it. gUPDATE OFF switches off this feature. The screen 
+will be updated as few times as possible, although you can force an 
+update by using the gUPDATE command on its 
+own. (An update is also forced by GET, KEY and by all 
+graphics keywords which return a value, other than gX, gY, 
+gWIDTH and gHEIGHT).
+<P>
+This can result in a considerable speed improvement in some cases. 
+You might, for example, use "gUPDATE OFF", then a sequence of 
+graphics commands, followed by "gUPDATE". You should certainly 
+use gUPDATE OFF if you are about to write exclusively to 
+bitmaps.
+<P>
+gUPDATE ON returns to normal screen updating.
+<P>
+As mentioned previously, a window with both black and grey planes 
+takes longer to move or scroll than a window with only a black plane. 
+So avoid creating windows with unnecessary grey planes.
+<P>
+Also, remember that scrolling and moving windows require every pixel 
+in a window to be redrawn.
+<P>
+The gPOLY command draws a sequence of lines, 
+as if by gLINEBY and gMOVE commands. If you have to 
+draw a lot of lines (or dots, with "gLINEBY 0,0"), gPOLY 
+can greatly reduce the time taken to do so.
+<P>
+<H3>Displaying a running clock</H3> 
+<P>
+gCLOCK displays or removes a running 
+clock showing the system time. The clock can be digital or conventional, 
+and can use many different formats.
+<P>
+<H3>User-defined fonts and cursors</H3> 
+<P>
+If you have a user-defined font you can load it into memory with gLOADFONT. This returns an ID for the font; use this with gFONT 
+to make the font current. The gUNLOADFONT command removes a user-defined font from memory when you 
+have finished using it.
+<P>
+You can use four extra arguments with the CURSOR command. 
+Three of these specify the ascent, width and height of the cursor. 
+The ascent is the number of pixels (-128 to 127) by which the 
+top of the cursor should be above the baseline of the current font. 
+The height and width arguments should both be between 0 and 255. For 
+example, "CURSOR 1,12,4,14" sets a cursor 4 pixels wide by 14 
+high in the default window (ID=1), with the cursor top at 12 
+pixels above the font baseline.
+<P>
+If you do not use these arguments, the cursor is 2 pixels wide, and 
+has the same height and ascent as the current font.
+<P>
+By default the cursor has square corners, is black and is flashing. 
+Supply the fifth argument as 1 for a rounded cursor, 2 for non-flashing 
+or 4 for grey. You can add these together  eg use 5 for a grey, 
+rounded cursor.
+<P>
+Note that the gINFO command returns information about the cursor 
+and font.
+<P>
+<H3>The text and graphics windows</H3> 
+<P>
+<P>
+PRINT displays mono-spaced text in the text window. You can change the text 
+window font (ie that used by PRINT) using the FONT keyword. 
+You can use any of those listed earlier in the chapter in the description 
+of gFONT; initially font 4 is used.
+<P>
+The text window is in fact part of the default graphics window. If 
+you have other graphics windows in front of the default window, they 
+may therefore hide any text you display with PRINT.
+<P>
+Initially the text window is very slightly smaller than the default 
+graphics window which is full-screen size. They are not the same because 
+the text window height and width always fits a whole number of 
+characters of the current text window font. If you use the FONT 
+command to change the font of the text window, this first sets the 
+default graphics window to the maximum size that will fit in 
+the screen (excluding any status window) and then resizes the text 
+window to be as large as possible inside it.
+<P>
+You can also use the STYLE keyword to set the style for all 
+characters subsequently written to the text window. This allows the 
+mixing of different styles in the text window. You can only use those 
+styles which do not change the size of the characters  ie inverse 
+video and underline. (Any other styles will be ignored.) Use the same 
+values as listed for gSTYLE, earlier in the chapter.
+<P>
+To find out exactly where the text window is positioned, use "SCREENINFO info%()". 
+This sets "info%(1)/info%(2)" to the number of pixels from the 
+left/top of the default window to the left/top of the text window. 
+(These are called the margins.) "info%(7)" and "info%(8)" 
+are the text window's character width and height respectively.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> The margins are fully determined by the font being used and  
+therefore change from their initial value only when FONT is 
+used. You cannot choose your own margins. gSETWIN and SCREEN 
+do not change the margins, so you can use FONT to select a 
+font (also clearing the screen), followed by SCREENINFO  to 
+find out the size of the margins with that font, and finally gSETWIN 
+and SCREEN  to change the sizes and positions of the default 
+window and text window taking the margins into account (see example 
+below). The margins will be the same after calling gSETWIN 
+and SCREEN as they were after FONT.
+</DL>
+It is not generally recommended to use both the text and graphics 
+windows. Graphics commands provide much finer control over the screen 
+display than is possible in the text window, so it is not easy to 
+mix the two.
+<P>
+If you do need to use the text window, for example to use keywords 
+like EDIT, it's easy to use SCREEN to place it out of 
+the way of your graphics windows. You can, however, use it on top 
+of a graphics window  for example, you might want to use EDIT 
+to simulate an edit box in the graphics window. Use gSETWIN 
+to change the default window to about the size and position 
+of the desired edit box. The text window moves with it  you 
+must then make it the same size, or slightly smaller, with the SCREEN 
+command. Use 1,1 as the last two arguments to SCREEN, to keep 
+its top left corner fixed. "gORDER 1,1" will then bring the 
+default window to the front, and with it the text window. EDIT 
+can then be used.
+<P>
+Here is an example program which uses this technique  moving 
+an `edit box', hiding it while you edit, then finally letting you 
+move it around.
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC gsetw1:</B>
+  LOCAL a$(100),w%,h%,g$(1),factor%,info%(10)
+  LOCAL margx%,margy%,chrw%,chrh%,defw%,defh%
+  SCREENINFO info%()       REM get text window information
+  margx%=info%(1) :margy%=info%(2)
+  chrw%=info%(7) :chrh%=info%(8)
+  defw%=23*chrw%+2*margx%  REM new default window width
+  defh%=chrh%+2*margy%     REM ... and height
+  w%=gWIDTH :h%=gHEIGHT
+  gSETWIN w%/4+margx%,h%/4+margy%,defw%,defh%
+  SCREEN 23,1,1,1   REM text window
+  PRINT "Text win:"; :GET
+  gCREATE(w%*.1,h%*.1,w%*.8,h%*.8,1)   REM new window
+  gPATT -1,gWIDTH,gHEIGHT,0 REM shade it
+  gAT 2,h%*.7 :gTMODE 4
+  gPRINT "Graphics window 2"
+  gORDER 1,0 REM back to default+text window
+  EDIT a$               REM you can see this edit
+  gORDER 1,9 REM to background
+  CLS
+  a$=""
+  PRINT "Hidden:";
+  GIPRINT "Edit in hidden edit box"
+  EDIT a$               REM YOU CAN'T SEE THIS EDIT
+  GIPRINT ""
+  gORDER 1,0 :GET REM now here it is
+  gUSE 1 REM graphics go to default window
+  DO  REM move default/text window around
+    CLS
+    PRINT "U,D,L,R,Quit";
+    g$=UPPER$(GET$)
+    IF kmod=2 REM Shift key moves quickly
+      factor%=10
+    ELSE
+      factor%=1
+    ENDIF
+    IF g$="U"
+      gSETWIN gORIGINX,gORIGINY-factor%
+    ELSEIF g$="D"
+      gSETWIN gORIGINX,gORIGINY+factor%
+    ELSEIF g$="L"
+      gSETWIN gORIGINX-factor%,gORIGINY
+    ELSEIF g$="R"
+      gSETWIN gORIGINX+factor%,gORIGINY
+    ENDIF
+  UNTIL g$="Q" OR g$=CHR$(27)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

@@ -1,0 +1,301 @@
+
+<TITLE>PSION Programming Ref.: Chapter C. Serial/parallel ports and printing</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Serial/parallel ports and printing</CENTER></H1>
+<P>
+<P>
+You can use LPRINT in an OPL program to send information (for 
+printing or otherwise) to any of these devices:
+<P>
+<UL><LI> A parallel port  "PAR:A"</LI> 
+</UL>
+<UL><LI> A serial port  "TTY:A"</LI> 
+</UL>
+<UL><LI> A file on the Series 3a or an attached computer.</LI> 
+</UL>
+You can also read information from the serial port.
+<P>
+OPL does not provide access to the advanced page formatting and font 
+control features of the Series 3a.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "C.1"><H2> Using the parallel port</H2></A>
+<P>
+In your OPL program, set up the port with the statement "LOPEN "PAR:A"". 
+<P>
+<P>
+Provided the port is not already in use, the connection is now ready. 
+LPRINT will send information down the parallel 3 Link lead  
+for example, to an attached printer.
+<P>
+<H3>Example</H3> 
+<P>
+<UL><PRE>
+<B>PROC prints:</B>
+  OPEN "clients",A,a$
+  LOPEN "PAR:A"
+  PRINT "Printing..."
+  DO
+    IF LEN(A.a$)
+      LPRINT A.a$
+    ENDIF
+    NEXT
+  UNTIL EOF
+  LPRINT CHR$(12); :LCLOSE
+  PRINT "Finished" :GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "C.2"><H2> Using the serial port</H2></A>
+<P>
+In your OPL program, set up the port with the statement "LOPEN "TTY:A"".
+<P>
+Now LPRINT should send information down the serial 3 Link 
+lead  for example, to an attached printer. If it does not, 
+the serial port settings are not correct.
+<P>
+<H3>Serial port settings</H3> 
+<P>
+"LOPEN "TTY:A"" opens the serial port with the following default 
+characteristics: 
+<P>
+9600 baud<br>
+no parity<br>
+8 data bits<br>
+1 stop bit<br>
+RTS handshaking.<br>
+<P>
+<UL><LI> If your printer (or other device) does match these </LI> 
+characteristics, the LOPEN statement sets the port up correctly, 
+and subsequent LPRINT statements will print there successfully.
+</UL>
+<UL><LI> If your printer does not match these characteristics, </LI> 
+you must use a procedure like the one listed below to change the characteristics 
+of the serial port, before LPRINTs will print successfully 
+to your printer.
+</UL>
+Printers very often use DSR (DSR/DTR) handshaking, and you may need 
+to set the port to use this.
+<P>
+<H3>Setting the serial port characteristics </H3> 
+<P>
+Calling the procedure
+The "rsset:" procedure listed below provides a convenient way 
+to set up the serial port.
+<P>
+Each time you use an  "LOPEN "TTY: ""  statement, follow 
+it with a call to the "rsset:" procedure. Otherwise  "the"  
+LOPEN will use the default characteristics.
+<P>
+Passing values to the procedure
+Pass the procedure the values for the five port characteristics, like 
+this:
+<P>
+rsset:(baud%,parity%,data%,stop%,hand%,&0)
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> The final parameter, which should be "&0" here, is only  
+used when reading from the port.
+</DL>
+To find the value you need for each characteristic, use the tables 
+below. You must give values to all five parameters, in the 
+correct order.
+<PRE>
+Baud =		50   75   110  134  150  300  600  1200
+value =		1    2    3    4    5    6    7    8
+<P>
+		1800 2000 2400 3600 4800 7200 9600 19200
+		9    10   11   12   13   14   15   16
+<P>
+Parity =	NONE EVEN ODD
+value = 	0    1    2
+<P>
+Data bits =	5, 6, 7 or 8
+<P>
+Stop bits =	2 or 1
+<P>
+Handshaking =	ALL  NONE XON  RTS  XON+RTS	DSR  XON+DSR   RTS+DSR
+value =		11   4    7    0    3		12   15        8
+</PRE>
+The "rsset:" procedure:
+<P>
+<UL><PRE>
+<B>PROC rsset:(baud%,parity%,data%,stop%,hand%,term&)</B>
+  LOCAL frame%,srchar%(6),dummy%,err%
+  frame%=data%-5
+  IF stop%=2 :frame%=frame% OR 16 :ENDIF
+  IF parity% :frame%=frame% OR 32 :ENDIF
+  srchar%(1)=baud% OR (baud%*256)
+  srchar%(2)=frame% OR (parity%*256)
+  srchar%(3)=(hand% AND 255) OR $1100
+  srchar%(4)=$13
+  POKEL ADDR(srchar%(5)),term&
+  err%=IOW(-1,7,srchar%(1),dummy%)
+  IF err% :RAISE err% :ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Take care to type this program in exactly as it appears here.  
+<P>
+Example of calling the procedure
+<P>
+<UL><PRE>
+<B>PROC test:</B>
+  PRINT "Testing port settings"
+  LOPEN "TTY:A"
+  LOADM "rsset"
+  rsset:(8,0,8,1,0,&0)
+  LPRINT "Port OK" :LPRINT
+  PRINT "Finished" :GET
+  LCLOSE
+<B>ENDP</B>
+</PRE></UL>
+<P>
+"rsset:(8,0,8,1,0,&0)"  sets 1200 Baud, no parity, 8 data bits, 
+1 stop bit, and RTS/CTS handshaking.
+<P>
+<B><I>Advanced use</B></I><BR>
+The section of the "rsset:" procedure which actually sets the 
+port is this:
+<PRE>
+srchar%(1)=baud% OR (baud%*256)
+srchar%(2)=frame% OR (parity%*256)
+srchar%(3)=(hand% AND 255) OR $1100
+srchar%(4)=$13
+POKEL ADDR(srchar%(5)),term&
+err%=IOW(-1,7,srchar%(1),dummy%)
+IF err% :RAISE err% :ENDIF
+</PRE>
+The elements of the array "srchar%" contain the values specifying 
+the port characteristics. If you want to write a shorter procedure, 
+you could work out what these values need to be for a particular setup 
+you want, assign these values to the elements of the array, and then 
+use the IOW function (followed by the error check) exactly 
+as above.
+<P>
+<H3>Reading from the serial port</H3> 
+<P>
+If you need to read from the serial port, you must also pass a parameter 
+specifying terminating mask for the read function. If  "term&"  
+is not supplied, the read operation terminates only after reading 
+exactly the number of bytes requested. In practice, however, you may 
+not know exactly how many bytes to expect and you would therefore 
+request a large maximum number of bytes. If the sender sends less 
+than this number of bytes altogether, the read will never complete.
+<P>
+The extra parameter,  "term&" , allows you to specify that one 
+or more characters should be treated as terminating characters. The 
+terminating character itself is read into your buffer too allowing 
+your program to act differently depending on its value.
+<P>
+The 32 bits of  "term&"  each represent the corresponding ASCII 
+character that should terminate the read. This allows any of the ASCII 
+charcaters 1 to 31 to terminate the read.
+<P>
+For example, to terminate the read when Control-Z (ie. ASCII 26) is 
+received, set bit 26 of  "term&". To terminate on Control-Z or 
+ "<CR>"  or  "<LF>"   which allows text to be read 
+a line at a time or until end of file  set the bits 26, 10 
+and 13. In binary, this is:
+<P>
+       0000 0100 0000 0000 0010 0100 0000 0000
+<P>
+Converting to a long integer gives &04002400 and this is the value 
+to be passed in  "term&"  for this case.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Clearly  "term&"  cannot be used for binary data which  
+may include a terminating character by chance. You can sometimes get 
+around this problem by using  "term&"  and having the sender 
+transmit a leading non-binary header specifying the exact number of 
+full-binary data following. You could then reset the serial characteristics 
+not to use  "term&" , read the binary data, and so forth.
+</DL>
+Example reading from serial port
+<P>
+This example assumes that each line sent has maximum length 255 characters 
+and is terminated by a  "<CR>"  and that Control-Z signals the 
+end of all the data.
+<P>
+<UL><PRE>
+<B>PROC testread:</B>
+  LOCAL ret%,pbuf%,buf$(255),end%,len%
+  PRINT "Test reading from serial port"
+  LOPEN "TTY:A"
+  LOADM "rsset"
+  REM receive at 2400 without h/shake
+  rsset:(11,0,8,1,0,&04002000) REM Control-Z or CR
+  pBuf%=ADDR(buf$)
+  DO
+    REM read max 255 bytes, after leading count byte
+    len%=255
+    ret%=IOW(-1,1,#UADD(pbuf%,1),len%)
+    POKEB pbuf%,len%   REM len% = length actually read
+                       REM including terminator char
+    end%=LOC(buf$,CHR$(26)) REM non-zero for Control-Z
+    IF ret%<0 and ret%<>-43
+      BEEP 3,500
+      PRINT
+      PRINT "Serial read error: ";ERR$(ret%)
+    ENDIF
+    IF ret%<>-43       REM if received with terminator
+      POKEB pbuf%,len%-1 REM remove terminator
+      PRINT buf$         REM echo with CRLF
+    ELSE
+      PRINT buf$;        REM echo without CRLF
+    ENDIF
+  UNTIL end%
+  PRINT "End of session" :PAUSE -30 :KEY
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> <B>Note that passing -1 as the first argument to I/O keywords  
+means that the </B>LOPEN handle is to be used. Also, OPL 
+strings have a leading byte giving the length of the rest of the string, 
+so the data is read beyond this byte. The byte is then 
+poked to the length which was read.
+</DL>
+<HR SIZE=4 NOSHADE ><A NAME = "C.3"><H2> Printing to a file</H2></A>
+<P>
+<H3>Printing to a file on a PC or Apple Macintosh</H3> 
+<P>
+As if you were going to transfer a file:
+<P>
+<UL><LI> Physically connect the Series 3a and the other computer.</LI> 
+</UL>
+<UL><LI> Select the `Remote link' option in the System screen and </LI> 
+press Enter.
+</UL>
+<UL><LI> Run the server program (supplied with 3 Link) on the other </LI> 
+computer.
+</UL>
+In your OPL program, specify the destination file with an LOPEN 
+statement. For example, to a PC:
+<P>
+LOPEN "REM::C:\BACKUP\PRINTOUT\MEMO.TXT"
+<P>
+Any subsequent LPRINT would go to the file "MEMO.TXT" in 
+the directory "\BACKUP\PRINTOUT" on the PC's drive "C:".
+<P>
+With a Macintosh, you might use a file specification like this:
+<P>
+LOPEN "REM::HD40:MY BACKUP:PRINTED:MEMO5"
+<P>
+An LPRINT would now go to the file "MEMO5" in the "PRINTED" 
+folder, itself in the "MY BACKUP" folder on the hard drive "HD40". 
+Note that colons are used to separate the various parts of the file 
+specification.
+<P>
+<H3>Printing to a file on the SERIES 3a</H3> 
+<P>
+In your OPL program, specify the destination file with an LOPEN 
+statement like this:
+<P>
+LOPEN "B:\PRINT\MEMO.TXT"
+<P>
+This would send each subsequent LPRINT to the file "MEMO.TXT" 
+in the "\PRINT\" directory on an SSD in drive B:.
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

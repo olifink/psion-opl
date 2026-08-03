@@ -1,0 +1,2826 @@
+
+<TITLE>PSION Programming Ref.: Chapter 11. Advanced Topics </TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Advanced Topics </CENTER></H1>
+<P>
+Many of the subjects covered in this chapter may provide 
+benefits for all levels of programmers.
+<P>
+The subjects become progressively more technical, however. 
+This manual cannot cover every OPL keyword in detail, as some give 
+access to the innermost workings of the Series 3a. Some of these 
+keywords are touched on in this chapter.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.1"><H2> Programs, modules, procedures</H2></A>
+<P>
+<H3>Programs using more than one module</H3> 
+<P>
+Program is the more general word for the "finished product"  
+a set of procedures which can be run. A program may consist of one 
+module containing one or more procedures:
+    (picture)
+<P>
+It may also consist of a number of modules containing various procedures:
+    (picture)
+<P>
+A procedure in one module can call procedures in another module, provided 
+this module has been loaded with the LOADM command. 
+LOADM needs the filename of the module to load.
+<P>
+For example, if an OPL module "MAIN" has these two procedures:
+<P>
+<UL><PRE>
+<B>PROC main:</B>
+  LOADM "library"
+  pthis: REM run pthis: in this module
+  pother: REM run pother: in "library"
+  PRINT "Finished"
+  PAUSE 40
+  UNLOADM "library"
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC pthis:</B>
+  PRINT "Running pthis:"
+  PRINT "in this module"
+  PAUSE 40
+<B>ENDP</B>
+</PRE></UL>
+<P>
+and a module called "LIBRARY" has this one:
+<P>
+<UL><PRE>
+<B>PROC pother:</B>
+  PRINT "Running pother:"
+  PRINT "in module called LIBRARY"
+  PAUSE 40
+<B>ENDP</B>
+</PRE></UL>
+<P>
+then running "MAIN" would display "Running pthis:" and "in this module"; 
+then display "Running pother:" and "in module called LIBRARY"; 
+and then display "Finished".
+<P>
+<B>You would usually only need to load other modules when developing 
+large OPL programs.</B>
+<P>
+You can use LOADM up to three times, to load up to three modules. 
+If you want to load a fourth module, you must first unload one of 
+those currently loaded, by using UNLOADM 
+with the filename. To keep your program tidy, you should UNLOADM 
+a module as soon as you have finished using it.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> If there is an error in the running program, you will only  
+be positioned in the Program editor to the place where the error occurred 
+if you were editing the module concerned (and you ran the program 
+from there).
+</DL>
+In spite of its name, LOADM does not "load" the whole of another 
+module into memory. Instead, it just loads a block of data stored 
+in the module which lists the names of the procedures which it contains. 
+If such a procedure is then called, the procedure will be searched 
+for, copied from file into memory and the procedure will then be run.
+<P>
+The modules are searched through in the order that they were loaded  
+the module loaded last is searched through last. <B>You may make considerable 
+improvements in speed if you have few modules loaded at a time (so 
+avoiding a long search for each procedure) and if you load the modules 
+with the most commonly called procedures first.</B>
+<P>
+<H3>Cacheing procedures for speed</H3> 
+<P>
+Without procedure cacheing, procedures are loaded from file whenever 
+they are called, and discarded when they return. This is true even 
+when procedures are all in one module. (With more than one module, 
+LOADM simply loads a map listing procedure names and their 
+positions in the module file so that they can be loaded fairly efficiently. 
+It does not load procedures into memory.)
+<P>
+If a well-designed program calls procedures regularly, you can speed 
+it up by cacheing procedures  keeping the code for a 
+procedure loaded in memory after it returns, so that if it is called 
+again there is no need to fetch it from file again. The CACHE command takes two arguments  the initial size of the 
+cache and the maximum size (both in bytes). These can be up to 32,767 
+bytes. The minimum in both cases is 2000 bytes.
+<P>
+For a small program, you might use "CACHE 2000,2000" at the 
+start of the program. Up to 2000 bytes of procedure code will be cached. 
+If the cache fills up, and a procedure is called which is not in the 
+cache, space will be made for it in the cache by removing other procedures 
+from it.
+<P>
+For a much larger program, you might use "CACHE 10000,10000". 
+You may wish to change the settings and find the smallest setting 
+which produces the maximum speed improvement.
+<P>
+Once a cache has been created, "CACHE OFF" prevents further 
+cacheing, although the cache is still searched when calling subsequent 
+procedures. "CACHE ON" may then be used to re-enable cacheing.
+<P>
+<H3>Calling procedures by strings</H3> 
+<P>
+Procedures can be called using a string expression for the procedure 
+name. Use an "@" symbol, optionally followed by a character to 
+show what type of value is returned  for example, "%" for 
+an integer. Follow this with the string expression in brackets. You 
+can use upper or lower case characters.
+<P>
+Here are examples showing the four types of value which can be returned:
+<P>
+<PRE>
+i%  = @%(name$):(parameters) for integer
+l&  = @&(name$):(parameters) for long integer
+s$  = @$(name$):(parameters) for string
+f   = @(name$):(parameters) for floating-point
+</PRE>
+So, for example, "test$:(1.0,2)" and "@$("test"):(1.0,2)" 
+are equivalent.
+<P>
+Note that the string expression does not itself include a symbol for 
+the type ("%", "&" or "$").
+<P>
+You may find this useful if, in a more complex program, you want to 
+"work out" the name of a procedure to call at a particular point. 
+The chapter on `Friendlier interaction' includes an example program 
+which uses this method.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.2"><H2> Where files are kept</H2></A>
+<P>
+The internal memory and SSDs use a DOS-compatible directory structure, 
+the same as that used on disks on business PCs. However, the Series 3a 
+hides the complexities of this. You have only to supply a filename, 
+and to say whereabouts a file is  internal, on an SSD, or on 
+another computer to which the Series 3a is linked.
+<P>
+In fact, in order to completely specify a file, the Series 3a uses 
+a filing system, drive (or device), directory 
+and filename: 
+<P>
+<P>
+<UL><LI> The filing system usually specifies the computer, and is </LI> 
+usually "LOC::" (`local'  the Series 3a) or "REM::" 
+(`remote'  an attached computer). This is always three letters 
+and two colons.
+</UL>
+<UL><LI> The drive is the area on that computer where the file is </LI> 
+kept. On the Series 3a this can be "M:" (internal disk), "A:" 
+(left SSD drive) or "B:" (right SSD drive).
+</UL>
+<UL><LI> Every drive has one root directory, usually written </LI> 
+as a backslash ("\"). This can "contain" files and/or other directories, 
+each of which can contain more files and/or more directories. When 
+you have "directories in directories" like this, they're often called 
+subdirectories. Their names show where they are. For example, 
+the root directory ("\") could contain a directory called "\JO", 
+which might in turn contain a directory called "\JO\BACKUP", which 
+might contain some files.
+</UL>
+<UL><LI> Filenames are composed of one to eight letters and/or numbers, </LI> 
+optionally followed by a file extension comprised of a dot 
+and from one to three letters/numbers. File extensions are by convention 
+used to group different types of files. The Series 3a uses file 
+extensions in this way, but hides this from you.
+</UL>
+To completely specify a file, you add the four parts together. The 
+directory part must end with a backslash. So an OPL module named "TEST", 
+in a directory called "\JO" in the Series 3a internal memory 
+can be specified as "LOC::M:\JO\TEST.OPL". If this file were in 
+the "\JO\BACKUP" directory, it would be completely specified as 
+"LOC::M:\JO\BACKUP\TEST.OPL". If it were in the root directory, 
+you would specify it as "LOC::M:\TEST.OPL".
+<P>
+A full file specification may be up to 128 characters long.
+<P>
+In OPL, unless you say otherwise, files are kept on the Series 3a 
+"(LOC::"), in the internal memory ("M:"). The directories 
+and file extensions used are:
+<PRE>
+Type of file	      Directory	     File extension 
+<P>
+OPL modules		\OPL		.OPL
+translated modules	\OPO		.OPO
+data files		\OPD		.ODB
+bitmaps		\OPD		.PIC
+</PRE>
+<H3>Using file specifications in OPL</H3> 
+<P>
+OPL commands which specify a filename, such as OPEN, CREATE, 
+gLOADBIT and so on, can also use any or all of the other parts 
+that make up a full file specification. (Normally, the only other 
+part you might use is the drive name, if the file were on an SSD.) 
+So for example, "OPEN "REM::C:\ADDR.TXT""... tries to open a 
+data file called "ADDR.TXT" on the root directory of a hard disk 
+"C:" on an attached PC.
+<P>
+You can use the PARSE$ function if you need 
+to build up complex filenames. See the alphabetic listing for more 
+details of PARSE$.
+<P>
+Unless you have a good reason, though, it's best not to change directories 
+or file extensions for files on the Series 3a. You can lose information 
+this way, unless you're careful.
+<P>
+<H3>Control of directories</H3> 
+<P>
+Use the MKDIR command to make a new directory. 
+For example, "MKDIR "M:\MINE\TEMP"" creates a "M:\MINE\TEMP" 
+directory, also creating "M:\MINE" if it is not already there. 
+An error is raised if the chosen directory exists already  
+use "TRAP MKDIR" to avoid this.
+<P>
+SETPATH sets the current directory for file 
+access  for example, "SETPATH "A:\DOCS"". LOADM 
+continues to use the directory of the running program, but all other 
+file access will be to the new directory instead of \OPD.
+<P>
+Use RMDIR to remove a directory  for 
+example, "RMDIR "M:\MINE"" removes the "MINE" directory 
+on "M:\". An error is raised if the directory does not exist  
+use "TRAP RMDIR" to avoid this.
+<P>
+You can only remove empty directories.
+<P>
+<H3>File specifications on REM::</H3> 
+<P>
+You should not assume that remote file systems use DOS-like file specifications  
+for example, an Apple Macintosh 
+specification is "disk:folder:folder:filename". You can only assume 
+that there will be four parts  disk/device, path, filename 
+and (possibly null) extension. PARSE$, however, will always 
+build up or break down REM:: file specifications correctly. 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.3"><H2> Safe pointer arithmetic</H2></A>
+<P>
+Whenever you wish to add or subtract something from an integer which 
+is an address of something (or a pointer to something) you should 
+use UADD and USUB. 
+If you do not, you will risk an `Integer overflow' error.
+<P>
+An address can be any value from 0 to 65535. An integer variable can 
+hold the full range of addresses, but treats those values from 32768 
+to 65535 as if they were -32768 to -1. If your addition or subtraction 
+would convert an address in the 0-32767 range to one in the 32768-65535 
+range, or vice versa, this would cause an `Integer overflow'.
+<P>
+UADD and USUB treat integers as if they were unsigned, 
+ie as if they really held a value from 0 to 65535.
+<P>
+For example, to add 1 to the address of a text string (in order to 
+skip over its leading byte count and point to the first character 
+in the string), use "i%=UADD(ADDR(a$),1)", not "i%=ADDR(a$)+1".
+<P>
+USUB works in a similar way, subtracting the second integer 
+value from the first integer, in unsigned fashion  for example, 
+"USUB(ADDR(c%),3)".
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> "USUB(x%,y%)" has the same effect as "UADD(x%,-y%)". 
+</DL>
+<HR SIZE=4 NOSHADE ><A NAME = "11.4"><H2> OPL applications (OPAs)</H2></A>
+<P>
+You can make an OPL program appear as an icon in the system screen, 
+and behave like the other icons there, by converting it into an OPL application,
+or OPA. There are five different types of OPA, called type 0 to type 4:
+<P>
+<UL><LI> "TYPE 0" (like Calc): The OPA uses no files.</LI> 
+</UL>
+<UL><LI> "TYPE 1": Only one file is used. A type 1 OPA will </LI> 
+look the same as a type 0. The only difference is that the type 1 
+is using a file, of the same name as the OPA.
+</UL>
+<UL><LI> "TYPE 2" (like World): You can have more than one </LI> 
+file, but only one can be in use (bold) at any time.
+</UL>
+When you pick a new file to use, its name becomes bold, 
+and the one that was previously bold reverts to normal. What has 
+actually happened is that the running OPA has switched files  
+it has not closed down, and no new copy of the OPA is 
+run.
+<P>
+<UL><LI> "TYPE 3" (like Data, Word, Agenda and Sheet): You </LI> 
+can have more than one file, and any number may be open (bold) at 
+a given time.
+</UL>
+When you select a new file, one of the running OPAs normally 
+switches to this file, as with type 2 OPAs. You can, however, with 
+Shift-Enter, start a new OPA running just for this file, without a 
+different file exiting.
+<P>
+<UL><LI> "TYPE 4" (like RunOpl): Many files can be used, and </LI> 
+any number may be in use at a given time. When you select a new file, 
+a new version of the OPA is always run, to use the new file.
+</UL>
+Types 3 and 4 allow more than one file to be in use (ie have 
+their names in bold). When this happens a separate version of the 
+OPA runs for each bold file. With types 0, 1 and 2, only one version 
+of the OPA can be running at any time.
+<P>
+Initially, the OPA's name appears beneath the icon. If you move onto 
+this name and press Enter, file-based OPAs (types 1 to 4) will use 
+a file of this name. Types 2, 3 and 4 allow you to create lists of 
+files below the icon (with the `New file' option). You use the file 
+lists in the same way as the lists under the other icons in the System 
+screen.
+<P>
+You can stop a running OPA by moving the cursor onto its bold name 
+and pressing Delete. After a `Confirm' dialog, the System screen tells 
+the OPA to stop running.
+<P>
+<H3>Defining an OPA</H3> 
+<P>
+To make an OPA, your OPL file should begin with the APP keyword, followed by a name for the OPA. The name should 
+begin with a letter, and comprise of 1 to 8 letters and/or numbers. 
+(Note that it does not have quote marks.) The APP line may 
+be followed by any or all of the keywords PATH, EXT, 
+ICON and TYPE. A Series 3a OPA should also add 
+$1000 to the type if it has its own 48x48 pixel, black/grey icon 
+(see the discussion of ICON below for details). Finally, use 
+ENDA, and then the first procedure may begin 
+as in a normal OPL file. Here is an example of how an OPA might start:
+<PRE>
+APP Expenses
+  TYPE $1003
+  PATH "\EXP"
+  EXT "EXP"
+  ICON "\OPD\EXPENSES.PIC"
+ENDA
+</PRE>
+Here is another example:
+<PRE>
+APP Picture
+  TYPE 1
+ENDA
+</PRE>
+TYPE takes an integer argument from 0 to 4. 
+The various types of OPA are outlined earlier. If you don't specify 
+the type, 0 is used.
+<P>
+PATH gives the directory to use for this OPA's 
+files. If you do not use this, the normal "\OPD" directory will 
+be used. The maximum length, including a final "\", is 19 characters. 
+Don't include any drive name in this path.
+<P>
+EXT gives the file extension of files used by 
+this OPA. If you do not specify this, ".ODB" is used. Note that 
+the files used by an OPA do not have to be data files, as the I/O 
+commands give access to files of all kinds. EXT does not define 
+the file type, just the file extension to use. However, for simplicity's 
+sake, examples in this section use data files.
+<P>
+(PATH and EXT provide information for the System screen  
+they do not affect the program itself. The System screen displays 
+under the OPA icon all files with the specified extension in the path 
+you have requested.)
+<P>
+ICON gives the name of the bitmap file to use 
+as the icon for this OPA. If no file extension is given, .PIC 
+is used. If you do not use ICON, the OPA is shown on the System 
+screen with a standard OPA icon.
+<P>
+As mentioned above, you should add $1000 to the argument to TYPE 
+for a Series 3a icon. This specifies that the icon has size 48x48 
+pixels (instead of 24x24 as it was on the Series 3). If the first 
+bitmap has size 24x24, it is ignored and the following two bitmaps 
+must be the 48x48 black and grey icons respectively. If the first 
+bitmap is 48x48, it is assumed to be the black icon and the grey icon 
+must follow. If $1000 is not set, a scaled up 24x24 icon 
+will be used. The translator does not check the size of the icons. 
+If you want to design your own icon using an OPL program, see gSAVEBIT 
+for details on saving both black and grey planes to a bitmap file.
+<P>
+The arguments to any of the keywords between APP and 
+ENDA must be constants and not expressions. So, for example, 
+you must use "TYPE $1003" instead of "TYPE $1000 OR 3".
+<P>
+<H3>Running the OPA</H3> 
+<P>
+Once you've translated the OPL file, return to the System screen and 
+use Install on the App menu to install the OPA in the System screen. 
+(You only need to do this once.) Once installed, file-based OPAs are 
+shown with the list of available files, if any are found. Otherwise, 
+the name used after the APP keyword appears below the icon.
+<P>
+(Note: the translated OPA is saved in a "\APP" directory. If you 
+previously translated the module without the APP...ENDA at 
+the start, the old translated version will still be listed under the 
+RunOpl icon, and should be deleted.)
+<P>
+The first thing a file-based OPA should do is to get the name of the 
+file to use, and check whether it is meant to create it or open it. 
+"CMD$(2)" returns the full name of the file to use; "CMD$(3)" 
+returns "C" for "Create" or "O" for "Open". All file-based OPAs 
+(types 1 to 4) should handle both these cases; if a "Create" fails 
+because the file exists already, or an "Open" fails because it does 
+not, OPL raises the error, and the OPA should take suitable action - 
+perhaps even just exiting.
+<P>
+<H3>How the SERIES 3a talks to an OPA</H3> 
+<P>
+When the Series 3a wants an OPA to exit or to switch files, it sends 
+it a System message, in the form of an event. This 
+would happen if you press Delete to stop a running OPA, or select 
+a new file for a type 2 or 3 OPA.
+<P>
+TESTEVENT and GETEVENT check for certain events, including both keypresses and System 
+messages. All types of OPA must use these keywords to check 
+for both keypresses and System messages; keyboard commands such 
+as GET, KEY and KEYA cause other events to be discarded.
+<P>
+GETEVENT waits for an event whereas TESTEVENT simply 
+checks whether an event has occurred without getting it.
+<P>
+If TESTEVENT returns non-zero, an event has occurred, and can 
+be read with GETEVENT. This takes one argument, the name of 
+an integer array  for example, "GETEVENT a%()". The array 
+should be at least 6 integers long. (This is to allow for future upgrades  
+you only need use the first two integers.)
+<PRE>
+If the event is a keypress:
+  a%(1)= keycode (as for GET)
+  a%(2) AND $00ff= modifier (as for KMOD)
+  a%(2)/256= auto-repeat count (ignored by GET; you can ignore it too)
+</PRE>
+For non-key events "(a%(1) AND $400)" will be non-zero. If 
+the event is a System message to change files or quit, "a%(1)=$404". 
+You should then use GETCMD$ to find the action required.
+<P>
+GETCMD$ returns a string, whose first character 
+is "C", "O" or "X". If it is "C" or "O", the rest of the string is 
+a filename.
+<P>
+You can only call GETCMD$ once for each event. You should 
+do so as soon as possible after reading the event. Assign the value 
+returned by GETCMD$ to a string variable so that you can extract 
+its components.
+<P>
+If you have "c$=GETCMD$", the first character, which you can extract 
+with "LEFT$(c$,1)", has the following meaning:
+<P>
+"C"  close down the current file, and create the specified 
+new file.
+<P>
+"O"  close down the current file, and open the specified existing 
+file.
+<P>
+"X"  close down the current file (if any) and quit the OPA.
+<P>
+Again with "c$=GETCMD$", "MID$(c$,2,128)" is the easiest way 
+to extract the filename.
+<P>
+Note: events are ignored while you are using keywords which 
+pause the execution of the program  GET, GET$, 
+EDIT, INPUT, PAUSE, MENU and DIALOG. 
+If you need to use these keywords, use "LOCK ON / LOCK OFF" 
+(described later) around them to prevent the System screen from sending 
+messages.
+<P>
+<H3>Example OPAs</H3> 
+<P>
+Here is a type 0 OPA, which just prints the keys you press. The keyboard 
+procedure "getk%:" returns the key pressed, as with GET, 
+but jumps to a procedure "endit:" if a System message to close 
+down is received. (Type 0 OPAs do not receive "change file" messages.)
+<P>
+"getk%:" does not return events with values 256 ($100) or above, 
+as they are not simple keypresses. This includes the non-typing keys 
+like Menu ($100-$1FF), hot-keys ($200-$3FF), and non-key events ($400 
+and above).
+<P>
+APP myapp0
+  TYPE $1000
+  ICON "\opd\me"
+ENDA
+<P>
+<UL><PRE>
+<B>PROC start:</B>
+  GLOBAL a%(6),k%
+  STATUSWIN ON :FONT 11,16
+  PRINT "Q to Quit"
+  PRINT " or press Delete in"
+  PRINT " the System screen"
+  DO
+    k%=getk%:
+    PRINT CHR$(k%);
+  UNTIL (k% AND $ffdf)=%Q  REM Quick way to do uppercase
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC getk%:</B>
+  DO
+    GETEVENT a%()
+    IF a%(1)=$404
+      IF LEFT$(GETCMD$,1)="X"
+        endit:
+      ENDIF
+    ENDIF
+  UNTIL a%(1)<256
+  RETURN a%(1)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC endit:</B>
+  STOP
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Here is a similar type 3 OPA. It does the same as the previous example, 
+but System messages to change files cause the procedure "fset:" 
+to be called. The relevant files are opened or created; the name of 
+the file in use is shown in the status window.
+<P>
+APP myapp3
+  TYPE $1003
+  ICON "\opd\me"
+ENDA
+<P>
+<UL><PRE>
+<B>PROC start:</B>
+  GLOBAL a%(6),k%,w$(128)
+  STATUSWIN ON :FONT 11,16 :w$=CMD$(2)
+  fset:(CMD$(3))
+  PRINT "Q to Quit"
+  PRINT " or press Delete in"
+  PRINT "the System screen"
+  PRINT " or create/swap files in"
+  PRINT "the System screen"
+  DO
+    k%=getk%:
+    PRINT CHR$(k%);
+  UNTIL (k% AND $ffdf)=%Q
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC getk%:</B>
+  LOCAL t$(1)
+  DO
+    GETEVENT a%()
+    IF a%(1)=$404
+      w$=GETCMD$
+      t$=LEFT$(w$,1)
+      w$=MID$(w$,2,128)
+      IF t$="X"
+        endit:
+      ELSEIF t$="C" OR t$="O"
+        TRAP CLOSE
+        IF ERR
+          CLS :PRINT ERR$(ERR)
+          GET :CONTINUE
+        ENDIF
+        fset:(t$)
+      ENDIF
+    ENDIF
+  UNTIL a%(1)<256
+  RETURN a%(1)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC fset:(t$)</B>
+  LOCAL p%(6)
+  IF t$="C"
+    TRAP DELETE w$  REM SYS.SCREEN DOES ANY "OVERWRITE?"
+    TRAP CREATE w$,A,A$
+  ELSEIF t$="O"
+    TRAP OPEN w$,A,A$
+  ENDIF
+  IF ERR
+    CLS :PRINT ERR$(ERR)
+    GET :STOP
+  ENDIF
+  SETNAME w$
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC endit:</B>
+  STOP
+<B>ENDP</B>
+</PRE></UL>
+<P>
+You should, as in both these examples, be precise in checking for 
+the System message; if in future the GETCMD$ function were 
+to use values other than "C", "O" or "X", these procedures would ignore 
+them.
+<P>
+If you need to check the modifier keys for the returned keypress, 
+use "a%(2) AND $00ff" instead of KMOD.
+<P>
+SETNAME extracts the main part of the filename 
+from any file specification (even one that is not DOS-like), in the 
+same way as PARSE$. Using SETNAME ensures that the correct 
+name will be used in the file list in the System screen. If an OPA 
+lets you change files with its own `Open file' option, it should always 
+use SETNAME to inform the System screen of the new file in 
+use.
+<P>
+To be strict, whenever creating a file, an OPA should first 
+use PARSE$ to find the disk and directory requested. It should 
+then use "TRAP MKDIR" to ensure that the directory exists.
+<P>
+<H3>When an OPA cannot respond</H3> 
+<P>
+The LOCK command marks an OPA as locked or 
+unlocked. When an OPA is locked with "LOCK ON", the System will 
+not send it events to change files or quit. If, for example, you move 
+onto the file list in the System screen and press Delete to try to 
+stop that running OPA, a message will appear, indicating that the 
+OPA cannot close down at that moment.
+<P>
+You should use "LOCK ON" if your OPA uses a keyword, such as 
+EDIT, which pauses the execution of the program. You might 
+also use it when the OPA is about to go busy for a considerable length 
+of time, or at any other point where a clean exit is not possible. 
+Do not forget to use "LOCK OFF" as soon as possible afterwards.
+<P>
+An OPA is initially unlocked.
+<P>
+<H3>Designing an icon</H3> 
+<P>
+As discussed earlier, an OPA icon is black and grey and has size 48 
+by 48 pixels. The icon is stored as two 48x48 bitmaps, black followed 
+by grey, in a bitmap file. Here is a simple example program which 
+creates a suitable bitmap:
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC myicon:</B>
+  gCREATE(0,0,48,48,1,1)
+  gBORDER $200
+  gAT 6,28
+  gPRINT "me!"
+  gSAVEBIT "me"
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Here the window is created with a grey plane (the sixth argument to 
+gCREATE) gSAVEBIT automatically saves a window with 
+both black and grey plane to a file in the required format.
+<P>
+In the OPA itself use the ICON keyword, as 
+explained previously, to give the name of the bitmap file to use  
+here, "ICON "\opd\me"".
+<P>
+<H3>OPAs and the status window</H3> 
+<P>
+If you use "STATUSWIN ON,2" to display 
+the status window, it shows the OPA's own icon and the name used with 
+the APP keyword. "STATUSWIN ON,1" displays the smaller 
+status window.
+<P>
+Important: The permanent status window is behind all other 
+OPL windows. In order to see it, you must use FONT (or 
+both SCREEN and gSETWIN) to reduce the size of the text 
+and graphics windows. You should ensure that your program does not 
+create windows over the top of it.
+<P>
+You can also display a list of modes/views for use with the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> 
+key with DIAMINIT and position the <IMG ALT = "DIAMOND" SRC = "diamond.gif"> indicator with "DIAMPOS".
+<P>
+The name can be changed with the SETNAME 
+command. In general, an OPA should use SETNAME whenever it 
+changes files, or creates a new file.
+<P>
+<H3>Other TYPE options</H3> 
+<P>
+You can add any of these numbers to the value you use with TYPE:
+<P>
+<UL><LI> $8000 (-32768) stops the System screen's `New file' option </LI> 
+from working, as for the RunOpl icon (translated OPL modules).
+</UL>
+<UL><LI> $4000 (16384) stops the System screen from closing the OPA, </LI> 
+as for the Time icon. You should not use this without a very 
+good reason.
+</UL>
+<UL><LI> $100 (8192) causes the System screen to terminate the OPA </LI> 
+(when Delete is pressed there) without sending a message to the OPA 
+to quit ("X"), as for the RunOpl icon again. This should be used only 
+for OPAs which have no data that could be lost by sudden termination.
+</UL>
+For example, use "TYPE $8001" for a type 1 OPA having the first 
+of the features above. (Note that "TYPE $8000+1" would fail 
+to translate as the translator cannot evaluate expressions for any 
+keywords between APP and ENDA).
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.5"><H2> Tricks</H2></A>
+<P>
+<H3>The calculator memories</H3> 
+<P>
+The calculator memories M0 to M9 are available as floating-point variables 
+in OPL. You might use them to allow OPL access to results from the 
+calculator, particularly if you use OPL procedures from within the 
+calculator.
+<P>
+It's best not to use them as a substitute for declaring your own variables. 
+Your OPL program might go wrong if another running OPL program uses 
+them, or if you use them yourself in the calculator.
+<P>
+<H3>Running a program twice</H3> 
+<P>
+Although you may never need to, you can run more than one copy 
+of the same translated OPL module at the same time. There are 
+two ways:
+<P>
+<UL><LI> Use `Copy file' in the System screen to make a new copy </LI> 
+of the module, with a different filename. Then run both files.
+</UL>
+<UL><LI> Run the file as normal. Then move the highlight to under </LI> 
+the RunOpl icon, press Tab to show the file selector, and pick the 
+name of the translated module again.
+</UL>
+<H3>Foreground and background</H3> 
+<P>
+<UL><LI> "CALL ($6c8d)" tells the Series 3a to send a "machine </LI> 
+switch on" event to the current program, whenever the Series 3a 
+switches on, even if this program is in the background. If required, 
+use it just once at the start of your program.
+</UL>
+<UL><LI> "CALL($198d,0,0)" brings the current program to the </LI> 
+foreground.
+</UL>
+<UL><LI> "CALL($198d,100,0)" sends it to the background again.</LI> 
+</UL>
+Each of these should be followed by "gUPDATE" to ensure they take 
+effect immediately.
+<P>
+This example program comes to the foreground and beeps whenever you 
+turn the Series 3a on. Be careful to enter the CALL and GETEVENT 
+statements exactly as shown.
+<P>
+<UL><PRE>
+<B>PROC beepon:</B>
+local a%(6)
+print "Hello"
+call($6c8d) :gupdate
+while 1
+  do
+    getevent a%()
+    if a%(1)=$404 :stop :endif :REM closedown
+  until a%(1)=$403 :REM machine ON
+  call($198d,0,0) :gupdate
+  beep 5,300 :pause 10 :beep 5,500
+  call($198d,100,0) :gupdate
+endwh
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Note: when a program runs in the background it can stop the "automatic 
+turn off" feature from working. However, as soon as the program waits 
+for a keypress or an event, with GET/GET$ or GETEVENT, 
+auto-turn off can occur.
+<P>
+Auto-turn off can also occur if the program does a PAUSE (of 
+2 or more 20ths of a second), but only if the program has used "CALL($138b)" 
+("unmark as active")
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.6"><H2> Cacheing procedures</H2></A>
+<P>
+Without procedure cacheing, procedures are loaded from file whenever 
+they are called and discarded when they return  LOADM 
+simply loads a map listing procedure names and their positions in 
+the module file so that they can be loaded fairly efficiently. The 
+cache handling commands provide a method for keeping the code for 
+a procedure loaded after it returns  it remains loaded until 
+a procedure called later requires the space in the cache. The strategy 
+is then to remove the least recently used procedures, making it more 
+likely that all the procedures called together in a loop, for example, 
+remain in the cache together, thus speeding up procedure calling significantly.
+<P>
+Cache handling keywords allow you to:
+<P>
+<UL><LI> create a cache of a specified initial and maximum size using </LI> 
+"CACHE init%,max%". You can specify these up 
+to 32,767 bytes.
+</UL>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> If you use hex, you can even exceed this figure, if you need  
+to  eg "CACHE $9000,$9000". However, you cannot exceed 
+the 64k total memory limit which each Series 3a process has.
+</DL>
+<UL><LI> prevent loading and removal of procedures from the cache </LI> 
+so that a given set of procedures can be guaranteed to remain in the 
+cache using "CACHE OFF". Procedures already in the cache are 
+still used when cacheing is off. The loading and removal of procedures 
+can subsequently be resumed using "CACHE ON".
+</UL>
+<UL><LI> tidy the cache by removing procedures that are no longer </LI> 
+in use (ie. procedures that have returned) using "CACHETIDY".
+</UL>
+<UL><LI> for advanced use during program development, further keywords </LI> 
+are provided for inspecting the contents of the cache at any time 
+(see CACHEHDR and CACHEREC).
+</UL>
+<H3>Cache size</H3> 
+<P>
+Cacheing procedures is not a cure all. Care should be taken that the 
+cache size is sufficient to load all procedures required for a fast 
+loop otherwise, for example, a large procedure may cause all the small 
+ones in a loop to be removed and equally, a small one may require 
+the large one to be removed, so that the cache provides no benefit 
+at all. In fact, the overhead needed for cache management can then 
+make your program less efficient than having no cache at all. If the 
+maximum cache size you can have is limited, careful use of "CACHE OFF" 
+should prevent such problems at the expense of not fitting all the 
+procedures in the loop in the cache. "CACHE OFF" is implemented 
+very efficiently and calling it frequently in a loop should not cause 
+much concern.
+<P>
+To guarantee that there is enough memory for a given cache size, create 
+the cache passing that value as the initial size using "TRAP CACHE init%,max%". 
+TRAP ensures that if the cache creation succeeds, ERR 
+returns zero and otherwise the negative `Out of memory' error is raised. 
+After creation, the cache will grow as required up to the maximum 
+size "max%" or until there is not enough free memory to grow it. 
+On failure to grow the cache, any procedures which will not fit into 
+the existing cache, even when unused procedures are removed, are simply 
+loaded without using the cache and are discarded when they return.
+<P>
+If you want to ensure a certain minimum cache size, say 10000 bytes, 
+but do not care how large it grows, you could use "TRAP CACHE 10000,$ffff" 
+so that the cache just grows up to the limits of memory. For a relatively 
+small program, you might want to load the whole program into cache 
+by making the cache size the same size as the module. This will in 
+fact be a little larger than required, unnecessarily including a procedure 
+name table and module file header which are not loaded into the cache. 
+The minimum cache size is 2000 bytes, which is used if any lower value 
+is specified. If the maximum size specified is less than the initial 
+size, the maximum is set to the initial size. The maximum cache size 
+cannot be changed once the cache has been created and an error is 
+returned if you attempt to do so.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> The initial cache size should ideally be large enough to hold  
+all procedures that are to be cached simultaneously. There is no advantage 
+in growing the cache from its initial size when you know that a certain 
+minimum size is needed.
+</DL>
+<H3>Procedures in unloaded modules</H3> 
+<P>
+When a module is unloaded, all procedures in it that are no longer 
+in use are removed from the cache. Any procedure that is still in 
+use, is hidden in the cache by changing its first character to lower 
+case; when it finally returns, a hidden procedure is removed in the 
+normal manner to make room for loading a new procedure when the cache 
+is full. Note that it considered bad practice to unload a module containing 
+procedures that are still running  eg. for a procedure to unload 
+its own module.
+<P>
+<H3>Cache timings</H3> 
+<P>
+Calling an empty procedure that simply returns is approximately 10 
+times faster with a cache. This figure was obtained by calling such 
+a procedure 10000 times in a loop, both with cacheing off and on, 
+and subtracting the time taken running an empty loop in each case.
+<P>
+Clearly that case is one of the best for showing off the advantages 
+of cacheing and there is no general formula for calculating the speed 
+gain. The procedures that benefit most will be those that need most 
+module file access relative to their size in order to load them into 
+memory. The programmer cannot reasonably write code taking this into 
+account, so no further details are provided here.
+<P>
+The case described above does not require any procedures to be removed 
+from the cache to make room for new procedures when the cache is full, 
+and removal of procedures requires a fair amount of processing by 
+the cache manager. If many procedures in a time-critical section of 
+your program are loaded into the cache and not used often before removal, 
+the speed gain may be less than expected  a larger cache may 
+be called for to prevent too many removals.
+<P>
+It should be noted however, that even with the worst case of procedures 
+being loaded into the cache for use just once before removal, having 
+a cache is often superior to having no cache. This is because the 
+cache manager reads module file data (required for loading the procedures 
+into memory) in one block rather than a few bytes at a time and it 
+is the avoidance of excessive file access which provides the primary 
+speed gains for cacheing.
+<P>
+<H3>Compatibility mode modules</H3> 
+<P>
+Procedures in modules translated for the Series 3 cannot be loaded 
+into the cache. On encountering such a procedure, the cache manager 
+simply loads it without using the cache and discards it when it returns. 
+The reason for this is that a few extra bytes of data are stored in 
+the Series 3a modules which are needed by the cache manager.
+<P>
+<H3>Potential problems in existing programs</H3> 
+<P>
+It is possible that previously undiscovered bugs in existing OPL programs 
+are brought to light simply by adding code to use the cache.
+<P>
+Without cacheing, the variables in a procedure are followed immediately 
+by the code for the procedure. Writing beyond the variables (for example 
+reading too many bytes into the final variable using such keywords 
+as gPEEKLINE or KEYA) would have written over the code 
+itself but would have gone unnoticed unless you happened to loop back 
+to the corrupted code. With a cached procedure, the code no longer 
+follows your variables, so the corruption occurs elsewhere in memory, 
+resulting quite probably in the program crashing.
+<P>
+<H3>Controlling procedure cacheing</H3> 
+<P>
+"TRAP CACHE initSize%,maxSize%" creates a cache of a specified 
+initial number of bytes, which may grow up to the specified maximum. 
+If the maximum is less than the initial size, the initial size becomes 
+the maximum. If growing the cache fails, normal loading without the 
+cache is used. The `In use' error (-9) is raised if a cache has 
+been created previously or the `Out of memory' error (-10) on failure 
+to create a cache of the specified initial size  use the TRAP 
+command if required. Procedure code and other information needed for 
+setting up variables are loaded into the cache when the procedure 
+is called. If there is no space in the cache and enough space can 
+be regained, the least recently used procedures are removed. Otherwise 
+the procedure is loaded in the normal way without cacheing. 
+<P>
+Once a cache has been created, "CACHE OFF" prevents further 
+cacheing although the cache is still searched when calling subsequent 
+procedures. "CACHE ON" may then be used to reenable cacheing. 
+Note that "CACHE ON" or "CACHE OFF" are ignored if used 
+before "CACHE initSize%,maxSize%".
+<P>
+<H3>Tidying the cache</H3> 
+<P>
+CACHETIDY removes any procedures from 
+the cache that have returned to their callers. This might be called 
+after performing a large, self-contained action in the program which 
+required many procedures. Using CACHETIDY will then result 
+in speedier searching for procedures called subsequently and, more 
+importantly, will prevent the procedures being unloaded one at a time 
+when the need arises  it is very efficient to remove a set 
+of procedures that are contiguous in the cache as is likely to be 
+the case in this situation.
+<P>
+Note that a procedure which has returned is automatically removed 
+from the cache if you unload the module it is in, so CACHETIDY 
+needn't be used for such a procedure.
+<P>
+<H3>Getting cache index header information</H3> 
+<P>
+The CACHEHDR command is provided for advanced 
+use and is intended for use during program development only.
+<P>
+"CACHEHDR ADDR(hdr%())" reads the current cache index header 
+into the array "hdr%()" which must have at least 11 integer elements. 
+Note that any information returned is liable to change whenever a 
+procedure is called, so you cannot save these values over a procedure 
+call.
+<P>
+If no cache has yet been created, "hdr%(10)=0" and the other 
+data read is meaningless. Otherwise, the data read is as follows:
+<PRE>
+hdr%(1)		current address of the cache itself
+hdr%(2)		number of procedures currently cached
+hdr%(3)		maximum size of the cache in bytes
+hdr%(4)		current size of the cache in bytes
+hdr%(5)		number of free bytes in the cache
+hdr%(6)		total number of bytes in cached procedures which are
+		freeable (ie. not running)
+hdr%(7)		offset from the start of the cache index to the first 
+		free index record
+hdr%(8)		offset from start of cache index to most recently used
+		procedure's record; zero if none
+hdr%(9)		offset from start of cache index to least recently used
+		procedure's record; zero if none
+hdr%(10)	address of the cache index, or zero if no cache created yet
+hdr%(11)	non-zero if cacheing is on, and zero if it is off
+</PRE>
+The cache manager maintains an index for the cache consisting of an 
+index header containing overall information for the whole cache as 
+well as one index record for each procedure cached. All offsets mentioned 
+above give the number of bytes from the start of the index to the 
+procedure record specified. The index records for cached procedures 
+form a doubly linked list, with one list beginning with the most recently 
+used procedure (MRU), with offset given by "hdr%(8)", and the 
+other with the least recently used procedure (LRU) with offset given 
+by "hdr%(9)". A further singly linked list gives the offsets to 
+free index records. The linkage mechanism is described in the discussion 
+of CACHEREC below.
+<P>
+<H3>Getting a cache index record</H3> 
+<P>
+The CACHEREC command is provided for advanced 
+use and is intended for use during program development only.
+<P>
+"CACHEREC ADDR(rec%()),offset%" reads the cache index record 
+(see the description of CACHEHDR above) at "offset%" into 
+array "rec%()" which must have at least 18 integer elements. "offset%=0" 
+specifies the most recently used (MRU) procedure's record if any and 
+"offset%<0" the least recently used procedure (LRU) procedure's 
+record if any.
+<P>
+The data returned by CACHEREC is meaningless if no cache 
+exists (in which case "rec%(17)=0") or if there are no procedures 
+cached yet (when "hdr%(8)=0" as returned by CACHEHDR).
+<P>
+Each record gives the offset to both the more recently used and to 
+the less recently used procedure's record in the linked lists, except 
+for the MRU and the LRU procedures' records themselves which each 
+terminate one of the lists with a zero offset. The first free index 
+record (see CACHEHDR above) starts the free record list, in 
+which each record gives the offset of the next free record or zero 
+offset to terminate the list. To "walk" the cache index, you would 
+always start by calling CACHEREC specifying either the MRU 
+or LRU record offset, and use the values returned to read the less 
+or more recently used procedure's record respectively. Note that any 
+information returned is liable to change whenever a procedure is called, 
+so you cannot save these values over a procedure call.
+<P>
+For the free cell list, only "rec%(1)" is significant, giving 
+the offset of the next free index record. For the records in the lists 
+starting with either the LRU or MRU record, the data returned in "rec%()" 
+is:
+<P>
+rec%(1)		offset to less recently used procedure's record or zero if on LRU
+rec%(2)		offset to more recently used procedure's record or zero if on MRU
+rec%(3)		usage count  zero if not running
+rec%(4)		offset in cache itself to descriptor for building the 
+		procedure frame
+rec%(5)		offset in cache itself to translated code for the procedure
+rec%(6)		offset in cache itself to the end of the translated 
+		code for the procedure
+rec%(7)		number of bytes used by the procedure in the cache itself
+rec%(8-15)	leading byte counted procedure name, followed by 
+		some private data
+rec%(16)	address of the procedure's leading byte counted module name
+rec%(17)	address of the cache index, or zero if no cache created yet
+rec%(18)	non-zero if cacheing is on, and zero if it is off
+<P>
+ 
+<P>
+For example, to print the names of procedures and their sizes from 
+MRU to LRU:
+<PRE>
+CACHEHDR ADDR(hdr%())
+IF hdr%(10)=0
+  PRINT "No cache created yet"
+  RETURN
+ENDIF
+IF hdr%(8)=0                    rem MRU zero?
+  PRINT "None cached currently"
+  RETURN
+ENDIF
+rec%(1)=0                       rem MRU first
+DO
+  CACHEREC ADDR(rec%()),rec%(1) rem less recently used
+											rem proc
+  PRINT PEEK$(ADDR(rec%(8))),rec%(7) rem name and size
+UNTIL rec%(1)=0
+</PRE>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.7"><H2> Sprite handling</H2></A>
+<P>
+<H3>How sprites work</H3> 
+<P>
+OPL includes a set of keywords for handling a sprite  
+a user-defined black/grey/white graphics object of variable size, 
+displayed on the screen at a specified position.
+<P>
+The sprite can also be animated  you can specify up 
+to 13 bitmap-sets which are automatically presented in a cycle, 
+with the duration for each bitmap-set specified by you. Each bitmap-set 
+may be displayed at a specifiable offset from the sprite's notional 
+position. 
+<P>
+The 13 bitmap-sets are each composed of up to six bitmaps. The set 
+pixels in each bitmap specify one of the following six actions: black 
+pixels to be drawn; black pixels to be cleared; black pixels to be 
+inverted; grey pixels to be drawn; grey pixels to be cleared; or grey 
+pixels to be inverted. The bitmaps in a set must have the same size.
+<P>
+All the bitmaps in a set are drawn to the screen together and displayed 
+for the specified duration, followed by the next set, and so on. 
+<P>
+If you do not specify that a pixel is to be drawn, cleared or inverted, 
+the background pixel is left unchanged.
+<P>
+Black pixels are drawn "on top of" grey pixels, so if you clear/invert 
+just the grey pixels in the sprite they will be hidden under any pixels 
+set black. So to clear/invert pixels on a background which has 
+both grey and black pixels set, you need to clear/invert both black 
+and grey pixels in the sprite.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> The pixels of one colour (black or grey) which are set in  
+one bitmap of the bitmap-set should not overlap with those of the 
+same colour which are set in another bitmap in the same 
+bitmap-set. This is because the order in which the bitmaps are applied 
+is undefined. So, for example, do not specify that pixel (0,0) should 
+have the black pixel both drawn and cleared.
+</DL>
+<H3>Why use sprites?</H3> 
+<P>
+A sprite is useful for displaying something in foreground without 
+having to worry about restoring the background display. Also a sprite 
+can have any shape, leaving the background display all around it intact, 
+and it can even be hollow  only the pixels specified by you 
+are drawn, cleared or inverted. Typically only one bitmap-set containing 
+two black bitmaps would be used  one for setting  and one for 
+clearing pixels.
+<P>
+You would not often use the sprite features in their full generality. 
+In fact, more than one bitmap-set is needed only for animation and 
+it is also seldom necessary to use all the available bitmaps in a 
+single bitmap-set.
+<P>
+<H3>Creating a sprite</H3> 
+<P>
+sprId%=CREATESPRITE creates a sprite and returns the sprite 
+ID.
+<P>
+<H3>Appending a bitmap-set to a sprite</H3> 
+<P>
+APPENDSPRITE tenths%,bitmap$()<BR>
+APPENDSPRITE tenths%,bitmap$(),dx%,dy%<BR>
+append a single bitmap-set to a sprite. These may be called up to 
+13 times for each sprite. "APPENDSPRITE" may be called only before 
+the sprite is drawn, otherwise it raises an error. <B>tenths%</B> gives 
+the duration in tenths of seconds for the bitmap-set to be displayed 
+before going on to the next bitmap-set in the sequence. It is ignored 
+if there is only one bitmap-set.
+<P>
+bitmap$() contains the names of the six bitmap files in the set:
+<PRE>
+bitmap$(1) for setting black pixels
+bitmap$(2) for clearing black pixels
+bitmap$(3) for inverting black pixels
+bitmap$(4) for setting grey pixels
+bitmap$(5) for clearing grey pixels
+bitmap$(6) for inverting grey pixels
+</PRE>
+Use "" to specify no bitmap. If "" is used for all the 
+bitmaps in the set, the sprite is left blank for the specified duration.
+<P>
+The array must have at least 6 elements.
+<P>
+All the bitmaps in a single bitmap-set must be the same size, otherwise 
+an `Invalid arguments' error is raised on attempting to draw the sprite. 
+Bitmaps in different bitmap-sets may differ in size. dx% and 
+dy% are the (x,y) offsets from the sprite position (see CREATESPRITE) 
+to the top-left of the bitmap-set with positive for right and down. 
+The default value of each is zero.
+<P>
+Sprites may use considerable amounts of memory. A sprite should generally 
+be created, initialised and closed in the same procedure to prevent 
+memory fragmentation. Care should also be taken in error handling 
+to close a sprite that is no longer in use.
+<P>
+Creating or changing a sprite consisting of many bitmaps requires 
+a lot of file access and should therefore be avoided if very fast 
+sprite creation is required. Once the sprite has been drawn, no further 
+file access is performed (even when it is animated) so the number 
+of bitmaps is no longer important.
+<P>
+<H3>Drawing a sprite</H3> 
+<P>
+DRAWSPRITE x%,y% draws a sprite in 
+the current window with top-left at pixel position (x%,y%). 
+The sprite must previously have been initialised using APPENDSPRITE 
+or the `Resource not open' error (-15) is raised. If any bitmap-set 
+contains bitmaps with different sizes, DRAWSPRITE raises an 
+`Invalid arguments' error (-2).
+<P>
+<H3>Changing a bitmap-set in a sprite</H3> 
+<PRE>
+CHANGESPRITE index%,tenths%,var bitmap$()
+CHANGESPRITE index%,tenths%,var bitmap$(),dx%,dy%
+</PRE>
+change the bitmap-set specified by "index%" (1 for the first bitmap-set) 
+in the sprite using the supplied bitmap files, offsets and duration 
+which are all used in the same way as for APPENDSPRITE.
+<P>
+CHANGESPRITE can be called only after DRAWSPRITE.
+<P>
+Note that if all or many bitmap-sets in the sprite need changing 
+or if each bitmap-set consists of many bitmaps, the time required 
+to read the bitmaps from file may be considerable, especially if fast 
+animation is in progress. In such circumstances, you should think 
+about closing the sprite and creating a new one, which will often 
+be more efficient.
+<P>
+<H3>Positioning a sprite</H3> 
+<P>
+POSSPRITE x%,y% sets the position of the sprite to (x%,y%).
+<P>
+<H3>Closing a sprite</H3> 
+<P>
+CLOSESPRITE sprId% closes the sprite with ID sprId%.
+<P>
+<H3>Sprite example</H3> 
+<P>
+The following code illustrates all the sprite handling keywords using 
+a sprite consisting of just two bitmap-sets each containing a single 
+bitmap.
+<P>
+<UL><PRE>
+<B>PROC sprite:</B>
+  LOCAL bit$(6,6),sprId%
+
+  crBits:                  REM create bitmap files
+  gAT gWIDTH/2,0
+  gFILL gWIDTH/2,gHEIGHT,0 REM fill half of screen
+  sprId%=CREATESPRITE
+  bit$(1)="" :bit$(2)=""
+  bit$(3)="cross"    REM black cross, pixels inverted
+  bit$(4)="" :bit$(5)="" :bit$(6)=""
+  APPENDSPRITE 5,bit$(),0,0 REM cross for half a second
+  bit$(1)="" :bit$(2)="" :bit$(3)=""
+  bit$(4)="" :bit$(5)="" :bit$(6)=""
+  APPENDSPRITE 5,bit$(),0,0 REM blank for half a second
+  DRAWSPRITE gWIDTH/2-5,gHEIGHT/2-5
+                            REM animate the sprite
+  BUSY "flash cross, c",3   REM no offset
+                            REM ('c' for central)
+  GET
+  bit$(3)="box"             REM black box, pixels inverted
+  CHANGESPRITE 2,5,bit$(),0,0        REM in 2nd bitmap-set
+  BUSY "cross/box, c/c",3   REM central/central
+  GET
+  CHANGESPRITE 2,5,bit$(),40,0
+                            REM offset by 40 pixels right
+  BUSY "cross/box, c/40",3  REM central/40
+  GET
+  bit$(3)=""                REM Remove the cross in set 1
+  CHANGESPRITE 1,3,bit$(),0,0 REM display for 3/10 seconds
+  BUSY "flash box, 40",3    REM box at offset 40 still
+  GET
+  bit$(3)="cross"
+  CHANGESPRITE 1,5,bit$(),0,0
+                            REM cross centralised - set 1
+  bit$(3)="box"
+  CHANGESPRITE 2,5,bit$(),0,0
+                            REM box centralised - set 2
+  BUSY "Escape quits"
+  DO
+    POSSPRITE RND*(gWIDTH-11),RND*(gHEIGHT-11)
+                            REM move sprite randomly
+    PAUSE -20               REM once a second
+  UNTIL KEY = 27
+  CLOSESPRITE sprId%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC crBits:</B>
+  REM create bitmap files if they don't exist
+  IF NOT EXIST("cross.pic") OR NOT EXIST("box.pic")
+    gCREATE(0,0,11,11,1,1)
+    gAT 5,0 :gLineBy 0,11
+    gAT 0,5 :gLineBy 11,0
+    gSAVEBIT "cross"
+    gCLS
+    gAT 0,0
+    gBOX gWIDTH,gHEIGHT
+    gSAVEBIT "box"
+    gCLOSE gIDENTITY
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.8"><H2> Scanning the keyboard directly</H2></A>
+<P>
+It is sometimes useful to know which keys are being pressed at a given 
+moment and also when a key is released. For example, in a game, a 
+certain key might start some action and releasing the key might stop 
+it.
+<P>
+CALL($288e,ADDR(scan%())) returns with the array scan%(), 
+which must have at least 10 elements, containing a bit set for keys 
+currently being pressed.
+<P>
+Every key on the keyboard is represented by a unique bit. This includes 
+the modifier keys (Shift, Control etc) and the application buttons 
+(System, Data, Word etc).
+<P>
+A set bit simply signifies a pressed key  a key pressed on 
+its own gives one bit set; that same key with a modifier gives the 
+same bit set with another bit for the modifier; the modifier on its 
+own gives the same modifier bit on its own.
+<P>
+The following table lists each key (according to the text printed 
+on the physical key itself), the scan%() array element for that 
+key and the hexadecimal bit mask to be "AND"ed with that array 
+element to check whether the key is being pressed.
+<P>
+<UL><PRE>
+key		scan%()		mask
+System		5		$200
+Data		4		$200
+Word		6		$200
+Agenda		2		$200
+Time		1		$200
+World		3		$200
+Calc		2		$100
+Sheet		1		$100
+Esc		8		$100
+1		8		$02
+2		8		$04
+3		6		$40
+4		5		$04
+5		5		$08
+6		8		$08
+7		4		$40
+8		3		$08
+9		3		$10
+0		2		$10
++		2		$08
+Delete		3		$01
+Tab		1		$04
+Q		7		$02
+W		7		$20
+E		6		$20
+R		5		$02
+T		5		$10
+Y		1		$08
+U		4		$20
+I		3		$04
+O		3		$20
+P		2		$20
+-		2		$04
+Enter		1		$01
+Control		3		$80
+A		7		$04
+S		7		$10
+D		6		$10
+F		6		$02
+G		5		$20
+H		8		$40
+J		4		$10
+K		3		$02
+L		3		$40
+*		2		$40
+/		2		$02
+Left shift	2		$80
+Z		7		$08
+X		7		$40
+C		6		$08
+V		6		$04
+B		5		$40
+N		1		$40
+M		4		$08
+,		4		$02
+.		8		$10
+Up		8		$20
+Right shift	4		$80
+Psion		1		$80
+Menu		6		$80
+<IMG ALT = "DIAMOND" SRC = "diamond.gif">		5		$80
+Space		5		$01
+Help		4		$04
+Left		1		$10
+Down		1		$20
+Right		1		$02
+</PRE></UL>
+For example, pressing Tab sets bit 2 of scan%(1), pressing Control 
+sets bit 7 of scan%(3) and pressing both together sets both 
+these bits. So Tab is being pressed if scan%(1) AND $04 is non-zero, 
+and Control is being pressed if scan%(3) AND $80 is non-zero.
+<P>
+A possible strategy for scanning the keys might be to wait for any 
+key of interest using "GETEVENT" or "GET" (allowing switch 
+off and less intensive use of the battery); start the required action 
+which is to be continued only while the key is being pressed; scan 
+the keyboard as discussed above until the key is released and then 
+stop the action; wait for the next key and repeat.
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> Note that the key returned by "GETEVENT" or "GET"  
+is not precisely synchronised with those scanned, so once you have 
+waited for a relevant key you should scan for all the keys pressed, 
+ignoring the keycode returned by "GETEVENT" or "GET".
+</DL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.9"><H2> I/O functions and commands</H2></A>
+<P>
+OPL includes powerful facilities to handle input and output (`I/O'). 
+These functions and commands can be used to access all types of files 
+on the Series 3a, as well as various other parts of the low-level 
+software.
+<P>
+This section describes how to open, close, read and write to files, 
+and how to set the position in a file. The data file handling commands 
+and functions have been designed for use specifically with data files. 
+The I/O functions and commands are designed for general file access. 
+You don't need to use them to handle data files.
+<P>
+These are powerful functions and commands and they must be used 
+with care. Before using them you must read this chapter closely 
+and have a good grounding in OPL in general.
+<P>
+<H3>Error handling</H3> 
+<P>
+You should have a good understanding of error handling before using 
+the I/O functions.
+<P>
+The functions in this section never raise an OPL error message. Instead 
+they return a value  if this is less than zero an error has 
+occurred. It is the responsibility of the programmer to check all 
+return values, and handle errors appropriately. Any error number returned 
+will be one of those in the list given in the error handling chapter. 
+You can use ERR$ to display the error as usual.
+<P>
+<H3>Handles</H3> 
+<P>
+Many of these functions use a handle, which must be an integer 
+variable. IOOPEN assigns this handle variable a value, which 
+subsequent I/O functions use to access that particular file. Each 
+file you IOOPEN needs a different handle variable.
+<P>
+<H3>`var' variables</H3> 
+<P>
+In this section, `var' denotes an argument which should normally be 
+a LOCAL or GLOBAL variable. (Single elements of arrays 
+may also be used, but not field variables or procedure parameters.) 
+Where you see `var' the address of the variable is passed, not 
+the value in it. (This happens automatically; don't use ADDR 
+yourself.)
+<P>
+In many cases the function you are calling passes information back 
+by setting these `var' variables.
+<P>
+`var' is just to show you where you must use a suitable variable  
+you don't actually type it.
+<P>
+For example:<BR>
+ret%=IOOPEN(var handle%,name$,mode%)<BR>
+indicates that "IOOPEN(h%,"abc",0)" is OK while" "IOOPEN(100,"abc",0) 
+is incorrect.
+<P>
+It is possible, though, that you already have the address 
+of the variable to use. It might be that this address is held in a 
+field variable, or is even a constant value, but the most common situation 
+is when the address was passed as a parameter to the current procedure.
+<P>
+If you add a `#' prefix to a `var' argument, this tells OPL that the 
+expression following is the address to be used, not a variable whose 
+address is to be taken.
+<P>
+<P>
+Here is an example program:
+<P>
+<UL><PRE>
+<B>PROC doopen:(phandle%, name$, mode%)</B>
+  REM IOOPEN, handling errors
+  LOCAL error%
+  error% = IOOPEN(#phandle%, name$, mode%)
+  IF error% : RAISE error% : ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+The current value held in phandle% is passed to IOOPEN. 
+You might call doopen: like this:
+<PRE>
+local filhand%,...
+...
+doopen:(addr(filhand%), "log.txt", $23)
+...
+</PRE>
+The "doopen:" procedure calls IOOPEN with the address of 
+"filhand%", and IOOPEN will write the handle into "filhand%".
+<P>
+<DL><DD><IMG ALT = "Note : " ALIGN=LEFT SRC="Point.gif"> If you ever need to add or subtract numbers from the address  
+of a variable, use the UADD and USUB functions, or you 
+run the risk of `Integer overflow' errors.
+</DL>
+<H3>Opening a file with IOOPEN</H3> 
+<P>
+ret%=IOOPEN(var handle%,name$,mode%)
+<P>
+or
+<P>
+ret%=IOOPEN(var handle%,address%,mode%)
+<P>
+for unique file creation
+<P>
+Creates or opens a file (or device) called name$ and sets handle%
+to the handle to be used by the other I/O functions.
+<P>
+mode% specifies how the file is to be opened. It is formed by 
+ORing together values which fall into the three following categories:
+<P>
+<B><I>Mode Category 1  Open mode</B></I><BR>
+One and only one of the following values must be chosen from this 
+category.
+<P>
+$0000
+<P>
+Open an existing file (or device). The initial current 
+position is set to the start of the file.
+<P>
+$0001
+<P>
+Create a file which must not already exist. 
+<P>
+$0002
+<P>
+Replace a file (truncate it to zero length) or create 
+it if it does not exist.
+<P>
+$0003
+<P>
+Open an existing file for appending. The initial current 
+position is set to the end of the file. For text format files (see 
+$0020 below) this is the only way to position to end of file. 
+<P>
+$0004
+<P>
+Creates a file with a unique name. For this case, you 
+must use the address of a string instead of "name$". This 
+string specifies only the path of the file to be created (any file 
+name in the string is ignored). The string at "address%" is then 
+set by IOOPEN to the unique file name generated (this will 
+include the full path). The string must be large enough to take 130 
+characters (the maximum length file specification). For example:
+"  s$="M:\home\" 
+  IOOPEN(handle%,ADDR(s$),mode%) 
+"This mode is typically used for temporary files which will later 
+be deleted or renamed."
+<P>
+ 
+<P>
+<B><I>Mode Category 2  File format </B></I><BR>
+One and only one of the following values must be chosen from this 
+category. When creating a file, this value specifies the format of 
+the new file. When opening an existing file, make sure you use the 
+format with which it was created.
+<P>
+$0000
+<P>
+The file is treated as a byte stream of binary data with 
+no restriction on the value of any byte and no structure imposed upon 
+the data. Up to 16K can be read from or written to the file in a single 
+operation.
+<P>
+$0020
+<P>
+The file is treated as a sequence of variable length records. 
+The records are assumed to contain text terminated by any combination 
+of the CR and LF ("$0D", "$0A") characters. 
+The maximum record length is 256 bytes and Control-Z ("$1A") marks 
+the end of the file.
+<P>
+<B><I>Mode Category 3  Access flags </B></I><BR>
+Any combination of the following values may be chosen from this category.
+<P>
+$0100
+<P>
+Update flag. Allows the file to be written to as well 
+as read. If not set, the file is opened for reading only. You must 
+use this flag when creating or replacing a file.
+<P>
+$0200
+<P>
+Choose this value if you want the file to be open for 
+random access (not sequential access), using the IOSEEK 
+function.
+<P>
+$0400
+<P>
+Specifies that the file is being opened for sharing  
+for example, with other running programs. Use if you want to read, 
+not write to the file. If the file is opened for writing ("$0100" 
+above), this flag is ignored, since sharing is then not feasible. 
+If not specified, the file is locked and may only be used by this 
+running program.
+<P>
+<H3>Closing a file with IOCLOSE</H3> 
+<P>
+Files should be closed when no longer being accessed. This releases 
+memory and other resources back to the system.
+<P>
+ret%=IOCLOSE(handle%)
+<P>
+Closes a file (or device) with the handle "handle%" as set by 
+IOOPEN.
+<P>
+<P>
+<H3>Reading a file with </H3> 
+IOREAD
+<P>
+ret%=IOREAD(handle%,address%,maxLen%)
+<P>
+Reads up to "maxLen%" bytes from a file with the handle "handle%" 
+as set by IOOPEN. "address%" is the address of a buffer 
+into which the data is read. This buffer must be large enough to hold 
+a maximum of "maxLen%" bytes. The buffer could be an array or 
+even a single integer as required. No more than 16K bytes can be read 
+at a time.
+<P>
+The value returned to "ret%" is the actual number of bytes read 
+or, if negative, is an error value. 
+<P>
+<P>
+<B><I>Text files </B></I><BR>
+If "maxLen%" exceeds the current record length, data only up to 
+the end of the record is read into the buffer; no error is returned 
+and the file position is set to the next record.
+<P>
+If a record is longer than "maxLen%", the error value `Record 
+too large' (-43) is returned. In this case the data read is valid 
+but is truncated to length "maxLen%", and the file position is 
+set to the next record.
+<P>
+A string array "buffer$(255)" could be used, but make sure that 
+you pass the address "UADD(ADDR(buffer$),1)" to IOREAD. 
+This leaves the leading byte free. You can then POKEB the leading 
+byte with the count (returned to "ret%") so that the string conforms 
+to normal string format. See the example program.
+<P>
+<P>
+<B><I>Binary files </B></I><BR>
+If you request more bytes than are left in the file, the number of 
+bytes actually read (even zero) will be less than the number requested. 
+So if "ret%<maxLen%", end of file has been reached. No error is 
+returned by IOREAD in this case, but the next IOREAD 
+would return the error value `End of file' (-36).
+<P>
+To read up to 16K bytes (8192 integers), you could declare an integer 
+array "buffer%(8192)". 
+<P>
+<H3>Writing to a file </H3> 
+<P>
+ret%=IOWRITE(handle%,address%,length%)
+<P>
+Writes "length%" bytes stored in a buffer at "address%" to 
+a file with the handle "handle%".
+<P>
+When a file is opened as a binary file, the data written by IOWRITE 
+overwrites data at the current position.
+<P>
+When a file is opened as a text file, IOWRITE writes a single 
+record; the closing CR/LF is automatically added.
+<P>
+<H3>Positioning within a file</H3> 
+<P>
+ret%=IOSEEK(handle%,mode%,var offset&)
+<P>
+Seeks to a position in a file that has been opened for random access 
+(see IOOPEN above). 
+<P>
+"mode%" specifies how the argument "offset&" is to be used. 
+"offset&" may be positive to move forwards or negative to move 
+backwards. The values you can use for "mode%" are:
+<PRE>
+1    	Set position in a binary file to the absolute value specified
+	in "offset&", with 0 for the first byte in the file.
+2   	Set position in a binary file to "offset&" bytes from the 
+	end of the file.
+3   	Set position in a binary file to "offset&" bytes relative 
+	to the current position.
+6    	Rewind a text file to the first record. "offset&" is not 
+	used, but you must still pass it as a argument, for compatibility
+	with the other cases.
+</PRE>
+IOSEEK sets the variable "offset&" to the absolute position 
+set.
+<P>
+<H3>Example - displaying a plain text file</H3> 
+<P>
+This program opens a plain text file, such as one created 
+with the `Save as' option in the Word Processor or Database, and types 
+it to the screen.
+Press Esc to quit and any other key to pause the typing to the screen.
+<P>
+<UL><PRE>
+<B>PROC ioType:</B>
+  LOCAL ret%,fName$(128),txt$(255),address%
+  LOCAL handle%,mode%,k%
+  PRINT "Filename?", :INPUT fName$ :  CLS
+  mode%= $0400 OR $0020
+  REM open=$0000, text=$0020, share=$0400
+  ret%=IOOPEN(handle%,fName$,mode%)
+  IF ret%<0
+    showErr:(ret%)
+    RETURN
+  ENDIF  
+  address%=ADDR(txt$)
+  WHILE 1
+    k%=KEY
+    IF k%    REM if keypress
+      IF k%=27 REM Esc pressed
+        RETURN
+      REM otherwise wait for a key
+      ELSEIF GET=27
+         RETURN REM Esc pressed
+      ENDIF
+    ENDIF
+    ret%=IOREAD(handle%,address%+1,255)
+    IF ret%<0
+      IF ret%<>-36 REM NOT EOF
+        showErr:(ret%)
+      ENDIF
+      BREAK
+    ELSE
+      POKEB address%,ret%
+      REM leading byte count
+      PRINT txt$
+    ENDIF
+  ENDWH
+  ret%=IOCLOSE(handle%)
+  IF ret%
+    showErr:(ret%)
+  ENDIF
+  PAUSE -100 :KEY
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<P>
+<UL><PRE>
+<B>PROC showErr:(val%)</B>
+  PRINT "Error",val%,err$(val%)
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<H3>I/O device handling</H3> 
+<P>
+The following I/O functions provide access to devices. A full description 
+is not within the scope of this manual, since these functions require 
+extensive knowledge of the Series 3a operating system and 
+related programming techniques. The syntax and argument descriptions 
+are provided here for completeness.
+<P>
+ret%=IOW(handle%,func%,var arg1,var arg2)  -
+The device driver opened with handle% (as returned by IOOPEN) 
+performs the synchronous I/O function func% with the two further 
+arguments. The size and structure of these two arguments is specified 
+by the particular device driver's documentation.
+<P>
+ret%=IOA(handle%,func%,var status%,var arg1,var arg2) -
+The device driver opened with handle% 
+(as returned by IOOPEN) performs the asynchronous I/O function 
+func% with two further arguments. The size and structure of 
+these two arguments is specified by the particular device driver's 
+documentation.
+<P>
+Asynchronous means that the IOA returns immediately, 
+and the OPL program can carry on with other statements. status% 
+will usually be set to -46, which means that the function is still 
+pending.
+<P>
+When, at some later time, the function completes, status% is 
+automatically changed. (For this reason, "status%" should usually 
+be global  if the program is still running, "status%" must 
+be available when the request completes, or the program will probably 
+crash.) If "status%" >=0, the function completed without error. 
+If <0, the function completed with error. The error number is specific 
+to the device driver.
+<P>
+At the same time, a signal is sent to the running OPL program.
+<P>
+In most cases, you cannot perform another I/O read/write function 
+to this device until you first read the signal of this function's 
+completion. If this is the only I/O device with a function pending, 
+wait for the signal with "IOWAITSTAT status%". (If you have 
+other functions pending on other devices, you must use IOWAIT 
+and IOSIGNAL. These commands are described below.)
+<P>
+Alternatively, you can cancel the pending function with "IOW(handle%,4)". 
+The program will still receive a signal, which should be read with 
+IOWAITSTAT or IOWAIT.
+<P>
+If an OPL program is ready to exit, it does not have to wait for any 
+signals from pending IOA calls.
+<P>
+IOWAIT  Wait for an asynchronous 
+request (such as one requested by IOC or IOA) to complete. 
+IOWAIT returns when any asynchronous I/O function completes. 
+Check "status%" to see whether it was the function which you called 
+with IOA. You must keep a count of the number of times IOWAIT 
+returns due to other functions completing. When "status%" finally 
+shows that IOWAIT has returned because of this function 
+completing, you must then call IOSIGNAL once for each other 
+function which completed, to replace these other signals.
+<P>
+If you have no other functions pending on different I/O handles, use 
+IOWAITSTAT instead.
+<P>
+IOSIGNAL  Replace a signal of 
+an I/O function's completion. See IOWAIT.
+<P>
+IOWAITSTAT var status%  
+Wait for a particular asynchronous function, called with IOA, 
+to complete. This saves using IOWAIT, checking each time to 
+see if it was the desired function completing, and finally calling 
+IOSIGNAL for each unexpected function completion.
+<P>
+"IOYIELD""  ensure that any asynchronous 
+function is given a chance to run. Some devices are unable to perform 
+an asynchronous request if an OPL program becomes computationally 
+intensive, using no I/O (screen, keyboard etc) at all. In such cases, 
+the OPL program should use IOYIELD before checking its "status%" 
+variable. IOYIELD is the equivalent of IOSIGNAL followed 
+by IOWAIT  the IOWAIT returns immediately with 
+the signal from IOSIGNAL, but the IOWAIT causes any 
+asynchronous handlers to run.
+<P>
+IOC(handle%,func%,var stat%,var a1,var a2)<BR>
+IOC(handle%,func%,var stat%,var a1)<BR>
+IOC(handle%,func%,var stat%)  - Make an I/O request 
+with guaranteed completion. This has the same form as IOA but 
+it returns zero always (ie the return value can be ignored). It is 
+effectively the same as:
+<PRE>
+ret%=IOA(h%,f%,stat%,...)
+IF ret%<0
+  IF ret%=-46 :RAISE -1 :ENDIF
+  stat%=ret% :IOSIGNAL
+ENDIF
+</PRE>
+IOC allows you to assume that the request started successfully  
+any error is always given in the status word "stat%". If there 
+was an error, "stat%" contains the error code and the IOSIGNAL 
+causes the next IOWAIT to return immediately as if the error 
+occurred after completion. There is seldom a requirement to 
+know whether an error occurred on starting a function, and IOC 
+should therefore be used in preference to IOA nearly always.
+<P>
+IOCANCEL(handle%) -  Cancels 
+any outstanding asynchronous I/O request (IOC or IOA) 
+on the specified channel, causing them to complete with the completion 
+status word containing -48 ("I/O cancelled"). The return value is 
+always zero and may be ignored. Device drivers that support truly 
+asynchronous services provide a cancel service. The detailed effect 
+of the cancel depends on the device driver. However, the following 
+general principles apply:
+<P>
+<UL><LI> The cancel precipitates the completion of the request (it </LI> 
+does not stop the request from completing).
+</UL>
+<UL><LI> The cancel may or may not be effective (ie. the request </LI> 
+may complete naturally before the cancel is processed).
+</UL>
+<UL><LI> After a cancel, you must still process the completion of </LI> 
+the asynchronous request (typically by immediately calling IOWAITSTAT 
+to "use up" the signal).
+</UL>
+The IOCANCEL function is harmless if no request is outstanding 
+(eg if the function completed just before cancellation requested).
+<P>
+err%=KEYA(var status%,key%(1)) - 
+This is an asynchronous keyboard read function. You must declare an 
+integer array with two elements  here, key%(1) and key%(2)  
+to receive the keypress information. If a key is pressed, the information 
+is returned in this way:
+<P>
+<UL><LI> key%(1) is assigned the character code of the key.</LI> 
+</UL>
+<UL><LI> The least significant byte of key%(2) takes the key </LI> 
+modifier, in the same way as KMOD  2 for Shift down, 
+4 for Control down and so on. KMOD cannot be used with KEYA.
+</UL>
+<UL><LI> The most significant byte of key%(2) takes the count </LI> 
+of keys pressed (0 or 1).
+</UL>
+KEYA needs an IOWAIT in the same way as IOA.
+<P>
+KEYA has been included in OPL because the handle of the keyboard 
+driver is unknown to the programmer. Otherwise it is equivalent to 
+IOA(keyhand%,1,status%,key%()).
+<P>
+"err%=KEYC(var status%)""  Cancels a KEYA.
+<P>
+<H3>Some useful IOW functions</H3> 
+<P>
+IOW has this specification:
+<P>
+ret%=IOW(handle%,func%,var arg1,var arg2)
+<P>
+Here are some uses:
+<PRE>
+LOCAL a%(6)
+  a%(1)=x1% :a%(2)=y1%
+  a%(3)=x2% :a%(4)=y2%
+  IOW(-2,8,a%(),a%()) REM 2nd a% is ignored
+</PRE>
+reads the cursor  position in the rectangle 
+x1%,y1% (top left), x2%,y2% (bottom right), writing the 
+x and y positions to a%(5) and a%(6) respectively. 
+This returns 0,0, not 1,1, as the top left.
+<P>
+Set "x1%,y1%,x2%,y2% to the screen top left and bottom right 
+(set by SCREEN), to read the cursor position in the current 
+screen.
+<PRE>
+LOCAL i%,a%(6)
+  i%=2
+  a%(1)=x1% :a%(2)=y1%
+  a%(3)=x2% :a%(4)=y2%
+  IOW(-2,7,i%,a%())
+</PRE>
+clears a rectangle at x1%,y1% (top left), x2%,y2% (bottom right). 
+If y2% is one greater than y1%, this will clear part or all of a line.
+<P>
+<H3>Example of IOW screen functions</H3> 
+<P>
+The final two procedures in this module call the two IOW screen 
+functions described beforehand. The rest of the module lets you select 
+the function and values to use. It uses the technique used in the 
+`Friendlier interaction' chapter of handling menus and hot-keys by 
+calling procedures with string expressions.
+<P>
+<UL><PRE>
+<B>PROC iotest:</B>
+GLOBAL x1%,x2%,y1%,y2%
+LOCAL i%,h$(2),a$(5)
+  x1%=2 :y1%=2
+  x2%=25 :y2%=5 REM our test screensize
+  SCREEN x2%-x1%,y2%-y1%,x1%,y1%
+  AT 1,1
+  PRINT "Text window IO test"
+  PRINT "Psion-Esc quits"
+  h$="cr" REM our hot-keys
+  DO
+    i%=GET
+    IF i%=$122 REM Menu key
+      mINIT
+      mCARD "Set","Rect",%r
+      mCARD "Sense","Cursor",%c
+      i%=MENU
+      IF i% AND INTF(LOC(h$,CHR$(i%)))
+         a$="proc"+chr$(i%)
+        @(a$): 
+      ENDIF
+    ELSEIF i% AND $200 REM hot-key
+      i%=(i%-$200)
+      i%=LOC(h$,CHR$(i%)) REM One of ours?
+      IF i%
+         a$="proc"+MID$(h$,i%,1)
+        @(a$):
+      ENDIF REM ignore other weird keypresses
+    ELSE REM some other key, so return it
+      PRINT CHR$(i%);
+    ENDIF
+  UNTIL 0
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC procc:</B>
+  LOCAL a&
+  a&=iocurs&:
+  PRINT "x";1+(a& AND &ffff);
+  PRINT "y";1+(a&/&10000);
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC procr:</B>
+  LOCAL xx1%,yy1%,xx2%,yy2%
+  LOCAL xx1&,yy1&,xx2&,yy2&
+  dINIT "Clear rectangle"
+  dLONG xx1&,"Top left x",1,x2%-x1%
+  dLONG yy1&,"Top left y",1,y2%-y1%
+  dLONG xx2&,"Bottom left x",2,x2%-x1%
+  dLONG yy2&,"Bottom left y",2,y2%-y1%
+  IF DIALOG
+    xx1%=xx1&-1 :xx2%=xx2&-1
+    yy1%=yy1&-1 :yy2%=yy2&-1
+    iorect:(xx1%,yy1%,xx2%,yy2%)
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC iocurs&:</B>
+  LOCAL a%(4),a&
+  REM don't change the order of these!
+  a%(1)=x1% :a%(2)=y1%
+  a%(3)=x2% :a%(4)=y2%
+  IOW(-2,8,a%(),a%()) REM 2nd a% is ignored
+  RETURN a&
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC iorect:(xx1%,yy1%,xx2%,yy2%)</B>
+  LOCAL i%,a%(6)
+  i%=2 :REM "clear rect" option
+  a%(1)=xx1% :a%(2)=yy1%
+  a%(3)=xx2% :a%(4)=yy2%
+  IOW(-2,7,i%,a%())
+<B>ENDP </B>
+</PRE></UL>
+<P>
+<H3>Alarm example  IOC to ALM:</H3> 
+<P>
+The "ALM:" device provides access to alarms. When writing to it 
+with IOW, IOC or IOA, you can use these two functions:
+<P>
+<UL><LI> function=1  only the date (and no time) is shown </LI> 
+on the screen when the alarm rings  eg "Thu 5 Sep"
+</UL>
+<UL><LI> function=2  the day and time are shown  eg "Thu 11:54"</LI> 
+</UL>
+In either case, you must pass these two arguments:
+<P>
+<UL><LI> An array of 2 long integers  the first is the time </LI> 
+for the alarm to go off, and the second is the time for which it is 
+due. Both are given in seconds since midnight on 1/1/1970.
+</UL>
+<UL><LI> A message, as a zero-terminated string of up to 64 characters.</LI> 
+</UL>
+This procedure asks for the information for an alarm, and sets it 
+(as type 2  day and time to be shown when the alarm rings). 
+If you press the Time button, and this is the next alarm to ring, 
+it is shown as a `RunOpl' alarm.
+<P>
+<UL><PRE>
+<B>PROC alm:</B>
+  LOCAL h%,a&(2),a$(64),b$(65),d&,t&,t2&,a%,r%,s%
+  r%=IOOPEN(h%,"ALM:",0)
+  IF r%<0 :RAISE r% :ENDIF
+  d&=DAYS(DAY,MONTH,YEAR) REM today
+  t&=DATETOSECS(1970,1,1,HOUR,MINUTE,0)
+  DINIT "Set alarm"
+  DTIME t&,"Time",0,0,DATETOSECS(1970,1,1,23,59,59)
+  DDATE d&,"Date",d&,DAYS(31,12,2049)
+  DTIME t2&,"Alarm advance time",2,0,86399
+  DEDIT a$,"Message"
+  IF DIALOG
+    a&(2)=86400*(d&-25567)+t&
+    a&(1)=a&(2)-t2&
+    b$=a$+CHR$(0) REM zero-terminate the string
+    IOC(h%,2,s%,a&(),#UADD(ADDR(b$),1))
+  ENDIF
+  IOCLOSE(h%)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+At the moment the alarm rings, either "s%" must still be available 
+to take the status word set by this ALM: function, or the program 
+must have exited. Otherwise the status word will be written to a random 
+area of memory. So in this example, no error-checking is  done after 
+the IOC - the program just ends. So you would have to use 
+this as a whole program itself  you must not call this procedure 
+as written here from another procedure.
+<P>
+<H3>Dialling example  IOW to SND:</H3> 
+<P>
+The "SND:" device provides sound services on the Series 3a. 
+One function, number 10, provides access to DTMF dialling. It requires 
+these two arguments:
+<P>
+<UL><LI> The number to dial, as a zero-terminated string of </LI> 
+up to 24 characters.
+</UL>
+<UL><LI> An array of 2 integers. The first is the tone length (*256) </LI> 
+plus the delay length, and the second is the pause length. All of 
+these are specified in  1/32 s of a second.
+</UL>
+<UL><PRE>
+<B>PROC dtmf:</B>
+  LOCAL h%,a$(24),b$(25),z%,r%,a%(2)
+  r%=IOOPEN(h%,"SND:",0)
+  IF r%<0 :RAISE r% :ENDIF
+  dINIT
+  dEDIT a$,"Dial"
+  IF DIALOG
+    a%(1)=8+(256*8)
+    a%(2)=48
+    b$=a$+CHR$(0)
+    r%=IOW(h%,10,#UADD(ADDR(b$),1),a%())
+    IF r%<0 :RAISE r% :ENDIF
+  ENDIF
+  r%=IOCLOSE(h%)
+  IF r%<0 :RAISE r% :ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.10"><H2> Recording and playing sounds</H2></A>
+<P>
+This section explains how to write a program which records sounds 
+to a sound file using the in-built Series 3a microphone, 
+and which plays these or pre-recorded sound files back.
+<P>
+<H3>Sound file structure</H3> 
+<P>
+Series 3a sound files are files with a .WVE extension that contain 
+a 32-byte header and a byte stream of digital sound which is sampled 
+and played back at 8000 bytes per second (12-bit sound is converted 
+to 8-bit using A-Law encoding).
+<P>
+The file header has the following format:
+<PRE>
+offset in file	bytes	contents
+0		16	zero-terminated 'ALawSoundFile**'
+16		2	version of this format
+18		4	number of 8-bit samples
+22		2	trailing silence in ticks
+24		2	repeats
+26		6	spare bytes reserved for future use
+</PRE>
+The number of samples is the number of bytes following the header 
+and should always be size of file less 32 for the header.
+<P>
+The silence in ticks is the number of system ticks of silence appended 
+to each repeat on playback (in practice, you get at least 2 ticks 
+between repeats). A system tick is 1/32 seconds or 250 samples.
+<P>
+The repeats are the number of times to repeat the sound on playback 
+(0 and 1 are treated as the same).
+<P>
+You can truncate the sound file, change the number of repeats and 
+the trailing silence by changing the file length and header using 
+the I/O binary file handling functions (IOOPEN, IOW, IOSEEK, IOWRITE 
+etc) described elsewhere in this chapter.
+<P>
+For example, you can truncate the file to length newLen& using: 
+ret%=IOW(handle%,11,newLen&,#0)
+<P>
+<H3>How to record and play sounds</H3> 
+<P>
+The following set of procedures perform asynchronous recording and 
+playing of sounds.
+<P>
+<UL><PRE>
+<B>PROC recorda:(pstat%,inname$,size%)</B>
+  LOCAL name$(128)
+  name$=inname$+chr$(0)
+  CALL($2186,UADD(ADDR(name$),1),size%,0,0,pstat%)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC recordc:</B>
+  CALL($2386)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC recordw%:(inname$,size%)</B>
+  LOCAL name$(128),p%,ret%
+  p%=PEEKW($1c)+6  REM address of saved flags after CALL
+  name$=inname$+chr$(0)
+  ret%=CALL($2286,UADD(ADDR(name$),1),size%)
+  IF PEEKW(p%) AND 1     REM carry set for error
+    RETURN ret% OR $FF00 REM return error
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC playa:(pstat%,inname$,ticks%,vol%)</B>
+  LOCAL name$(128)
+  name$=inname$+chr$(0)
+  CALL($1E86,UADD(ADDR(name$),1),ticks%,vol%,0,pstat%)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC playc:</B>
+  CALL($2086)
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC playw%:(inname$,ticks%,vol%)</B>
+  LOCAL name$(128),p%,ret%
+  p%=PEEKW($1c)+6 REM address of saved flags after CALL
+  name$=inname$+chr$(0)
+  ret%=CALL($1F86,UADD(ADDR(name$),1),ticks%,vol%)
+  IF PEEKW(p%) AND 1     REM carry set for error
+    RETURN ret% OR $FF00 REM return error
+  ENDIF
+<B>ENDP</B>
+</PRE></UL>
+<P>
+"recorda:(pstat%,inname$,size%)" and "recordw%:(inname$,size%)" 
+respectively perform asynchronous and synchronous recording to file 
+"inname$". Any existing file is replaced. You can only record 
+to the Internal disk or to a RAM SSD  you cannot record to 
+a Flash SSD. (You can playback from a Flash SSD, however.)
+<P>
+"size%" specifies the maximum number of bytes to be recorded in 
+units of 2048 bytes. To record for one second "size%=4". This 
+figure excludes the 32-byte header. Before recording, a file of length 
+"32+size%*2048" bytes is created and there must actually be room 
+on the disk for a file of that length.
+<P>
+"pstat%" is the address of the status word to take the completion 
+code for asynchronous recording.
+<P>
+"recordc:" cancels recording and truncates the file to the actual 
+length recorded before cancellation.
+<P>
+"playa:(pstat%,inname$,ticks%,vol%)
+" and "playw%:(inname$,ticks%,vol%)" respectively perform asynchronous 
+and synchronous playing of "inname$".
+<P>
+"inname$" should either be the filename of the sound file to play 
+or a `*' followed by just the name component of the sound file. If 
+it is preceded by a `*', the extension .WVE is assumed and the service 
+automatically searches ROM:: and the \WVE directories of M: (Internal 
+disk), A: and B: (in that order). The ROM:: .WVE files have names 
+SYS$AL01, SYS$AL02 and SYS$AL03.
+<P>
+"ticks%" is the duration that the sound file will play back in 
+system ticks. If it is shorter than the given sound then playback 
+is truncated to that time. If "ticks%" is negative, in addition 
+to truncating the playback of longer files, it pads out as necessary 
+to that duration with silence. If duration is zero, it plays the file 
+without truncation or padding. (Alarms use a parameter of -480 to 
+truncate or pad out to 15 seconds.)
+<P>
+"volume%" is a number between 0 and 5 inclusive, with 0 being 
+the loudest. On the Series 3a there are only 4 actual levels: 0/1, 
+2, 3, and 4/5. "pstat%" is the address of the status word to take 
+the completion code for asynchronous playback. Playback will append 
+periods of silence and repeat the sound as specified in the file header.
+<P>
+"playc:" cancels playing back a sound.
+<P>
+<H3>Alarms</H3> 
+<P>
+The system dialogs that are used to set alarms detect the presence 
+of any .WVE files in the \WVE directory of any local directory (in 
+practice, A:, B: and Internal) and make these available (by file name) 
+as the sound of the alarm.
+<P>
+When an alarm with a .WVE file rings, .WVE file playback (including 
+any repeats) is clipped to 15 seconds. If the .WVE file plays for 
+less than 15 seconds (including any repeats), the 15 seconds is padded 
+out with silence.
+<P>
+<H3>Example of recording</H3> 
+<P>
+The following asynchronously records "time%" seconds of sound 
+to file "file$" or cancels the recording when any key is pressed. 
+The section I/O device handling and asynchronous requests also 
+in this chapter discusses the principles involved. The "recorda:" 
+and "recordc:" procedures, from above, are used.
+<P>
+<UL><PRE>
+<B>PROC record:(file$,time%)</B>
+  LOCAL sstat%,kstat%,key%(4),size%,ret%,signals%
+  size%=time%*4
+  recorda:(ADDR(sstat%),file$,size%) REM async record
+  IOC(-2,1,kstat%,key%())            REM async key read
+  WHILE 1
+    IOWAIT  REM wait for recording to complete, or a key
+    IF sstat%<>-46         REM if sound no longer pending
+      IOCANCEL(-2)         REM cancel key read
+      IOWAITSTAT kstat%    REM wait for cancellation
+      IF sstat%<0
+        gIPRINT "Error recording:"+err$(sstat%)
+      ENDIF
+      BREAK
+    ELSEIF kstat%<>-46     REM else if key pressed
+      recordc:             REM cancel record
+      IOWAITSTAT sstat%    REM wait for cancellation
+      gIPRINT "Cancelled"
+      BREAK
+    ELSE
+      REM some async request made outside this PROC
+      signals%=signals%+1  REM save it for later
+    ENDIF
+  ENDWH
+  WHILE signals%
+    IOSIGNAL               REM put back foreign signals
+    signals%=signals%-1
+  ENDWH
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.11"><H2> OPL database information</H2></A>
+<P>
+ODBINFO var info%() is provided for advanced 
+use only and allows you to use OS and CALL to call DbfManager 
+interrupt functions not accessible with other OPL keywords.
+<P>
+The description given here will be meaningful only to those who have 
+access to full SDK documentation of the DbfManager services, which 
+explains any new terms. Since that documentation is essential for 
+use of "ODBINFO", no attempt is made here to explain these terms.
+<P>
+ODBINFO returns "info%()", which must have four elements 
+containing pointers to four blocks of data; the first corresponds 
+to the file with logical name "A", the second to "B" and so 
+on.
+<P>
+Take extreme care not to corrupt these blocks of memory, as they 
+are the actual data structures used by the OPL runtime interpreter.
+<P>
+A data block which has no open file using it has zero in the first 
+two bytes. Otherwise, the block of data for each file has the following 
+structure, giving the offset to each component from the start of the 
+block and with offset 0 for the 1st byte of the block:
+<pre>
+Offset	Bytes	Description
+0	2	DBF system's file control block (handle)
+		or zero if file not open
+2	2	offset in the record buffer to the current record
+4	2	pointer to the field name buffer
+6	2	number of fields
+8	2	pointer to start of record buffer
+10	2	length of a NULL record
+12	1	non-zero if all fields are text
+13	1	non-zero for read-only file
+14	1	non-zero if record has been copied down
+15	1	number of text fields
+16	2	pointer to device name
+</PRE>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.12"><H2> Example</H2></A>
+<P>
+To copy the Descriptive Record of logical file "B" to logical 
+file "C":
+<P>
+<UL><PRE>
+<B>PROC dbfDesc:</B>
+  LOCAL ax%,bx%,cx%,dx%,si%,di%
+  LOCAL info%(4),len%,psrc%,pdest%
+  ODBINFO info%()
+  bx%=PEEKW(info%(2))   REM handle of logical file B
+  ax%=$1700             REM DbfDescRecordRead
+  IF OS($d8,ADDR(ax%)) and 1
+    RETURN ax% OR $ff00 REM return the error
+  ENDIF
+  REM the descriptive record has length ax%
+  REM and is at address peekW(uadd(info%(2),8))
+  IF  ax%=0
+    RETURN 0            REM no DescRecord
+  ENDIF
+  len%=ax%+2            REM length of the descriptive
+                        REM record read + 2-byte header
+  psrc%=PEEKW(uadd(info%(2),8))
+  pdest%=PEEKW(uadd(info%(3),8))
+  CALL($a1,0,len%,0,psrc%,pdest%)
+                        REM copy to C's buffer
+  cx%=len%
+  bx%=PEEKW(info%(3))   REM handle of logical file C
+  ax%=$1800             REM DbfDescRecordWrite
+  IF OS($d8,ADDR(ax%)) and 1
+    RETURN ax% OR $ff00
+  ENDIF
+  RETURN 0              REM success
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.13"><H2> DYL handling</H2></A>
+<P>
+This section contains a complete reference description of OPL's support 
+for accessing previously created dynamic libraries (DYLs). 
+These libraries have an object-oriented programming (OOP) user-interface 
+and several have been built into the Series 3a ROM for use by the 
+ROM applications. DYLs cannot be created using OPL.
+<P>
+Since a vast amount of documentation would need to be provided 
+to describe the essential concepts of OOP and the services available 
+in existing DYLs, no attempt is made to supply it here. This section 
+simply introduces the syntax for all the OOP keywords supported in 
+OPL with a brief description of each. Also, OOP terminology is used 
+here without explanation, to cater for those who have previous experience 
+of DYL handling in the `C' programming language.
+<P>
+<H3>`var' arguments</H3> 
+<P>
+The use of `var' and "#" for arguments was discussed earlier in 
+this chapter in the section `I/O functions and commands'. The DYL 
+handling keywords use `var' and "#" in the same way, for example:
+"ret%=SEND(pobj%,method%,var p1,var p2,var p3)".
+<P>
+This is because many DYL methods need the address of a variable 
+or of a structure to be passed to them.
+<P>
+When you use a LOCAL or GLOBAL variable as the `var' argument, the 
+address of the variable is used. (You cannot use procedure parameters 
+or field variables, for this reason.) If you use a "#" before 
+a `var' argument, though, the argument/value is used directly, instead 
+of its address being used.
+<P>
+If, for example, you need to call a method with "p1" the address 
+of a long variable "a&", "p2" the integer constant 3, and 
+"p3" the address of a zero terminated string "X", you could call 
+it as follows:
+<P>
+s$="X"+CHR$(0)   REM zero terminate
+p%=UADD(ADDR(s$),1)    REM skip leading count byte
+ret%=SEND(pobj%,method%,a&,#3,#p%)
+<P>
+The address of "a&" is passed because there is no "#". 
+"3" and the value in "p%" are passed directly (no address 
+is taken) because they are preceded by "#".
+<P>
+<H3>Loading a DYL</H3> 
+<P>
+"ret%=LOADLIB(var cathand%,name$,link%)" loads and optionally 
+links a DYL that is not in the ROM. If successful, writes the category 
+handle to "cathand%" and returns zero. You would normally only 
+set "link%" to zero if the DYL uses another DYL which you have 
+yet to load  in which case LINKLIB would subsequently 
+be used. The DYL is shared in memory if already loaded by another 
+process.
+<P>
+<H3>Unloading a DYL</H3> 
+<P>
+"ret%=UNLOADLIB(cathand%)" unloads a DYL from memory. Returns 
+zero if successful.
+<P>
+<H3>Linking a DYL</H3> 
+<P>
+"LINKLIB cathand%" links any libraries that have been loaded 
+using LOADLIB. LINKLIB is not likely to be used much 
+in OPL  pass "link%" with a non-zero value to LOADLIB 
+instead.
+<P>
+<H3>Finding a category handle given its name</H3> 
+<P>
+"ret%=FINDLIB(var cathand%,name$)" finds DYL category "name$" 
+(including ".DYL" extension) in the ROM. On success returns zero and 
+writes the category handle to "cathand%". To get the handle of 
+a RAM-based DYL, use LOADLIB which guarantees that the DYL 
+remains loaded in RAM. FINDLIB will get the handle of a RAM-based 
+DYL but does not keep it in RAM.
+<P>
+<H3>Converting a category number to a handle</H3> 
+<P>
+"cathand%=GETLIBH(catnum%)" converts a category number "catnum%" 
+to a handle. If "catnum%" is zero, this gets the handle for OPL.DYL.
+<P>
+<H3>Creating an object by category number</H3> 
+<P>
+"pobj%=NEWOBJ(catnum%,clnum%)" creates a new object by category 
+number "catnum%" belonging to the class "clnum%", returning 
+the object handle on success or zero if out of memory. This keyword 
+simply converts the category number supplied to a category handle 
+using GETLIBH and then calls NEWOBJH.
+<P>
+<H3>Creating an object by category handle</H3> 
+<P>
+"pobj%=NEWOBJH(cathand%,clnum%)" creates a new object by category 
+handle "cathand%" belonging to the class "clnum%", returning 
+the object handle on success or zero if out of memory.
+<P>
+<H3>Sending a message to an object</H3> 
+<P>
+"ret%=SEND(pobj%,method%)"
+"ret%=SEND(pobj%,method%,var p1)"
+"ret%=SEND(pobj%,method%,var p1,var p2)"
+"ret%=SEND(pobj%,method%,var p1,var p2,var p3)"
+send a message to the object "pobj%" to call the method number 
+"method%", passing between zero and three arguments depending 
+on the requirements of the method, and returning the value returned 
+by the selected method.
+<P>
+<H3>Protected message sending</H3> 
+<P>
+"ret%=ENTERSEND(pobj%,method%)"
+"ret%=ENTERSEND(pobj%,method%,var p1)"
+"ret%=ENTERSEND(pobj%,method%,var p1,var p2)"
+"ret%=ENTERSEND(pobj%,method%,var p1,var p2,var p3)"
+send a message to an object with protection.
+<P>
+Methods which return errors by leaving must be called with 
+protection.
+<P>
+ENTERSEND is the same as SEND except that, if the method 
+leaves, the error code is returned to the caller; otherwise the value 
+returned is as returned by the method.
+<P>
+Use ENTERSEND0 (described next) for methods which leave but 
+do not return a value explicitly on success.
+<P>
+<H3>Protected message sending (returns zero on success)</H3> 
+<P>
+"ret%=ENTERSEND0(pobj%,method%)"
+"ret%=ENTERSEND0(pobj%,method%,var p1)"
+"ret%=ENTERSEND0(pobj%,method%,var p1,var p2)"
+"ret%=ENTERSEND0(pobj%,method%,var p1,var p2,var p3)"
+send a message to an object with protection and guarantee that the 
+known value zero is returned on success. Otherwise ENTERSEND0 
+is the same as ENTERSEND.
+<P>
+Methods which return errors by leaving but return nothing (or 
+NULL) on success must use ENTERSEND0. Besides providing 
+protection, ENTERSEND0 also returns zero if the method did 
+not leave, or the negative error code if it did.
+<P>
+If ENTERSEND were incorrectly used instead and the method completed 
+successfully (ie. without leaving), the return value would be random 
+and could therefore be in the range of the error codes implying that 
+the method failed.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.14"><H2> Dynamic memory allocation</H2></A>
+<P>
+<H3>Overview of memory usage</H3> 
+<P>
+For each running OPL program (or process) the operating system 
+automatically allocates memory which can grow up to a maximum of 32 
+bytes less than 64K. The actual memory used, up to this limit, depends 
+on the requirements of the process and is automatically grown or shrunk 
+as necessary. This memory is called the process data segment 
+and contains all the data used by the process as well as some fixed 
+length data at low memory in the segment needed by the operating system 
+to manage the process and for other system data.
+<P>
+Although the data segment for an OPL process contains several components, 
+the only component of significant interest to the OPL programmer is 
+the process heap. This section describes several keywords for 
+accessing the heap.
+<P>
+The heap is essentially a block of memory at the highest addresses 
+in a process data segment, so that the operating system can grow and 
+shrink the heap simply by growing and shrinking the data segment and 
+without having to move other blocks of memory at higher addresses 
+in the data segment. The heaps of different processes are totally 
+independent  you need concern yourself only with the heap used 
+in your own data segment.
+<P>
+<H3>The heap allocator</H3> 
+<P>
+The heap allocator keywords are used to allocate, resize and free 
+variable length memory cells from the process heap. Cells typically 
+range in size from tens of bytes to a few kilobytes. Allocated cells 
+are referenced directly by their address; they do not move to compact 
+free space left by freed cells.
+<P>
+Heap allocator keywords are:
+<P>
+<UL><LI> ALLOC allocates a cell of specified </LI> 
+size, returning its address.
+</UL>
+<UL><LI> FREEALLOC frees a previously </LI> 
+allocated cell, which is returned to the heap.
+</UL>
+<UL><LI> REALLOC changes the size of a </LI> 
+cell, returning its new address.
+</UL>
+<UL><LI> ADJUSTALLOC opens or closes </LI> 
+a gap in the middle of a cell (useful for insertion or deletion of 
+cell content), changing the size of the cell as appropriate.
+</UL>
+<UL><LI> LENALLOC returns the size of </LI> 
+a cell.
+</UL>
+<H3>The heap structure</H3> 
+<P>
+Initially, the heap consists of a single free cell. After a number 
+of calls to allocate and free cells, the heap typically consists of 
+ranges of adjacent allocated cells separated by single free cells 
+(which are linked). If a cell being freed is next to another free 
+cell the two cells are automatically joined to make a single cell 
+to prevent the free cell linked list from growing unnecessarily.
+<P>
+Writing beyond the end of a cell will corrupt the heap's integrity. 
+Such errors are difficult to debug because there is no immediate effect  
+the corruption is a "time bomb". It will eventually be detected  
+resulting in the process exiting prematurely  by a subsequent 
+allocator call such as "FREEALLOC".
+<P>
+<H3>Growing and shrinking the heap</H3> 
+<P>
+The heap is not fixed in size. The operating system can grow the heap 
+to satisfy allocation requests or shrink it to release memory back 
+to the system.
+<P>
+Allocation of cells is based on "walking" the free space list to find 
+the first free cell that is big enough to satisfy the request. If 
+no free cell is big enough, the operating system will attempt to grow 
+the data segment to add more free space at the end of the heap.
+<P>
+If there is no memory in the system to accomodate growth or if the 
+data segment has reached its maximum size of (approximately) 64K, 
+the allocate request fails. There are few circumstances when an allocate 
+request can be assumed to succeed and calls to ALLOC, REALLOC 
+and ADJUSTALLOC should have error recovery code to handle a 
+failure to allocate.
+<P>
+<H3>Lost cells</H3> 
+<P>
+There are cases in which programs allocate a sequence of cells which 
+must either exist as a whole or not at all. If during the allocate 
+sequence one of the later allocations fails, the previously allocated 
+cells must be freed. If this is not done, the heap will contain unreferenced 
+cells that consume memory to no purpose.
+<P>
+When designing multi-cell sequences of this kind, you should be mindful 
+of the recovery code that must be written to free partially built 
+multi-cell structures. The fewer the cells in such a structure, the 
+simpler the recovery code is.
+<P>
+<H3>Internal fragmentation</H3> 
+<P>
+The free space in the heap is normally fragmented to some extent; 
+the largest cell that can be allocated is substantially smaller than 
+the total free space. Excessive fragmentation, where the free space 
+is distributed over a large number of cells  and where, by 
+implication, many of the free cells are small  should be avoided 
+because it results in inefficient use of memory and reduces the speed 
+with which cells are allocated and freed. 
+<P>
+Practical design hints for limiting internal fragmentation are:
+<P>
+<UL><LI> Avoid using the heap for small, highly transient data structures </LI> 
+for which ordinary variables are adequate. High frequency cycling 
+through allocate and free pairs, "churns" the heap and leads to a 
+long free space list.
+</UL>
+<UL><LI> When you have a large number of variable length data structures  </LI> 
+particularly when they are frequently resized, "granularise" them 
+(ie. round the allocation up to a multiple of some reasonable value) 
+so that you decrease the chance of leaving small, unusable free space 
+cells.
+</UL>
+<H3>The OPL runtime interpreter and the heap</H3> 
+<P>
+The OPL runtime interpreter, which actually runs your program, uses 
+the same data segment and heap as your program and  makes extensive 
+use of the heap. It is very important that you should understand the 
+interpreter's use of the heap  at least to a limited extent  
+to avoid substantial internal fragmentation as described above.
+<P>
+Whenever an OPL procedure is called, a cell is allocated to store 
+data required by the interpreter to manage the procedure. The same 
+cell contains all the variables that you have declared in the procedure. 
+When cacheing is not being used, the same cell also contains the translated 
+code for the procedure which is interpreted. When the procedure returns 
+(or implicitly returns due to an error) the cell is freed again back 
+to the heap. This use of the heap is very tidy  adjacent cells 
+are allocated and freed with little opportunity for leaving gaps in 
+the heap.
+<P>
+Unfortunately various other keywords also cause cells to be allocated 
+and these can cause fragmentation. For example, LOADM, CREATE, 
+OPEN etc. all allocate cells; UNLOADM, CLOSE 
+etc. free those cells. If a procedure is called which uses CREATE 
+to create a data file, the procedure cell is allocated, followed by 
+the CREATE cell and the procedure cell is then freed when the 
+procedure returns. The heap structure therefore contains a gap where 
+the procedure cell was, which remains until all cells at higher addresses 
+are freed.
+<P>
+Although a small number of gaps are not too serious and should eventually 
+disappear in most cases anyway, the new heap allocating keywords provide 
+ample opportunity to fragment the heap. Provided that you create and 
+free cells in a careful and structured way, where any task needing 
+the allocator frees them tidily on completion, there should not be 
+a problem.
+<P>
+<H3>Warning  peeking/poking the cell</H3> 
+<P>
+Using the allocator is by no means simple in OPL since the data in 
+an allocated  cell usually has to be read or written in OPL using 
+the PEEK and POKE set of keywords which are intrinsically 
+subject to programming error. OPL does not provide good support for 
+handling pointers (variables containing addresses), which are basic 
+to heap usage, nor for complicated data structures, so that it is 
+all too easy to make simple programming errors that have disastrous 
+effects.
+<P>
+For these reasons, you are recommended to use the heap accessing keywords 
+only when strictly necessary (which should not be very often) and 
+to take extreme care when you do use them. On the other hand, for 
+programmers with previous experience of dynamic memory allocation, 
+the heap allocation keywords will often prove most useful.
+<P>
+<H3>Reasons for using the heap allocator</H3> 
+<P>
+A few common instances where the allocator might be used are:
+<P>
+<UL><LI> when the amount of data to be stored is variable or cannot </LI> 
+be determined at the time of writing the program. Without using the 
+allocator, you would have to declare a large array to hold the data 
+always even when it turns out that only a few bytes are needed in 
+a particular case. Using the allocator allows you to grow the cell 
+containing your data as and when required.
+</UL>
+<UL><LI> the amount of data may be specified in a file or by the </LI> 
+user of the program. Once again, you would need to declare a possibly 
+unnecessarily large array to cope with all allowed cases.
+</UL>
+<UL><LI> a system of library procedures might use a common cell, </LI> 
+usually called a control block, to store common data. You could 
+have one procedure creating the cell and initialising data in it, 
+other procedures in the system could be passed the address of the 
+cell, using and possibly updating the data in it, and finally a further 
+procedure could free the cell.
+</UL>
+This concept will be familiar to you if you have used handles 
+for the I/O keywords, where the handle references a cell used internally 
+by the I/O system.
+<P>
+If you did not use the allocator in this case, you would 
+probably need to declare a global array in the procedure calling the 
+library procedures, with the disadvantages that the name and size 
+of the array would need to be fixed for all time  even when 
+a better alternative mechanism has been devised for the library code 
+with different data requirements.
+<P>
+<UL><LI> ADJUSTALLOC allows you to insert or remove data at </LI> 
+the start or in the middle of data that has previously been set up. 
+With an array, you would need to copy each element to the next or 
+previous element to make or close a gap.
+</UL>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.15"><H2> Using the heap allocator</H2></A>
+<P>
+<H3>Allocating a cell</H3> 
+<P>
+Use "pcell%=ALLOC(size%)" to allocate cell on heap of specified 
+size returning the pointer to the cell or zero if there is not enough 
+memory. The new cell is uninitialised  you cannot assume 
+that it is zeroed.
+<P>
+<H3>Freeing an allocated cell</H3> 
+<P>
+Use "FREEALLOC pcell%" to free a previously allocated cell at 
+"pcell%" as returned, for example, by ALLOC. Does nothing 
+if "pcell%" is zero.
+<P>
+<H3>Changing a cell's size</H3> 
+<P>
+Use "pcelln%=REALLOC(pcell%,size%)" to change the size of a previously 
+allocated cell at address "pcell%" to "size%", returning the 
+new cell address or zero if there is not enough memory. If out of 
+memory, the old cell at "pcell%" is left as it was.
+<P>
+If successful, "pcelln%" will not be the same as "pcell%" 
+on return only if the size increases and there is no free cell following 
+the cell being grown which is large enough to accomodate the extra 
+amount.
+<P>
+<H3>Inserting or deleting data in cell</H3> 
+<P>
+Use "pcelln%=ADJUSTALLOC(pcell%,offset%,amount%)" to open or close 
+a gap at "offset%" within the allocated cell "pcell%" returning 
+the new cell address or zero if there is not enough memory. "offset%" 
+is 0 for the first byte in the cell. Opens a gap if amount% is positive 
+and closes it if negative. The data in the cell is automatically copied 
+to the new position.
+<P>
+If successful, "pcelln%" will not be the same as "pcell%" 
+on return only if "amount%" is positive and there is no free cell 
+following the cell being adjusted which is large enough to accomodate 
+the extra amount.
+<P>
+<H3>Finding out the cell length</H3> 
+<P>
+Use "len%=LENALLOC(pcell%)" to get the length of the previously 
+allocated cell at "pcell%".
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "11.16"><H2> Example using the allocator</H2></A>
+<P>
+This example illustrates the careful error checking which is essential 
+when using the allocator. RAISE is used to jump to the error 
+recovery code.
+<P>
+If you cannot understand this example it would be wise to avoid using 
+the allocator altogether.
+<P>
+<PRE>
+local pcell% rem pointer to cell
+LOCAL pcelln%        rem new pointer to cell
+LOCAL p%             rem general pointer
+LOCAL n%             rem general integer
+ONERR e1
+pcell%=ALLOC(2+2*8)  rem holds an integer and
+                     rem 2 8-byte floats initially
+IF pcell%=0
+  RAISE -10          rem out of memory; go to e1::
+ENDIF
+POKEW pcell%,2       rem store integer 2 at start of cell
+                     rem ie. no. of floats
+POKEF UADD(pcell%,2),2.72     rem store float 2.72
+POKEF UADD(pcell%,10),3.14    rem store float 3.14
+...
+pcelln%=REALLOC(pcell%,2+3*8) rem space for 3rd float
+IF pcelln%=0
+  RAISE -10                   rem out of memory
+ENDIF
+pcell%=pcelln%                rem use new cell address
+n%=PEEKW(pcell%)              rem no. of floats in cell
+POKEF UADD(pcell%,2+n%*8),1.0 rem 1.0 after 3.14
+POKEW pcell%,n%+1             rem one more float in cell
+...
+pcelln%=ADJUSTALLOC(pcell%,2,8) rem open gap before 2.72
+IF pcelln%=0
+  RAISE -10              rem out of memory
+ENDIF
+pcell%=pcelln%           rem use new cell address
+POKEF UADD(pcell%,2),1.0 rem store 1.0 before 2.72
+POKEW pcell%,4           rem 4 floats in cell now
+...
+p%=UADD(pcell%,LENALLOC(pcell%)) rem byte after cell end
+p%=USUB(p%,8)              rem address of final float
+POKEF p%,90000.1           rem overwrite with 90000.1
+RAISE 0                    rem clear ERR value
+e1::
+FREEALLOC pcell%           rem free any cell created
+IF err<>0
+  ...                      rem display error message etc
+ENDIF
+RETURN ERR
+</PRE>
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

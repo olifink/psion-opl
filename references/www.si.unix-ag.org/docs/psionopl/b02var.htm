@@ -1,0 +1,635 @@
+
+<TITLE>PSION Programming Ref.: Chapter 2. Variables and constants</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Variables and constants</CENTER></H1>
+<P>
+Programs can process data in a variety of ways. They 
+may, for example, perform calculations with numbers, or save and recall 
+strings of text (such as names and phone numbers in a data 
+file).
+<P>
+In all cases, your program must be able to handle values  
+different types of numbers, strings, and so on.
+<P>
+In OPL, there are two ways of handling values: variables 
+and constants. Constants are fixed values, such as 1, 2, 3. 
+Variables are used to store values which may change  for example, 
+a variable called "X" may start with the value 3 but later take 
+the value 7.
+<P>
+ 
+<P>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.1"><H2> Declaring variables</H2></A>
+<P>
+Most procedures begin by declaring (creating) variables:
+<P>
+<PRE>LOCAL x,y,z</PRE>
+<P>
+LOCAL is the word telling the Series 3a to create variables, 
+with the names which follow  here "x", "y" and "z"  
+separated by commas. 
+<P>
+The statement "LOCAL x,y,z" defines three variables called "x", 
+"y" and "z". The Series 3a will recognise these names whenever 
+you use them in this procedure. (If you used them in another procedure, 
+they wouldn't be recognised; the variables are `local' to the procedure 
+in which they are declared.)
+<P>
+These variables are initially given the value 0.
+<P>
+Any variables you wish to use must be declared at the start 
+of a procedure.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.2"><H2> Choosing the variable</H2></A>
+<P>
+Before declaring variables, decide what information they are going 
+to contain. There are different types of variables for different sorts 
+of values. If you try to give the wrong type of value to a variable, 
+an error message will be displayed.
+<P>
+You specify the type of each variable when you declare it, by adding 
+a symbol at the end of its name.
+<P>
+<H3>Numbers</H3> 
+<P>
+<UL><LI> For small whole numbers  for example 6  use </LI> 
+an integer variable. Integer variables have a "%" symbol 
+on the end, for example "number%".
+</UL>
+Integer variables can handle numbers only in the range -32768 
+to +32767. If you try to give an integer variable a whole number bigger 
+than this, an error message will be displayed.
+<P>
+<UL><LI> For larger whole numbers  for example 10000000  </LI> 
+use a long integer variable. Long integer variables have an 
+"&" symbol on the end, for example "number&".
+</UL>
+Long integer variables can handle whole numbers in 
+the range -2147483648 to +2147483647. If a variable may have to handle 
+numbers outside normal integer range, make it a long integer variable.
+<P>
+<UL><LI> For non-whole numbers  for example 2.5  use a floating-point </LI> 
+variable. Floating-point variables have no symbol on the end  
+"price", for example.
+</UL>
+<B>If you know that at some stage in your program your variable 
+will have to handle non-whole numbers, like 1.2, use a floating-point, 
+not an integer variable</B>. Otherwise you may get unpredictable results. 
+(There's more about this later in this chapter.)
+<P>
+<UL><LI> For very large numbers  outside long integer range  </LI> 
+you should also use floating-point variables. These can handle numbers 
+as big as "‘"9.99999999999e99 and as small as "‘"1e-99. (Intermediate 
+results in calculations may even be up to about "‘"10307.)
+</UL>
+<H3>Text</H3> 
+<P>
+For text  "Are you sure?", "54th", etc.  use 
+a string variable. (Pieces of text are called strings 
+in OPL.) String variables have a "$" symbol on the end  
+for example, "name$".
+<P>
+To declare a string variable, you must follow the "$" symbol 
+with the maximum length of string you want the variable to handle, 
+in brackets. So if you want to store names up to 15 characters long 
+in the variable "NAME$", declare it like this: "LOCAL NAME$(15)". 
+Strings cannot be longer than 255 characters.
+<P>
+<H3>Array variables</H3> 
+<P>
+You may want a group of variables, for example to store lists of values. 
+Instead of having to declare separate variables "a", "b", 
+"c", "d" and "e", you can declare array variables 
+"a(1)" to "a(5)" in one go like this:
+<P>
+"LOCAL a%(5)"	(array of integer variables) 
+"LOCAL a(5)"		(array of floating-point variables)
+"LOCAL a$(5,8)"	(array of string variables)
+or
+"LOCAL a&(5)"	(array of long integers)
+<P>
+The number in brackets is the number of elements in the array. So 
+"LOCAL a%(5)" creates five integer variables: "a%(1)", "a%(2)", 
+"a%(3)", "a%(4)" and "a%(5)".
+<P>
+With strings, the second number in the brackets specifies the maximum 
+length of the strings. All the elements in the string array have the 
+same capacity  for example, "LOCAL ID$(5,10)" allocates 
+memory space for five strings, each up to ten characters in length.
+<P>
+OPL does not support two-dimensional arrays.
+<P>
+<H3>Initial values</H3> 
+<P>
+All numeric variables have zero as their initial value. String variables 
+have a string with no characters in it. Every element in an array 
+variable is also initialised in the appropriate way.
+<P>
+<H3>Choosing descriptive names</H3> 
+<P>
+To make it easier to write your programs, and understand them when 
+you read through them at a later date, give your main variables names 
+which describe the values they hold. For example, in a procedure which 
+calculates fuel efficiency, you might use variables named "speed" 
+and "distance".
+<P>
+All variable names:
+<P>
+<UL><LI> May be up to 8 characters long</LI> 
+</UL>
+<UL><LI> Must start with a letter, but after that may use any </LI> 
+combination of numbers and letters
+</UL>
+<UL><LI> May be entered in any combination of upper and lower case. </LI> 
+"sPeeD" and "SpEEd" would be considered the same name.
+</UL>
+Additionally, you must not use any of the names of keywords, as listed 
+in the `Alphabetic listing' chapter  if you use these you will 
+see a `Declaration error' 
+message when you translate your module.
+<P>
+The "$ & "and "%" symbols are included in the 8 characters 
+allowed in variable names  so "V2345678%" is too long to 
+be a valid variable name, but "V234567%" is acceptable. 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.3"><H2> Examples</H2></A>
+<P>
+<UL><LI> "LOCAL clients$(12),z&(3)" declares one string variable, </LI> 
+"clients$", of capacity twelve characters, and one long integer 
+array variable containing three elements, "z&(1)", "z&(2)" 
+and "z&(3)"
+</UL>
+<UL><LI> "LOCAL AGE%,B5$(10),i" declares one integer variable, </LI> 
+"AGE%", one string variable, "B5$", of capacity ten characters, 
+and one floating-point variable, "i"
+</UL>
+<UL><LI> "LOCAL profit93" declares one floating-point variable, </LI> 
+"profit93"
+</UL>
+<UL><LI> "LOCAL x,MAN6$(4,7)" declares one floating-point variable, </LI> 
+"x", and one string array variable, "man6$", containing four 
+elements, "man6$(1)", "man6$(2)", "man6$(3)" and "man6$(4)", 
+each of capacity 7 characters
+</UL>
+<H3>For preference</H3> 
+<P>
+<UL><LI> Integer variables use less memory than long integer variables, </LI> 
+and both use less than floating-point.
+</UL>
+<UL><LI> Integer variables are processed faster than floating-point.</LI> 
+</UL>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.4"><H2> Giving values to variables</H2></A>
+<P>
+<H3>Assigning values</H3> 
+<P>
+You can assign a value to a variable directly, like this:
+<P>
+<PRE>
+x=5
+y=10
+</PRE>
+<P>
+This procedure adds two numbers together:
+<P>
+<UL><PRE>
+<B>PROC add:</B>
+  LOCAL x%,y%,z%
+  x%=569
+  y%=203
+  z%=x%+y%
+  PRINT z%
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+"add:" is the procedure name.
+<P>
+The "LOCAL" statement defines three variables "x%", "y%" 
+and "z%", all initially with the value 0. "PRINT" displays 
+the value of "z%" on the screen. You can display the value of 
+any variable like this.
+<P>
+"PROC" and "ENDP" define the beginning and end of the procedure  
+as you saw in Chapter 1.
+<P>
+Assigning values to string variables
+String variables can be assigned text values like this:
+<P>
+<PRE>a$="some text"</PRE>
+<P>
+The text to use must be enclosed in double quote characters.
+<P>
+Assigning values to an array variable
+If you declare a%(4), assign values to each of the elements in the 
+array like this: "a%(1)=56, a%(2)=345" and so on. Similarly for 
+the other variable types: "a(1)=.0346, a&(3)=355440, a$(10)="name"".
+<P>
+<H3>Arithmetic operations</H3> 
+<P>
+You can use these operators:
+<PRE><B>
++	plus
+-	minus or make negative
+/	divide
+*	multiply
+**	raise to a power
+%	percentage
+</PRE></B>
+<P>
+Operators have the same precedence as in the Calculator. For example, 
+"3+51.3/8" is treated as "3+(51.3/8)", not "(3+51.3)/8". 
+For more information on operators and precedence, see Appendix B.
+<P>
+<H3>Values from functions</H3> 
+<P>
+There are two kinds of keyword  commands and functions:
+<P>
+<UL><LI> A command is just a straightforward instruction to OPL to </LI> 
+do some particular thing. PRINT and PAUSE, for example, 
+are commands.
+</UL>
+<UL><LI> A function is just like a command but it also returns </LI> 
+a value which you can then use.
+</UL>
+GET is in fact a function; it waits for you to press a key 
+on the keyboard, and then returns a value which identifies the key 
+which was pressed. (In previous example programs, the value returned 
+by GET was ignored, as GET was being used to provide 
+a pause while you read the screen. This is a common use of the GET 
+function.)
+<P>
+The number returned by GET will always be a small whole number, 
+so you might store it away in an integer variable, like this:
+<P>
+<PRE>a%=GET</PRE>
+<P>
+There is more about the GET function later in this chapter.
+<P>
+<H3>Expressions</H3> 
+<P>
+You can assign a value to a variable with an expression  
+that is, a combination of numbers, variables, and functions. For example:
+<P>
+"z=x+y/2" gives the "z" the value of "x" plus the value 
+of " y/2 ".
+<P>
+"z=x*y+34.78" gives "z" the value of "x" times "y", 
+plus "34.78".
+<P>
+"z=x+COS(y)" gives "z" the value of "x" plus the cosine 
+of "y". COS is another OPL function. Unlike the GET function, COS requires a value 
+or variable to work with. As you can see, you put this in brackets, 
+after the function name. Values you give to functions in this way 
+are called arguments to the function. There is more information 
+about arguments in the next chapter.
+<P>
+All of the above are operations using the variables "x" 
+and "y"  assigning the result to "z" and not actually 
+affecting the value of "x" or "y". 
+<P>
+The ways you can change the values of variables fall into these groups:
+<P>
+<UL><LI> Arithmetic operations, such as multiplication or addition  </LI> 
+for example "z=sales+costs" or "z=y%*(4-x%)"
+</UL>
+<UL><LI> Using one of the OPL functions, for example "z=SIN(PI/6)"</LI> 
+</UL>
+or
+<P>
+<UL><LI> Using certain keywords like INPUT or EDIT </LI> 
+which wait for you to type in values from the keyboard.
+</UL>
+Self reference
+In expressions, variables can refer to themselves. For example:
+<P>
+"z%=z%+1" (make the value of "z%" one greater than its current 
+value)
+<P>
+"x%=y+x%/4" (make the value of "x%" a quarter of its current 
+value, plus the value of "y")
+<P>
+<H3>Constants</H3> 
+<P>
+In an OPL program, numbers (and strings in quote marks) are sometimes 
+called constants. In practice, you will use constants without 
+thinking about them. For example:
+<P>
+<PRE>
+x=0.32
+x%=569
+x&=32768
+x$="string"
+x(1)=4.87
+</PRE>
+OPL can also represent hexadecimal constants. This is explained under 
+the HEX$ entry in the `Alphabetic listing' chapter.
+<P>
+Exponential notation may be useful for very large or very small numbers. 
+Use "E" (capital or lower case) to mean "times ten to the power 
+of"  for example, 3.14E7 is 3.14*10^7 (31400000), while 
+1E-9 is 1*10^-9 (0.000000001).
+<P>
+<H3>Problems with integers</H3> 
+<P>
+When calculating an expression, OPL uses the simplest arithmetic possible 
+for the numbers involved. If all of the numbers are integers, integer 
+arithmetic is used; if one is outside integer range but within long 
+integer range, then long integer arithmetic is used; if any of the 
+numbers are not whole numbers, or are outside long integer range, 
+floating-point arithmetic is used.
+<P>
+This has the benefit of maximising speed, but you must beware of calculations 
+going out of the range of the type of arithmetic used. For example, 
+in "X=200*300" both "200" and "300" are integers, so integer 
+arithmetic is used for speed (even though "X" is a floating-point 
+variable). However, the result, 60000, cannot be calculated because 
+it is outside integer range (32767 to -32768), so an `Integer Overflow' 
+error is produced.
+<P>
+You can get around this by using the INT function, which turns 
+an integer into a long integer, without changing its value. If you 
+rewrite the previous example as "X=INT(200)*300", OPL has to use 
+long integer arithmetic, and can therefore give the correct result 
+(60000). (If you understand hexadecimal numbers, you can instead write 
+one of the numbers as a hexadecimal long integer  eg "200" 
+would become "&C8".)
+<P>
+Integer arithmetic uses whole numbers only.  For 
+example,  if "y%" is 7 and "x%" is 4, "y%/x%" gives 1. 
+However, you can use the INTF function to convert an integer 
+or long integer into a floating-point number, forcing floating-point 
+arithmetic to be used  for example, "INTF(y%)/x%" gives 
+1.75. This rule applies to each part of an expression -e.g. 
+"1.0+2/4" works out as "1.0+0" (=1.0), while "1+2.0/4" 
+works out as "1+0.5" (=1.5).
+<P>
+If one of the integers in an all-integer calculation is a constant, 
+you can instead write it as a floating-point number. 7/4 gives 1, 
+but 7/4.0 gives 1.75.
+<P>
+<H3>Operations on strings</H3> 
+<P>
+If "a$" is ""down"" and "b$" is ""wind"", then the 
+statement "c$=a$+b$" means "c$" becomes ""downwind"".
+<P>
+Alternatively, you could give "c$" the same value with the statement 
+"c$="down"+"wind"".
+<P>
+When adding strings together, the result must not be longer than the 
+maximum length you declared  eg if you declared "LOCAL a$(5)" 
+then "a$="first"+"second"" would cause an error to be displayed.
+<P>
+Most operators do not work on strings. To cut up strings, use string 
+functions like MID$, LEFT$ and RIGHT$, explained 
+in a later chapter. You need them to extract even a single character  
+you cannot, for example, refer to the 4th character in "a$(7)" 
+as "a$(4)".
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.5"><H2> Displaying variables</H2></A>
+<P>
+PRINT is one of the most useful OPL commands. Use it to display 
+any combination of text messages and the values of variables.
+<P>
+<H3>Where the cursor goes after a PRINT</H3> 
+<P>
+In general, each PRINT statement ends by moving to a new line. 
+For example:
+<PRE>
+  A%=127 :PRINT "A% is"
+  PRINT a%"
+</PRE>
+would display as
+<PRE>
+  A%  is
+  127
+</PRE>
+<P>
+You can stop a PRINT statement from moving to a new line by 
+ending it with a semicolon. For example:
+<PRE>
+  A%=127 :PRINT "A% is";
+  PRINT a%
+</PRE>
+would display as
+<PRE> 
+  A%  is127
+</PRE>
+If you end a PRINT statement with a comma, it stays on the 
+same line but displays an extra space. For example:
+<PRE>
+  A%=127 :PRINT "A% is",
+  PRINT a%
+</PRE>
+would display as 
+<PRE>
+  A%  is  127
+</PRE>
+<H3>Displaying a list of things</H3> 
+<P>
+You can use commas or semicolons to separate things to be displayed 
+on one line, instead of using one PRINT statement for each. 
+They have the same effect as before:
+"  A%=127 :PRINT "A% is",a%"
+would display as 
+" A% is  127"
+while
+"  user$="Fred""
+"  PRINT "Hello",user$;"!""
+would display as 
+" Hello  Fred!"
+<P>
+<H3>Displaying the quote character</H3> 
+<P>
+Each string you use with PRINT must start and end with a quote 
+character. Inside the string to display, you can represent the quote 
+character itself by entering it twice. So "PRINT "Press "" key"" 
+displays as "Press " key", while "PRINT """"" displays 
+a single quote character.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "2.6"><H2> Values from the keyboard</H2></A>
+<P>
+If you want a program to be reusable, it often needs to be able to 
+accept different sets of information each time you use it. You can 
+do this with the INPUT command, which takes numbers and text 
+typed in at the keyboard and stores them in variables.
+<P>
+For example, this simple procedure converts from Pounds Sterling to 
+Deutschmarks. It asks you to type in two numbers  the number 
+of Pounds Sterling, and the current exchange rate. You can edit as 
+you type the numbers  the Delete key, for example, deletes 
+characters, and Esc clears everything you've typed. Press Enter when 
+you've finished each number. The values are assigned to the variables 
+"pounds" and "rate", and the result of the conversion is then 
+displayed:
+<P>
+<UL><PRE>
+<B>PROC exch:</B>
+  LOCAL pounds,rate
+  AT 1,4
+  PRINT "How many Pounds Sterling?",
+  INPUT pounds  :REM value from keyboard
+  PRINT "Exchange rate (DM to œ1)?",
+  INPUT rate  :REM value from keyboard
+  PRINT "=",pounds*rate,"Deutschmarks"
+  GET
+<B>ENDP </B>
+</PRE></UL>
+<P>
+Here PRINT is used to show messages (often called prompts) 
+before the two INPUT commands, to say what information needs 
+to be typed in. In both cases the PRINT command ends in a comma, 
+which displays a single space, and keeps the cursor position on the 
+same line. Without the commas, the numbers you type to the INPUT 
+commands would appear on the line below.
+<P>
+The value entered to an INPUT command must be of the appropriate 
+kind for the variable which INPUT is setting. If you enter 
+the wrong type (for example, if you enter the string "three" for 
+the floating-point variable "rate"), INPUT will show a 
+"?" prompt, and wait for you to enter another value.
+<P>
+When using INPUT with a numeric variable (integer, long integer 
+or floating-point), you can enter any number within the range of that 
+type of variable. Note that if you enter a non-whole number as the 
+value for an integer variable, it will take only the whole number 
+part (so eg if you enter 12.75 for an integer variable, it will be 
+set to 12).
+<P>
+<P>
+<B><I>Comments</B></I><BR>
+The REM command lets you add comments to a program to help 
+explain how it works. Begin the comment with the word REM (short 
+for `remark'). Everything after the REM command is ignored.
+<P>
+If you put a REM command on the end of a line, the colon you 
+would normally put before it is optional. For example, you could use 
+either of these:
+<P>
+  CLS :REM Clears the screen
+<P>
+or
+<P>
+  CLS REM Clears the screen
+<P>
+<P>
+<B><I>AT command</B></I><BR>
+This positions the cursor or your message at the co-ordinates you 
+specify. Use the command like this:
+<P>
+AT column%,row%
+<P>
+where "column%" and "row%" give the character position to 
+use.
+<P>
+"AT 1,1" positions the cursor to the top left corner.
+<P>
+<H3>Single keypresses</H3> 
+<P>
+In addition to using INPUT to ask for values, your program 
+can ask for single keypresses. Use one of these functions:
+<P>
+<UL><LI> GET waits for a keypress and returns the key pressed.</LI> 
+</UL>
+<UL><LI> KEY returns a key if any was pressed, but doesn't </LI> 
+wait for one.
+</UL>
+Every separate letter, number or symbol has a number which represents 
+it, called a character code. The full list of character codes  
+the character set  is included as an appendix to the 
+User Guide. GET and KEY return the character code of 
+the key pressed  for example, if "A" were pressed, these 
+functions would return the value 65. KEY returns 0 if no key 
+was pressed.
+<P>
+KEY$ and GET$ work in the same way as KEY and 
+GET, except that they return the key pressed as a string, not 
+as a character code:
+<P>
+<UL><LI> GET$ waits for a keypress and returns the key pressed, </LI> 
+as a string.
+</UL>
+<UL><LI> KEY$ returns a key if any was pressed, but doesn't </LI> 
+wait for one. KEY$ returns a null string ("") if no key was 
+pressed.
+</UL>
+Unlike INPUT, these functions do not display the key pressed 
+on the screen, and do not wait for you to press Enter.
+<P>
+<H3>Example using GET$</H3> 
+<P>
+<UL><PRE>
+<B>PROC kchar:</B>
+  LOCAL k$(1)
+  PRINT "Press a key, A-Z:"
+  k$=GET$
+  PRINT "You pressed",k$
+  PAUSE 60
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Single keypresses are often useful for making decisions. A program 
+might, for example, offer a set of choices which you choose from by 
+typing the word's first letter, like this:
+ "Add (A) Erase (E) or Copy (C) ?"
+ Or it might ask for confirmation of a decision, by displaying a "YES 
+or NO?" message and waiting until "Y" or "N" is pressed.
+<P>
+<H3>Modifier keys</H3> 
+<P>
+If you need to check for the Shift, Control, Psion keys  and/or Caps 
+Lock being used, see the description of the KMOD function, 
+in the `Alphabetic listing' chapter.
+<P>
+<H3>SUMMARY</H3> 
+<P>
+Declare variables with one or more LOCAL statements in the 
+line after "PROC:"
+<P>
+<UL><LI> Integer variables  for example "year%"</LI> 
+</UL>
+<UL><LI> Floating-point variables  for example "price"</LI> 
+</UL>
+<UL><LI> String variables  for example "name$(12)" </LI> 
+where the maximum length is given in the brackets
+</UL>
+<UL><LI> Long integer variables  for example "profit&"</LI> 
+</UL>
+Variables will be floating-point unless you add a symbol to the end 
+of the variable name.
+<P>
+<UL><LI> Array variables  for example "prices%(4)" </LI> 
+or "clients$(5,12)" where the first number inside the brackets 
+specifies the number of elements, and the second number in the brackets, 
+in the case of string arrays, specifies the maximum length.
+</UL>
+Assign values to variables:
+<P>
+<UL><LI> Expressions  for example "x=5.5/y"  ,   "profit=x-y"</LI> 
+</UL>
+<UL><LI> INPUT command  for example "INPUT a$"</LI> 
+</UL>
+<UL><LI> `Add' strings  for example "a$="MR"+names$"</LI> 
+</UL>
+REM allows you to add comments to a program.
+<P>
+AT positions the cursor.
+<P>
+GET and KEY return the key pressed as a character code.
+<P>
+GET$ and KEY$ return the key pressed as a single-character 
+string.
+<P>
+GET and GET$ wait until a key is pressed, KEY 
+and KEY$ do not.
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

@@ -1,0 +1,382 @@
+
+<TITLE>PSION Programming Ref.: Chapter 4. Calling procedures</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Calling procedures</CENTER></H1>
+<P>
+<P>
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "4.1"><H2> Using more than one procedure</H2></A>
+<P>
+If you wanted a single procedure to perform a complex task, the procedure 
+would become long and complicated. It is more convenient to have a 
+module containing a number of procedures, each of which you can write 
+and edit separately.
+<P>
+Many OPL modules are in fact a set of procedures linked up  
+each procedure doing just one job (such as a certain calculation) 
+and then passing its results on to other procedures so they can do 
+other operations:
+    (picture)
+<P>
+OPL is designed to encourage programs written in this way, since:
+<P>
+<UL><LI> You can store all the procedures which make up a program </LI> 
+in the same module file
+</UL>
+and
+<UL><LI> One procedure can call, that is run, another.</LI> 
+</UL>
+<H3>Modules containing more than one procedure</H3> 
+<P>
+You can have as many procedures as you like in a module. Each must 
+begin with PROC and end with ENDP.
+<P>
+<B>When you run a translated module it is always the first procedure, 
+at the top of the module, which is actually run</B>. When this finishes, 
+the module stops; any other procedures in the file are only run if 
+and when they are called.
+<P>
+Although you can use any name you want, it's common to give the first 
+procedure a name like "start".
+<P>
+Procedures which run on their own should be written and translated 
+as separate modules, otherwise you won't be able to run them.
+<P>
+<H3>Calling procedures</H3> 
+<P>
+To run another procedure, simply give the name of the procedure (with 
+the colon). For example, this module contains two procedures:
+<P>
+<UL><PRE>
+<B>PROC one:</B>
+  PRINT "Start"
+  PAUSE 40
+  two:     REM calls procedure two:
+  PRINT "Finished"
+  PAUSE 40
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC two:</B>
+  PRINT "Doing..."
+  PAUSE 40
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Running this module would run procedure "one:", with this effect: 
+"Start" is displayed; after a PAUSE it calls "two:", 
+which displays "Doing..."; after another PAUSE "two:" 
+returns to the "one:" procedure; "one:" displays "Finished"; 
+and after a final PAUSE, "one:" finishes.
+<P>
+<H3>Uses of calling procedures</H3> 
+<P>
+Calling procedures can be used to:
+<P>
+<UL><LI> Structure your programs more clearly so they're easier to </LI> 
+adapt after you've written them
+</UL>
+<UL><LI> Use the same procedure in different programs  say, </LI> 
+to perform a certain common calculation.
+</UL>
+For example, when your program asks you "Do this or do that?", make 
+two procedure calls  either "this:" or "that:" procedure  
+depending on what you reply, for example:
+<P>
+<UL><PRE>
+<B>PROC input:</B>
+  LOCAL a$(1)
+  PRINT "Add [A] or Subtract [S]?:",
+  a$=UPPER$(GET$)
+  IF a$="A"
+    add:       REM first procedure
+  ELSEIF a$="S"
+    subtract:  REM second procedure
+  ENDIF 
+<B>ENDP</B>
+</PRE></UL>
+<P>
+To make full use of procedure calls, you must be able to communicate 
+values between one procedure and another. There are two ways of doing 
+this: global variables and parameters.
+<P>
+ 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "4.2"><H2> Parameters</H2></A>
+<P>
+Values can be passed from one procedure to another by using parameters. 
+They look, and act, very much like arguments to functions.
+<P>
+In the example below, the procedure "price:" calls the procedure 
+"tax:". At the same time as it calls it, it passes a value (in 
+this case, the value which INPUT gave to the variable "x") 
+to the parameter "p" named in the first line of "tax:". The 
+parameter "p" is rather like a new local variable inside "tax:", 
+and it has the value passed when "tax:" is called. (The "tax:" 
+procedure is not changing the variable "x".)
+<P>
+The "tax:" procedure displays the value of "x" plus 17.5% 
+tax.
+<P>
+<UL><PRE>
+<B>PROC price:</B>
+    (picture)
+  LOCAL x
+  PRINT "ENTER PRICE",
+  INPUT x
+  tax:(x) REM Passes the value of x to p
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC tax:(p)</B>
+  PRINT "PRICE INCLUDING TAX =",p*1.175
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><LI> In the called procedure, follow the procedure name </LI> 
+by the names to use for the parameters, in brackets and separated 
+by commas  for example "proc2:(cost,profit)".
+</UL>
+The parameter type is specified as with variables  for example 
+"p" for a floating-point parameter, "p%" for an integer, "p&" 
+for a long integer, "p$" for a string. You can't have array parameters.
+<P>
+<UL><LI> In the calling procedure, the values for the </LI> 
+parameters are given in brackets, in the right order and separated 
+by commas, after the colon of the called procedure  for example 
+"proc2:(60,30)".
+</UL>
+The values passed as parameters may be the values of variables, strings 
+in quotes, or constants. So a call might be "calc:(a$,x%,15.8)" 
+and the first line of the called procedure "PROC calc:(name$,age%,salary)"
+<P>
+In the called procedure, you cannot assign values to parameters  
+for example, if "p" is a parameter, you cannot use a statement 
+like "p=10".
+<P>
+You will see a `Type mismatch' error displayed if you try to pass 
+the wrong type of value to a parameter  for example, 45 
+to (a$).
+<P>
+<H3>Multiple parameters</H3> 
+<P>
+In the following example, the second procedure "tax2:" has two 
+parameters: 
+<P>
+<UL><LI> The value of the price variable "x" is passed to the </LI> 
+parameter "p1".
+</UL>
+<UL><LI> The value of the tax rate variable "r" is passed to </LI> 
+the parameter "p2". 
+</UL>
+"tax2:" displays the price plus tax at the rate specified.
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC price2:</B>
+    (picture)
+  LOCAL x,r
+  PRINT "ENTER PRICE",
+  INPUT x
+  PRINT "ENTER TAX RATE",
+  INPUT r
+  tax2:(x,r)
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC tax2:(p1,p2)</B>
+  PRINT p1+p2 %
+<B>ENDP</B>
+</PRE></UL>
+<P>
+This uses the "%" symbol as an operator  "p1+p2 %" 
+means "p1" plus "p2" percent of "p1". Note the space before 
+the "%"; without it, "p2%" would be taken as representing 
+an integer variable.
+<P>
+Appendix B has more about the "%" operator.
+<P>
+<H3>Returning values</H3> 
+<P>
+In the following example, the RETURN command is used to return 
+the value of "x" plus tax at "r" percent  to be displayed 
+in "price3:". This is very similar to the way functions return 
+a value.
+<P>
+The "tax3:" procedure calculates, but doesn't display the result. 
+This means it can be called by other procedures which need to perform 
+this calculation but do not necessarily need to display it.
+<P>
+<UL><PRE>
+<B>PROC price3:</B>
+    (picture)
+  LOCAL x,r
+  PRINT "ENTER PRICE",
+  INPUT x
+  PRINT "ENTER TAX RATE",
+  INPUT r
+  PRINT "PRICE INCLUDING TAX =",tax3:(x,r)
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC tax3:(p1,p2)</B>
+  RETURN p1+p2 %
+<B>ENDP</B>
+</PRE></UL>
+<P>
+Only one value may be returned by the RETURN command.
+<P>
+The name of a procedure which returns a value must end with the correct 
+identifier  "$" for string, "%" for integer, or "&" 
+for long integer. To return a floating-point number, it should end 
+with none of these symbols. For example, "PROC abcd$:" can return 
+a string, while "PROC counter%:" can return an integer. In this 
+example, "ref$:" returns a string:
+<P>
+ 
+<P>
+<UL><PRE>
+<B>PROC refname:</B>
+  LOCAL a$(30),b$(2)
+  PRINT "Enter reference and name:",
+  INPUT a$
+  b$=ref$:(a$)
+  PRINT "Ref is:",b$
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC ref$:(name$)</B>
+  RETURN LEFT$(name$,2)
+  REM LEFT$ takes first 2 letters of name$
+<B>ENDP</B>
+</PRE></UL>
+<P>
+If you don't use the RETURN command, a string procedure returns 
+the null string (""""). Other (numeric) types of procedure return 
+zero.
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "4.3"><H2> GLOBAL variables</H2></A>
+<P>
+You can only return one value with the RETURN command. If you 
+need to pass back more than one value, use GLOBAL variables.
+<P>
+Instead of declaring "LOCAL x%,name$(5)" declare "GLOBAL x%,name$(5)". 
+The difference is that:
+<P>
+<UL><LI> Local variables are valid only in the procedure in which </LI> 
+they are declared. 
+</UL>
+<UL><LI> Global variables can also be used in any procedures (including </LI> 
+those in loaded modules) called by the procedure in which they are 
+declared. 
+</UL>
+So this module would run OK:
+<P>
+<UL><PRE>
+<B>PROC one:</B>
+  GLOBAL a%
+  PRINT a%
+  two:
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<UL><PRE>
+<B>PROC two:</B>
+  a%=2 REM Sees a% declared in one:
+  PRINT a%
+<B>ENDP</B>
+</PRE></UL>
+<P>
+When you run this, the value 0 is displayed first, and then the value 
+2.
+<P>
+You would see an `Undefined externals' error displayed if you used 
+LOCAL instead of GLOBAL to declare "a%", since the 
+procedure "two:" wouldn't recognise the variable "a%". In 
+general, though, it is good practice to use the LOCAL command 
+unless you really need to use GLOBAL.
+<P>
+A local declaration overrides a global declaration in that procedure. 
+So if "GLOBAL a%" was declared in a procedure, which called 
+another procedure in which "LOCAL a%" was declared, any modifications 
+to the value of "a%" in this procedure would not effect the value 
+of the global variable "a%".
+<P>
+<H3>Passing back values</H3> 
+<P>
+You can effectively pass as many values as you like back from one 
+procedure to another by using global variables. Any modifications 
+to the value of a variable in a called procedure are automatically 
+registered in the calling procedure.
+<P>
+For example:
+<P>
+<UL><PRE>
+<B>PROC start:</B>
+  GLOBAL varone,vartwo
+  varone=2.5
+  vartwo=2
+  op:
+  PRINT varone,vartwo
+  GET
+<B>ENDP</B>
+</PRE></UL>
+<P>
+<P>
+<UL><PRE>
+<B>PROC op:</B>
+  varone=varone*2
+  vartwo=vartwo*4
+<B>ENDP</B>
+</PRE></UL>
+<P>
+This would display "5 8"
+<P>
+<H3>`Undefined externals' error</H3> 
+<P>
+If, perhaps because of a typing error, you use a name which is not 
+one of your variables, no error occurs when you translate the module. 
+This is because it could be the name of a global variable, declared 
+in a different procedure, which might be available when the procedure 
+in question was called. If no such global variable is available, an 
+`Undefined externals' error is shown. This also displays the variable 
+name which caused the error, together with the module and procedure 
+names, in this format: `Error in MODULE\PROCEDURE,VARIABLE'.
+<P>
+<H3>SUMMARY</H3> 
+<P>
+Call a procedure by stating its name, including the colon.
+<P>
+Pass parameters to a procedure by following the procedure call 
+with the values for the parameters, eg "calc2:(4.5,32)". In the 
+called procedure, follow the procedure name with the parameter names, 
+eg "PROC calc2:(mod,div%)".
+<P>
+To make variables declared in one procedure accessible to called procedures, 
+declare the variables with GLOBAL instead of LOCAL.
+<P>
+ 
+<P>
+ 
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

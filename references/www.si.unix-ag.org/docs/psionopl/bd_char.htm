@@ -1,0 +1,54 @@
+
+<TITLE>PSION Programming Ref.: Chapter D. Character codes</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Character codes</CENTER></H1>
+<P>
+<P>
+To find out a character's character code either look up the character 
+in the table given in the back of your User Guide, or press the Calc 
+button and type the "%" sign followed by the character  
+for example "%P" returns 80. Characters with codes from 0 to 127 
+are the same as in the ASCII character set. Codes 128 to 255 
+are compatible with the IBM code page 850.
+<P>
+Codes from 256 upwards are for other Series 3a keys  see 
+the list below.
+<P>
+<H3>Character codes of special keys</H3> 
+<P>
+The GET and KEY functions return the character code 
+of the key that was pressed. Some of the keys are not in the character 
+set. They return these numbers:
+<PRE>
+Esc       	27	Tab		9
+Delete		8	Enter		13
+<P>
+<P>
+<I>Special keys</I><PRE>
+UP 		256	DOWN		257
+RIGHT		258	LEFT		259
+Pg Up   	260 	Pg Dn		261
+Home  		262 	End    		263
+Menu  		290 	Help	    	291
+<IMG ALT = "DIAMOND" SRC = "diamond.gif">	292
+</PRE>
+The Psion key adds 512 to the value of the key pressed. For example, 
+Psion-a is 609 (512+97), and Psion-Help (Dial) is 803 (512+291).
+<P>
+<H3>Special character codes with PRINT</H3> 
+<P>
+These values can be used with PRINT and CHR$():
+<PRE>
+7	beep
+8	backspace
+9	tab
+10	line feed
+12	form feed (clear screen)
+13	carriage return (cursor to left of window)
+</PRE>
+For example, "PRINT CHR$(8)" moves the cursor backwards, one 
+character to the left.
+<P>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>

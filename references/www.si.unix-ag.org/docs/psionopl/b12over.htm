@@ -1,0 +1,506 @@
+
+<TITLE>PSION Programming Ref.: Chapter 12. Overview</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+Return to the Index<BR>
+<A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A> 
+<H1><CENTER>Overview</CENTER></H1>
+<P>
+Keywords can be subdivided into functions, 
+which return a value, and commands, which do not. In practice 
+you use functions and commands together, often using functions as 
+if they were commands, ignoring the values they return.
+<P>
+This chapter lists all the keywords, grouped according 
+to their purpose. Use this chapter if you know what you'd like to 
+do, but not which function or command will do it.
+<P>
+The chapter which follows this one lists the keywords 
+alphabetically, with explanations and full specifications.
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.1"><H2>Program control</H2></A>
+<P>
+<H3>Loops, branches, jumps</H3> 
+<PRE>
+Repeat a set of instructions				DO...UNTIL
+							WHILE...ENDW
+<P>
+Do either one set of instructions or another set, or 	IF...ENDIF
+another, or another..
+<P>
+Go...
+...to a specified label					GOTO
+...to one of a list of labels				VECTOR/ENDV
+...to the end/start of a repeating set of instructions	BREAK, CONTINUE
+...back to the calling procedure			RETURN
+<P>
+End the program						STOP
+<P>
+<P>
+<H3>Error handling</H3> 
+<P>
+<P>
+Raise an error						RAISE
+<P>
+Put an explanatory comment in your program		REM
+<P>
+Declare an error-handler				ONERR
+<P>
+Let the program continue after an error			TRAP
+<P>
+After an error, find out what the error was		ERR, ERR$ 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.2"><H2>Screen and keyboard control</H2></A>
+<P>
+<P>
+Display a string to be edited and get a value from the 	EDIT
+keyboard
+<P>
+Get a value from the keyboard				INPUT
+<P>
+Display text, numbers etc.				PRINT
+<P>
+Set screen update method				gUPDATE
+<P>
+Pause... 
+...for a number of seconds				PAUSE
+<P>
+...until a key is pressed				GET, GET$
+<P>
+Position or hide the cursor 				AT, CURSOR
+<P>
+Clear the text window					CLS 
+<P>
+Sound the buzzer					BEEP
+<P>
+Set the size/position of the text window		SCREEN
+<P>
+Get information on the text window			SCREENINFO
+<P>
+Set text window font and style				FONT, STYLE
+<P>
+Find out which key was pressed, if any			KEY, KEY$, GET, GET$
+<P>
+Find out what combination of modifiers was pressed	KMOD
+<P>
+Disable/enable stopping from a running program		ESCAPE Off/On
+<P>
+Turn the Series 3a off					OFF 
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.3"><H2>Files</H2></A>
+<P>
+<H3>General file management</H3> 
+<P>
+Copy a file						COPY
+<P>
+Delete or rename a file					DELETE, RENAME
+<P>
+Check to see if a certain file exists			EXIST
+<P>
+Find out what files there are				DIR$
+<P>
+<P>
+<H3>OPL procedures and modules</H3> 
+<P>
+Set up a procedure cache				CACHE
+<P>
+Load an OPL module file so you can use the		LOADM
+procedures in it
+<P>
+Remove a module from memory				UNLOADM
+<P>
+<H3>Data files</H3> 
+<P>
+Create a new data file					CREATE
+<P>
+OPEN or CLOSE a data file				OPEN, OPENR, CLOSE
+<P>
+Use a different data file that has been opened 		USE
+<P>
+Copy a data file, optionally appending to another data	COMPRESS
+file, and removing deleted records
+<P>
+Once a data file has been OPENed, you can:
+<P>
+Make a new record					APPEND
+<P>
+Change a record						UPDATE
+<P>
+Search for those records which contain a certain string	FIND, FINDFIELD
+<P>
+Erase a record						ERASE
+<P>
+Move to a different record				{FIRST, LAST, NEXT,
+							{BACK, POSITION
+<P>
+Count the records					COUNT
+<P>
+Find whether you're at the end of the file yet		EOF
+<P>
+Find the current record number				POS
+<P>
+Find the number of bytes used by the current record	RECSIZE
+<P>
+<H3>Managing directories</H3> 
+<P>
+Create directory					MKDIR
+<P>
+Set current directory					SETPATH
+<P>
+Remove directory					RMDIR
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.4"><H2>Memory</H2></A>
+<P>
+Declare variables
+<P>
+GLOBAL, LOCAL
+<P>
+Find how much free memory there is on a device
+<P>
+SPACE
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.5"><H2>Printing</H2></A>
+<P>
+Specify a device or file to print to			LOPEN
+<P>
+Close the print device or file opened with LOPEN	LCLOSE
+<P>
+Print to a device or file				LPRINT
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.6"><H2>Numbers</H2></A>
+<P>
+<H3>Trigonometry</H3> 
+<P>
+Trig functions						{COS, SIN, TAN,
+							{ACOS, ASIN, ATAN
+<P>
+Convert between degrees and radians			RAD, DEG
+<P>
+<H3>Other functions</H3> 
+<P>
+Raise e to a power					EXP
+<P>
+Logarithms						LN, LOG
+<P>
+Pi as a constant					PI
+<P>
+Square root						SQR
+<P>
+Use random numbers					RND, RANDOMIZE
+<P>
+Unsigned integer/pointer arithmetic			UADD, USUB
+<P>
+<H3>Lists of numbers</H3> 
+<P>
+Find the greatest or smallest value in the list		MAX, MIN
+<P>
+Average the list					MEAN
+<P>
+Add up the list						SUM
+<P>
+Find the standard deviation or variance			STD, VAR
+<P>
+<H3>Changing the format of numbers</H3> 
+<P>
+Knock the minus sign off a number			ABS, IABS
+<P>
+Take whole number, removing any fractional part		INT, INTF
+<P>
+Convert...
+...an integer into floating-point			FLT
+...an integer into a hexadecimal string			HEX$
+...a number into a string				{FIX$, GEN$
+							{SCI$, NUM$
+...a string into a number				EVAL, VAL 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.7"><H2>Strings</H2></A>
+<P>
+<P>
+Copy characters from a string				LEFT$, MID$, RIGHT$
+<P>
+Repeat a string						REPT$
+<P>
+Make a string upper or lower case			LOWER$, UPPER$
+<P>
+Find out...
+...how long a string is					LEN
+...the character code of the first char of a string	ASC
+<P>
+...where a certain string is within a string		LOC
+<P>
+<P>
+Convert...
+... a string of digits to a number			VAL
+...a number to a string					{FIX$, GEN$
+							{SCI$, NUM$
+Get the character with a certain character code		CHR$
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.8"><H2>Date and time</H2></A>
+<P>
+Find out the current date and time...
+...as a string						DATIM$
+...just the current time				{SECOND,
+							{MINUTE, HOUR
+...just the current date				DAY, MONTH, YEAR
+<P>
+Find out...
+...the number of days between two dates			DAYS
+...what day of the week, or what week number,
+   a certain date falls in				DOW, WEEK
+<P>
+Express...
+...1-12 as the name of a month				MONTH$
+<P>
+...1-7 as a day of the week				DAYNAME$
+<P>
+Convert between time formats				{DATETOSECS
+							{SECSTODATE
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.9"><H2>Graphics</H2></A>
+<P>
+<H3>Drawing commands</H3> 
+<P>
+Set current position					gAT, gMOVE
+<P>
+Draw a line						gLINEBY, gLINETO
+<P>
+Draw a sequence of lines				gPOLY
+<P>
+Draw a rectangle					{gBOX, gBORDER
+							{gXBORDER
+<P>
+Fill a rectangle					gFILL
+<P>
+Invert a rectangle					gINVERT
+<P>
+Scroll a rectangle					gSCROLL
+<P>
+Get current position					gX, gY
+<P>
+Display a running clock					gCLOCK
+<P>
+Draw a 3-D button (key)					gBUTTON
+<P>
+Draw a lozenge						gDRAWOBJECT
+<P>
+<H3>Displaying graphics text</H3> 
+<P>
+Display a list of expressions				gPRINT
+<P>
+Display text in a cleared box				gPRINTB
+<P>
+Display text neatly clipped				gPRINTCLIP
+<P>
+Find width required by text				gTWIDTH
+<P>
+Display text underlined/highlighted			gXPRINT 
+<P>
+<H3>Setting styles</H3> 
+<P>
+Set font to use						gFONT
+<P>
+Set to user-defined fonts				{gLOADFONT
+							{gUNLOADFONT
+<P>
+Set graphics to set / clear / invert points		gGMODE
+<P>
+Set text to set / clear / invert / replace points	gTMODE
+<P>
+Set text to bold / underline / inverse / double / 	gSTYLE
+mono / italic
+<P>
+<P>
+<H3>Windows and bitmaps</H3> 
+<P>
+Create a new window					gCREATE
+<P>
+Set position and/or size of a window			gSETWIN
+<P>
+Set order to show windows				gORDER
+<P>
+Get order of a window					gRANK
+<P>
+Set window visible / invisible				gVISIBLE
+<P>
+Get screen position of a window				{gORIGINX
+							{gORIGINY
+<P>
+Create a bitmap						gCREATEBIT
+<P>
+Load a bitmap from file					gLOADBIT
+<P>
+Clear a window / bitmap					gCLS
+<P>
+Save window / bitmap to bitmap file			gSAVEBIT
+<P>
+Close down a window / bitmap				gCLOSE
+<P>
+Set which window / bitmap to use			gUSE
+<P>
+Set grey on/off in a window				{gGREY
+							{DEFAULTWIN
+<P>
+Fill an area with repetitions of another window/bitmap	{gPATT
+<P>
+Copy an area from one window/bitmap to another		gCOPY
+<P>
+Read data back from a window / bitmap			gPEEKLINE
+<P>
+Get ID number of a window / bitmap			gIDENTITY
+<P>
+Get size of a window / bitmap				gWIDTH, gHEIGHT
+<P>
+Get status information about a window/bitmap and 
+about the cursor					gINFO
+<P>
+<H3>Sprites</H3> 
+<P>
+Create a sprite						CREATESPRITE
+<P>
+Define bitmap-sets for a sprite				{APPENDSPRITE
+							{CHANGESPRITE
+<P>
+Draw a sprite						DRAWSPRITE
+<P>
+Set a sprite's position					POSSPRITE
+<P>
+Set which sprite to use					USESPRITE
+<P>
+Close a sprite						CLOSESPRITE
+<P>
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.10"><H2>Menus</H2></A>
+<P>
+<P>
+Start a new set of menus				mINIT
+<P>
+Define a menu						mCARD
+<P>
+Display menus						MENU
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.11"><H2>Dialogs</H2></A>
+<P>
+Start a new dialog					dINIT
+<P>
+Position a dialog					dPOSITION
+<P>
+Define text for a dialog				dTEXT
+<P>
+Define an edit box for a dialog				dEDIT
+<P>
+Define a secret edit box for a dialog			dXINPUT
+<P>
+Define a filename edit box for a dialog			dFILE
+<P>
+Define a choice list for a dialog			dCHOICE
+<P>
+Define a numeric edit box for a dialog			dFLOAT, dLONG
+<P>
+Define a date/time edit box for a dialog		dDATE, dTIME
+<P>
+Define exit keys for a dialog				dBUTTONS
+<P>
+Display a dialog					DIALOG
+<P>
+Display a simple "alert" dialog				ALERT 
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.12"><H2>Status Window</H2></A>
+<P>
+Display/hide status window				STATUSWIN
+<P>
+Get status window information				STATWININFO
+<P>
+Set a program's name					SETNAME
+<P>
+Initialise a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list				DIAMINIT
+<P>
+Position <IMG ALT = "DIAMOND" SRC = "diamond.gif"> on a <IMG ALT = "DIAMOND" SRC = "diamond.gif"> list			DIAMPOS
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.13"><H2>Screen messages</H2></A>
+<P>
+Display information messages				GIPRINT
+<P>
+Display `busy' messages					BUSY
+<P>
+<HR SIZE=4 NOSHADE ><A NAME = "12.14"><H2>Advanced use</H2></A>
+<P>
+Run machine code					USR, USR$
+<P>
+Find out where a certain variable is in memory		ADDR
+<P>
+Store a value in a specific place in memory		POKE commands
+<P>
+Find out the value stored at a certain place in memory	PEEK commands
+<P>
+Open any type of file					IOOPEN
+<P>
+Read from a file opened with IOOPEN			IOREAD
+<P>
+Write to a file opened with IOOPEN			IOWRITE
+<P>
+Close a file opened with IOOPEN				IOCLOSE
+<P>
+Position within a file opened with IOOPEN		IOSEEK
+<P>
+<P>
+Keywords which provide low-level access to the Series 3a
+<P>
+Call an operating system service			CALL, OS
+<P>
+Perform an aysnchronous I/O function			IOA, IOC
+<P>
+Cancel an aysnchronous I/O function			IOCANCEL
+<P>
+Wait for completion of a function performed by IOA	{IOWAIT
+or IOC							{IOWAITSTAT
+<P>
+Signal completion of an I/O function			IOSIGNAL
+<P>
+Ensure an asynchronous handler runs			IOYIELD
+<P>
+Perform a synchronous I/O function			IOW
+<P>
+Perfom an asynchronous keyboard read			KEYA
+<P>
+Cancel a KEYA						KEYC
+<P>
+Get command line information				CMD$, GETCMD$
+<P>
+Parse a full file specification				PARSE$
+<P>
+Check for system events					{GETEVENT
+							{TESTEVENT
+<P>
+Mark an OPA as locked or unlocked			LOCK
+<P>
+Get system-level info on data files			ODBINFO
+<P>
+Load/link a DYL						LOADLIB, LINKLIB
+<P>
+Unload a DYL						UNLOADLIB
+<P>
+Find category handles					FINDLIB, GETLIBH
+<P>
+Create new objects					NEWOBJ, NEWOBJH
+<P>
+Send a message to an object				{SEND, ENTERSEND
+							{ENTERSEND0
+<P>
+Allocate a heap cell					ALLOC
+<P>
+Free an allocated cell					FREEALLOC
+<P>
+Change size of allocated cell				REALLOC
+<P>
+Insert or delete section of cell			ADJUSTALLOC
+<P>
+Find length of allocated cell				LENALLOC
+<P>
+Remove returned procedures from a cache			CACHETIDY
+<P>
+Read cache index header					CACHEHDR
+<P>
+Read cache index record					CACHEREC
+<P>
+</PRE>
+<P><P><HR><H2><A HREF="https://www.si.unix-ag.org/docs/psionopl/psion.htm"><IMG ALT = "<==" SRC ="psi-logo.gif"></A>  Return to the Index</H2>
